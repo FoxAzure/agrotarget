@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+/* Definindo suas cores personalizadas direto no CSS (padrão v4) */
+@theme {
+  --color-agro-green: #116534;
+  --color-agro-orange: #F6821F;
+  --color-agro-dark: #08331a;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-950 text-slate-100 antialiased;
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
