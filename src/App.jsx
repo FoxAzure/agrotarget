@@ -1,85 +1,100 @@
 import React from 'react';
+import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 
-// Sub-componente para manter o código limpo, como você gosta
-const ModuleCard = ({ title, acronym, status, description }) => (
-  <div className="group relative flex flex-col items-center justify-center p-8 bg-slate-900 border border-agro-green/30 rounded-2xl hover:border-agro-orange/60 transition-all duration-500 cursor-pointer overflow-hidden shadow-[0_0_15px_-5px_rgba(17,101,52,0.3)]">
-    
-    <div className="relative w-16 h-16 mb-4 flex items-center justify-center bg-agro-green/10 rounded-xl border border-agro-green/30 group-hover:scale-110 group-hover:border-agro-orange/40 transition-all duration-500">
-      <span className="text-2xl font-black italic text-agro-orange drop-shadow-[0_0_8px_rgba(246,130,31,0.4)]">
-        {acronym}
-      </span>
-    </div>
+// Importando as logos
+import qualyflowLogo from './gallery/logo/qualyflow.png';
+import coacenterLogo from './gallery/logo/coacenter.png';
 
-    <h2 className="text-xs font-black text-white uppercase tracking-[0.2em] group-hover:text-agro-orange transition-colors">
+// Importando a nova página modularizada do QualyFlow
+import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
+
+// ================================= HELPERS (COMPONENTES) ================================= //
+
+const ModuleCard = ({ title, logoSrc, to }) => (
+  <Link 
+    to={to}
+    className="group flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-agro-orange hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95 outline-none"
+  >
+    <img 
+      src={logoSrc} 
+      alt={title} 
+      className="w-16 h-16 object-contain mb-3 opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 drop-shadow-sm" 
+    />
+    <h2 className="text-[11px] font-black text-agro-green uppercase tracking-widest group-hover:text-agro-orange transition-colors text-center">
       {title}
     </h2>
-    <p className="text-[10px] text-slate-500 font-medium mt-1 group-hover:text-slate-400">
-      {description}
-    </p>
-
-    <div className="mt-6 pt-4 border-t border-white/5 w-full flex flex-col items-center">
-      <span className="text-[7px] text-slate-600 uppercase font-bold tracking-widest">Status do Sistema</span>
-      <div className="flex items-center gap-1.5 mt-1">
-        <div className="w-1.5 h-1.5 rounded-full bg-agro-orange animate-pulse" />
-        <span className="text-[9px] font-mono text-agro-orange uppercase tracking-tighter">
-          {status}
-        </span>
-      </div>
-    </div>
-  </div>
+  </Link>
 );
 
-function App() {
+// ================================= PÁGINAS (ROTAS) ================================= //
+
+// Página 1: O seu Hub AgroTarget intacto
+function Hub() {
   return (
-    <div className="min-h-screen flex flex-col bg-slate-950 no-scrollbar">
-      {/* Header com a sua cara */}
-      <header className="w-full py-10 px-6 text-center border-b border-white/5 bg-slate-900/50 backdrop-blur-xl sticky top-0 z-50">
-        <h1 className="text-4xl font-black tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-white via-agro-green to-agro-orange">
-          AgroTarget
+    <div className="min-h-screen flex flex-col bg-slate-50 no-scrollbar selection:bg-agro-orange/20">
+      
+      <header className="w-full py-6 px-6 text-center bg-agro-green border-b-2 border-agro-orange sticky top-0 z-50 shadow-sm">
+        <h1 className="text-4xl font-black tracking-tighter text-white drop-shadow-sm">
+          Agro<span className="text-agro-orange">Target</span>
         </h1>
-        <div className="flex items-center justify-center gap-2 mt-1">
-          <div className="h-[1px] w-8 bg-agro-green" />
-          <p className="text-[10px] uppercase tracking-[0.5em] text-agro-green font-black">
+        <div className="flex items-center justify-center gap-3 mt-2">
+          <div className="h-[1px] w-8 bg-white/30" />
+          <p className="text-[9px] uppercase tracking-[0.5em] text-white/90 font-black">
             Inteligência Agrícola
           </p>
-          <div className="h-[1px] w-8 bg-agro-green" />
+          <div className="h-[1px] w-8 bg-white/30" />
         </div>
       </header>
 
-      {/* Grid Principal */}
-      <main className="flex-grow p-8 flex items-center justify-center">
-        <div className="w-full max-w-3xl grid grid-cols-1 md:grid-cols-2 gap-6">
-          
-          <ModuleCard 
-            title="QualyFlow" 
-            acronym="QF" 
-            status="Monitorando..." 
-            description="Gestão de Qualidade e Fluxos"
-          />
-
-          <ModuleCard 
-            title="COA Center" 
-            acronym="COA" 
-            status="Sincronizado" 
-            description="Centro de Operações Agrícolas"
-          />
-
+      <main className="flex-grow p-6 flex justify-center items-start pt-10">
+        <div className="w-full max-w-2xl grid grid-cols-2 gap-4">
+          <ModuleCard title="QualyFlow" logoSrc={qualyflowLogo} to="/qualyflow" />
+          <ModuleCard title="COA Center" logoSrc={coacenterLogo} to="/coacenter" />
         </div>
       </main>
 
-      {/* Footer */}
-      <footer className="w-full py-10 px-6 text-center border-t border-white/5 bg-slate-950">
-        <div className="flex flex-col gap-2">
-          <p className="text-[10px] text-slate-600 uppercase tracking-[0.3em] font-bold">Arquitetura de Dados</p>
-          <p className="text-lg font-black text-white tracking-tight uppercase">
+      <footer className="w-full py-6 px-6 text-center border-t border-slate-200 bg-white">
+        <div className="flex flex-col gap-1">
+          <p className="text-[8px] text-slate-400 uppercase tracking-widest font-black">Desenvolvido Por</p>
+          <p className="text-md font-black text-agro-green tracking-tight uppercase">
             Paulo <span className="text-agro-orange">Roberto</span>
           </p>
-          <div className="flex items-center justify-center gap-4 mt-2">
-            <span className="text-[9px] px-2 py-0.5 rounded border border-agro-green/30 text-agro-green font-bold">V2.0 REACT</span>
+          <div className="flex items-center justify-center mt-2">
+            <span className="text-[10px] font-mono font-bold text-slate-400">Versão 2.0.0</span>
           </div>
         </div>
       </footer>
     </div>
+  );
+}
+
+// Página Rascunho da aplicação COA Center (Deixaremos aqui até separarmos em pasta igual fizemos com o QualyFlow)
+function COACenterPage() {
+  const navigate = useNavigate();
+  return (
+    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
+      <img src={coacenterLogo} alt="COA Center" className="w-24 mb-6 drop-shadow-md" />
+      <h1 className="text-3xl font-black text-agro-green uppercase tracking-widest mb-2">COA Center</h1>
+      <p className="text-slate-500 mb-8 text-center max-w-md">Área isolada para as regras de negócio de Operações. Ferramenta de alta performance.</p>
+      <button onClick={() => navigate('/')} className="px-6 py-3 bg-white border-2 border-agro-orange text-agro-orange font-bold uppercase text-xs rounded-lg hover:bg-agro-orange hover:text-white transition-colors active:scale-95">
+        ← Voltar ao Hub
+      </button>
+    </div>
+  );
+}
+
+// ================================= EXECUTOR (ROUTER PRINCIPAL) ================================= //
+
+function App() {
+  return (
+    <Routes>
+      <Route path="/" element={<Hub />} />
+      
+      {/* Aqui a mágica acontece: apontamos a rota para a sua nova página modularizada! */}
+      <Route path="/qualyflow" element={<QualyFlowHome />} />
+      
+      <Route path="/coacenter" element={<COACenterPage />} />
+    </Routes>
   );
 }
 
