@@ -106,7 +106,51 @@ export const QUALY_RULES = {
   },
   // --- CASA DE BOMBA (EB) ---
   "CasaBomba": {
-    percentual: (v) => (v >= 100 ? COLORS.dentro : COLORS.fora),
+    percentual: (v) => {
+      if (v >= 90) return COLORS.dentro;   // Verde (Top)
+      if (v >= 80) return COLORS.atencao;   // Amarelo/Laranja Leve
+      return COLORS.fora;                  // Vermelho (< 70)
+    },
     status: (s) => (s === "Conforme" ? COLORS.dentro : COLORS.fora)
+  },
+  // --- CHECKLIST GOTEJO ---
+  "ChecklistGotejo": {
+    pressao: (v) => (v >= 7 && v <= 22 ? COLORS.dentro : COLORS.fora),
+    // Cores específicas do gráfico solicitado
+    colors: {
+      minOk: "#60A5FA",    // Azul Claro (Blue-400)
+      maxOk: "#1D4ED8",    // Azul Escuro (Blue-700)
+      erro: "#EF4444",     // Vermelho (Red-500)
+      meta: "#94A3B8"      // Cinza Neutro (Slate-400)
+    }
+  },
+  // --- PLANTIO MANUAL ---
+  "PlantioManual_Viaveis": {
+    meta: (v) => {
+      if (v >= 90) return COLORS.dentro;    // Verde
+      if (v >= 80) return COLORS.atencao;   // Amarelo
+      return COLORS.fora;                   // Vermelho
+    },
+    unidade: "%"
+  },
+  "PlantioManual_Falha": {
+    meta: (v) => {
+      if (v === 0) return COLORS.dentro;    // Verde (Zero absoluto)
+      if (v <= 1) return COLORS.atencao;    // Amarelo (Até 1%)
+      return COLORS.fora;                   // Vermelho (Acima de 1%)
+    },
+    unidade: "%"
+  },
+  "PlantioManual_GemasMetro": {
+    meta: (v) => {
+      if (v >= 15 && v <= 18) return COLORS.dentro; // Verde
+      if ((v >= 12 && v <= 14) || (v >= 19 && v <= 21)) return COLORS.atencao; // Amarelo
+      return COLORS.fora; // Vermelho
+    },
+    unidade: "un"
+  },
+  "PlantioManual_Cobertura": {
+    meta: (v) => (v >= 5 && v <= 8) ? COLORS.dentro : COLORS.fora,
+    unidade: "cm"
   },
 };

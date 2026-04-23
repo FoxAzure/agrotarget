@@ -16,17 +16,16 @@ const CasaBombaCard = ({ stats, to }) => {
           </h2>
         </div>
 
-        {/* Tabela de EBs Clean */}
+        {/* Tabela de EBs - Colunas Ajustadas para o Não Conforme */}
         <div className="px-4 py-3 flex flex-col gap-3">
-          {/* Cabeçalho da Tabela */}
-          <div className="grid grid-cols-[1fr_45px_45px_65px] pb-1 border-b border-slate-200">
+          {/* Grid recalibrado: EB(1fr) | Telas(40px) | Caixas(40px) | Org(85px) */}
+          <div className="grid grid-cols-[1fr_40px_40px_85px] pb-1 border-b border-slate-200">
             <span className="text-left text-[8px] font-black text-slate-500 uppercase">EB Referência</span>
             <span className="text-center text-[8px] font-black text-slate-500 uppercase">Telas</span>
             <span className="text-center text-[8px] font-black text-slate-500 uppercase">Caixas</span>
-            <span className="text-right text-[8px] font-black text-slate-500 uppercase">Org.</span>
+            <span className="text-right text-[8px] font-black text-slate-500 uppercase pr-1">Org.</span>
           </div>
 
-          {/* Linhas da Tabela */}
           <div className="flex flex-col gap-2">
             {ebs.map((eb, idx) => {
               const corTelas = QUALY_RULES.CasaBomba.percentual(eb.telasPerc);
@@ -34,7 +33,7 @@ const CasaBombaCard = ({ stats, to }) => {
               const corOrg = QUALY_RULES.CasaBomba.status(eb.organizacao);
 
               return (
-                <div key={idx} className="grid grid-cols-[1fr_45px_45px_65px] items-center pb-1 border-b border-slate-100 last:border-0">
+                <div key={idx} className="grid grid-cols-[1fr_40px_40px_85px] items-center pb-1 border-b border-slate-100 last:border-0">
                   <span className="text-left text-[10px] font-black text-slate-700 uppercase truncate pr-1">
                     {eb.referencia}
                   </span>
@@ -44,7 +43,7 @@ const CasaBombaCard = ({ stats, to }) => {
                   <span className="text-center text-[11px] font-black tracking-tighter" style={{ color: corCaixas }}>
                     {eb.caixasPerc.toFixed(0)}%
                   </span>
-                  <span className="text-right text-[9px] font-black tracking-tighter uppercase" style={{ color: corOrg }}>
+                  <span className="text-right text-[9px] font-black tracking-tighter uppercase whitespace-nowrap pr-1" style={{ color: corOrg }}>
                     {eb.organizacao}
                   </span>
                 </div>

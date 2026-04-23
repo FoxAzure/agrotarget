@@ -7,6 +7,7 @@ import coacenterLogo from './gallery/logo/coacenter.png';
 
 // Importando a nova página modularizada do QualyFlow
 import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
+import CucDetails from './pages/QualyFlow/CucDetails';
 
 // ================================= HELPERS (COMPONENTES) ================================= //
 
@@ -92,6 +93,7 @@ function App() {
       
       {/* Aqui a mágica acontece: apontamos a rota para a sua nova página modularizada! */}
       <Route path="/qualyflow" element={<QualyFlowHome />} />
+      <Route path="/qualyflow/cuc" element={<CucDetails />} />
       
       <Route path="/coacenter" element={<COACenterPage />} />
     </Routes>
