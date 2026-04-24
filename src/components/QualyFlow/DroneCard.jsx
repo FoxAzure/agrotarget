@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { QUALY_RULES, COLORS } from '../../pages/QualyFlow/rules';
 
-const DroneCard = ({ stats, to }) => {
+const DroneCard = ({ stats, to, selectedDate }) => {
   const { variacaoGeral, coletasMedia, totalDrones } = stats;
 
   const corGeral = QUALY_RULES.Drone.meta(variacaoGeral);
@@ -62,7 +62,12 @@ const DroneCard = ({ stats, to }) => {
           </div>
         </div>
 
-        <Link to={to} className="w-full py-3 bg-slate-50/80 border-t border-slate-100 flex justify-center items-center group-hover:bg-green-50 transition-all">
+        {/* Passando o bilhete (state) no Link */}
+        <Link 
+          to={to} 
+          state={{ selectedDate }} 
+          className="w-full py-3 bg-slate-50/80 border-t border-slate-100 flex justify-center items-center group-hover:bg-green-50 transition-all"
+        >
           <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100">
             <span className="text-[9px] font-black text-slate-500 group-hover:text-agro-green uppercase tracking-[0.2em]">
               Detalhes Técnicos

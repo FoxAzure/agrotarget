@@ -6,8 +6,15 @@ import qualyflowLogo from './gallery/logo/qualyflow.png';
 import coacenterLogo from './gallery/logo/coacenter.png';
 
 // Importando a nova página modularizada do QualyFlow
+import EmDesenvolvimento from './pages/QualyFlow/EmDesenvolvimento';
 import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
 import CucDetails from './pages/QualyFlow/CucDetails';
+import PreparoDetails from './pages/QualyFlow/PreparoDetails';
+import DroneDetails from './pages/QualyFlow/DroneDetails';
+
+// Importando Páginas do COA Center
+import COACenterHome from './pages/COACenter/COACenterHome';
+import Operacoes from './pages/COACenter/Operacoes';
 
 // ================================= HELPERS (COMPONENTES) ================================= //
 
@@ -94,8 +101,20 @@ function App() {
       {/* Aqui a mágica acontece: apontamos a rota para a sua nova página modularizada! */}
       <Route path="/qualyflow" element={<QualyFlowHome />} />
       <Route path="/qualyflow/cuc" element={<CucDetails />} />
+      <Route path="/qualyflow/preparo" element={<PreparoDetails />} />
+      <Route path="/qualyflow/drone" element={<DroneDetails />} />
+
+      <Route path="/qualyflow/semente" element={<EmDesenvolvimento />} />
+      <Route path="/qualyflow/adubcob" element={<EmDesenvolvimento />} />
+      <Route path="/qualyflow/adubsulc" element={<EmDesenvolvimento />} />
+      <Route path="/qualyflow/composto" element={<EmDesenvolvimento />} />
+      <Route path="/qualyflow/plantiomanual" element={<EmDesenvolvimento />} />
+      <Route path="/qualyflow/plantio" element={<EmDesenvolvimento />} />
+      <Route path="/qualyflow/checklist" element={<EmDesenvolvimento />} />
+      <Route path="/qualyflow/casabomba" element={<EmDesenvolvimento />} />
       
-      <Route path="/coacenter" element={<COACenterPage />} />
+      <Route path="/coacenter" element={<COACenterHome />} />
+      <Route path="/coacenter/operacoes" element={<Operacoes />} />
     </Routes>
   );
 }

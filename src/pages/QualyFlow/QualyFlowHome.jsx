@@ -290,20 +290,20 @@ const QualyFlowHome = () => {
               case 'ChecklistGotejo': 
                 return stats.hasChecklistGotejo && <ChecklistGotejoCard key="chk" stats={stats.checklistGotejo} to="/qualyflow/checklist" />;
               case 'CUC': 
-                return stats.hasCuc && <CucCard key="cuc" stats={stats.cuc} to="/qualyflow/cuc" />;
+                return stats.hasCuc && <CucCard key="cuc" stats={stats.cuc} to="/qualyflow/cuc" selectedDate={selectedDate} />;
               case 'Semente': 
                 return stats.hasSemente && <SementeCard key="sem" stats={stats.semente} to="/qualyflow/semente" />;
               case 'Composto': 
                 return stats.hasComposto && <CompostoCard key="comp" stats={stats.composto} to="/qualyflow/composto" />;
               case 'Drone': 
-                return stats.hasDrone && <DroneCard key="drn" stats={stats.drone} to="/qualyflow/drone" />;
+                return stats.hasDrone && <DroneCard key="drn" stats={stats.drone} to="/qualyflow/drone" selectedDate={selectedDate}/>;
               case 'AdubCob': 
                 return stats.hasAdubCob && <AdubacaoCard key="adc" title="Adubação de Cobertura" stats={stats.adubCob} to="/qualyflow/adubcob" />;
               case 'AdubSulc': 
                 return stats.hasAdubSulc && <AdubacaoCard key="ads" title="Adubação de Sulcamento" stats={stats.adubSulc} to="/qualyflow/adubsulc" />;
               case 'Preparo': 
                 return stats.hasPreparo && (
-                  <UnifiedModuleCard key="prep" sectionTitle="Preparo de Solo" to="/qualyflow/preparo">
+                  <UnifiedModuleCard key="prep" sectionTitle="Preparo de Solo" to="/qualyflow/preparo" selectedDate={selectedDate}>
                     <IndicatorRow title="Haste" value={stats.preparo.haste} unit="cm" color={QUALY_RULES.Haste.meta(stats.preparo.haste)} />
                     <IndicatorRow title="Cana" value={stats.preparo.cana} unit="cm" color={QUALY_RULES.Cana.meta(stats.preparo.cana)} />
                     <IndicatorRow title="Fita" value={stats.preparo.fita} unit="cm" color={QUALY_RULES.Fita.meta(stats.preparo.fita)} />

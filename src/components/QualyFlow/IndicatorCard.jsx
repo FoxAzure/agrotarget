@@ -38,7 +38,8 @@ const IndicatorRow = ({ title, value, unit, color }) => {
   );
 };
 
-const UnifiedModuleCard = ({ sectionTitle, children, to }) => (
+// ADICIONADO: selectedDate nas props
+const UnifiedModuleCard = ({ sectionTitle, children, to, selectedDate }) => (
   <section className="w-full max-w-[340px] animate-in fade-in zoom-in duration-500 mt-2 font-sans">
     <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden group hover:border-agro-orange/40 transition-all relative">
       
@@ -58,6 +59,7 @@ const UnifiedModuleCard = ({ sectionTitle, children, to }) => (
 
       <Link 
         to={to}
+        state={{ selectedDate }} // PULO DO GATO: Enviando a data no clique!
         className="w-full py-3 bg-slate-50/80 border-t border-slate-100 flex justify-center items-center group-hover:bg-orange-50 transition-all"
       >
         <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">

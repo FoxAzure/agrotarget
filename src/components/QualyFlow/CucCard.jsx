@@ -24,7 +24,8 @@ const AnimatedProgressBar = ({ value, color }) => {
   );
 };
 
-const CucCard = ({ stats, to }) => {
+// Adicionado o selectedDate aqui nas props
+const CucCard = ({ stats, to, selectedDate }) => {
   const { totais, campos } = stats;
 
   return (
@@ -98,6 +99,7 @@ const CucCard = ({ stats, to }) => {
 
         <Link 
           to={to}
+          state={{ selectedDate }} // Passando o bilhete com a data
           className="w-full py-3 bg-slate-50/80 border-t border-slate-100 flex justify-center items-center group-hover:bg-green-50 transition-all"
         >
           <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100">
