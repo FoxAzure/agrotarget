@@ -2,10 +2,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { QUALY_RULES } from '../../pages/QualyFlow/rules';
 
-const CompostoCard = ({ stats, to }) => {
+const CompostoCard = ({ stats, to, selectedDate }) => {
   const { geralTon, geralVar, implementos } = stats;
 
-  // Evita o erro de NaN no cabeçalho
   const tonValue = Number(geralTon) || 0;
   const varValue = Number(geralVar) || 0;
 
@@ -19,14 +18,14 @@ const CompostoCard = ({ stats, to }) => {
         {/* Fita Premium no Topo */}
         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-agro-green to-agro-orange opacity-90" />
         
-        {/* Título Padronizado com CUC */}
+        {/* Título Padronizado */}
         <div className="px-4 pt-4 pb-2">
           <h2 className="text-[10px] font-black text-agro-green uppercase">
             Aplicação de Composto
           </h2>
         </div>
 
-        {/* Resumo Geral: Estrutura idêntica ao Resumo Superior do CUC */}
+        {/* Resumo Geral */}
         <div className="px-4 py-3 flex justify-between bg-slate-50/50 border-y border-slate-100 shadow-inner">
           <div className="flex flex-col">
             <span className="text-[8px] font-black text-slate-500 uppercase tracking-tighter mb-0.5">Média ton/ha</span>
@@ -45,17 +44,14 @@ const CompostoCard = ({ stats, to }) => {
           </div>
         </div>
 
-        {/* Tabela de Implementos: Espaçamento e fontes iguais ao CUC */}
+        {/* Tabela de Implementos */}
         <div className="px-4 py-3 flex flex-col gap-3">
-          
-          {/* Cabeçalho da Tabela */}
           <div className="grid grid-cols-[1fr_60px_60px] pb-1 border-b border-slate-200">
             <span className="text-left text-[8px] font-black text-slate-500 uppercase">Implemento</span>
             <span className="text-center text-[8px] font-black text-slate-500 uppercase">ton/ha</span>
             <span className="text-right text-[8px] font-black text-slate-500 uppercase">var%</span>
           </div>
 
-          {/* Linhas da Tabela */}
           <div className="flex flex-col gap-2">
             {implementos.map((impl, idx) => {
               const tonColor = QUALY_RULES.Composto.ton(impl.valor);
@@ -78,9 +74,10 @@ const CompostoCard = ({ stats, to }) => {
           </div>
         </div>
 
-        {/* Link Técnico Padronizado */}
+        {/* Link Técnico Padronizado - LIMPO E SEM COMENTÁRIOS INTERNOS */}
         <Link 
           to={to} 
+          state={{ selectedDate }} 
           className="w-full py-3 bg-slate-50/80 border-t border-slate-100 flex justify-center items-center group-hover:bg-green-50 transition-all"
         >
           <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100">

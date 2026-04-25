@@ -294,7 +294,7 @@ const QualyFlowHome = () => {
               case 'Semente': 
                 return stats.hasSemente && <SementeCard key="sem" stats={stats.semente} to="/qualyflow/semente" />;
               case 'Composto': 
-                return stats.hasComposto && <CompostoCard key="comp" stats={stats.composto} to="/qualyflow/composto" />;
+                return stats.hasComposto && <CompostoCard key="comp" stats={stats.composto} to="/qualyflow/composto" selectedDate={selectedDate} />;
               case 'Drone': 
                 return stats.hasDrone && <DroneCard key="drn" stats={stats.drone} to="/qualyflow/drone" selectedDate={selectedDate}/>;
               case 'AdubCob': 

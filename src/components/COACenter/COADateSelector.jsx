@@ -1,5 +1,18 @@
 import React from 'react';
 
+// Helper local para garantir que a exibição seja sempre BR
+const formatToBR = (dateStr) => {
+  if (!dateStr) return "--/--/----";
+  // Se já for DD/MM/AAAA, mantém
+  if (dateStr.includes('/') && dateStr.indexOf('/') === 2) return dateStr;
+  // Se for ISO (AAAA-MM-DD), inverte
+  if (dateStr.includes('-')) {
+    const [y, m, d] = dateStr.split('-');
+    return `${d}/${m}/${y}`;
+  }
+  return dateStr;
+};
+
 const COADateSelector = ({ date, onPrev, onNext, disablePrev, disableNext }) => (
   <div className="w-full flex flex-col items-center py-6 font-sans bg-transparent">
     <div className="flex items-center gap-4">
@@ -23,7 +36,8 @@ const COADateSelector = ({ date, onPrev, onNext, disablePrev, disableNext }) => 
           Data Operacional
         </p>
         <span className="text-sm font-black tracking-tight text-slate-200 bg-[#161B22] px-4 py-2 rounded-xl border border-slate-700 shadow-inner min-w-[120px]">
-          {date}
+          {/* A mágica acontece aqui: Traduzimos o 'date' recebido para o visual BR */}
+          {formatToBR(date)}
         </span>
       </div>
 
