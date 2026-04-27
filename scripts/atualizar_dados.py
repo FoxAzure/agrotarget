@@ -49,10 +49,10 @@ def execute():
         with open(JSON_UPDATE_PATH, 'w', encoding='utf-8') as f:
             json.dump(update_info, f, ensure_ascii=False, indent=2)
             
-        print(f"Carimbo de tempo atualizado: {update_info['DATA_HORA']}")
+        print(f"Atualizado: {update_info['DATA_HORA']}")
 
     except Exception as e:
-        print(f"Erro cataclísmico ao atualizar dados: {e}")
+        print(f"Erro: {e}")
         raise
 
 if __name__ == "__main__":

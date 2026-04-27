@@ -275,12 +275,16 @@ const QualyFlowHome = () => {
       <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} onNavigate={(p) => console.log(p)} />
 
       <main className="p-4 flex flex-col items-center">
-        <DateSelector 
-          date={selectedDate} onPrev={() => setDateIndex(di => di + 1)} onNext={() => setDateIndex(di => di - 1)} 
-          disablePrev={dateIndex === availableDates.length - 1} disableNext={dateIndex === 0} 
-        />
+        {/* DateSelector agora alinhado com o novo tamanho */}
+        <div className="w-full max-w-[400px]">
+          <DateSelector 
+            date={selectedDate} onPrev={() => setDateIndex(di => di + 1)} onNext={() => setDateIndex(di => di - 1)} 
+            disablePrev={dateIndex === availableDates.length - 1} disableNext={dateIndex === 0} 
+          />
+        </div>
 
-        <div className="w-full max-w-[340px] flex flex-col gap-4">
+        {/* CONTAINER MESTRE ATUALIZADO: de 340px para 400px */}
+        <div className="w-full max-w-[400px] flex flex-col gap-6 mt-4">
           
           {/* Loop Inteligente de Renderização */}
           {ORDEM_DOS_CARDS.map(cardNome => {
@@ -319,7 +323,7 @@ const QualyFlowHome = () => {
                     <IndicatorRow title="Cobertura" value={stats.plantio.cob} unit="cm" color={QUALY_RULES.Cobertura.meta(stats.plantio.cob)} />
                   </UnifiedModuleCard>
                 );
-              case 'PlantioManual': // O NOSSO NOVO CARD [cite: 2026-02-11]
+              case 'PlantioManual': 
                 return stats.hasPlantioManual && (
                   <UnifiedModuleCard key="plntman" sectionTitle="Plantio Manual" to="/qualyflow/plantiomanual">
                     <IndicatorRow title="Gemas Viáveis" value={stats.plantioManual.gemasPerc} unit="%" color={QUALY_RULES.PlantioManual_Viaveis.meta(stats.plantioManual.gemasPerc)} />

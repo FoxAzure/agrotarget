@@ -10,7 +10,7 @@ const IndicatorRow = ({ title, value, unit, color }) => {
   return (
     <div className="flex flex-col py-1 font-sans">
       <h3 
-        className={`text-[8px] font-black uppercase tracking-tight leading-none mb-1 transition-all duration-500 ${isFora ? 'animate-pulse' : ''}`}
+        className={`text-[10px] font-black uppercase tracking-widest leading-none mb-0.5 transition-all duration-500 ${isFora ? 'animate-pulse' : ''}`}
         style={{ 
           color: displayColor,
           textShadow: isFora ? `0 0 12px ${displayColor}` : 'none'
@@ -18,7 +18,7 @@ const IndicatorRow = ({ title, value, unit, color }) => {
       >
         {title}
       </h3>
-      <div className="flex items-baseline gap-0.5">
+      <div className="flex items-baseline gap-1">
         <span 
           className="text-2xl font-black tracking-tighter leading-none"
           style={{ 
@@ -29,7 +29,7 @@ const IndicatorRow = ({ title, value, unit, color }) => {
           {displayValue}
         </span>
         {hasValue && (
-          <span className="text-[8px] font-bold text-slate-400 uppercase opacity-60 ml-0.5 tracking-tighter">
+          <span className="text-[9px] font-bold text-slate-400 uppercase opacity-60 ml-0.5 tracking-tighter">
             {unit}
           </span>
         )}
@@ -40,33 +40,34 @@ const IndicatorRow = ({ title, value, unit, color }) => {
 
 // ADICIONADO: selectedDate nas props
 const UnifiedModuleCard = ({ sectionTitle, children, to, selectedDate }) => (
-  <section className="w-full max-w-[340px] animate-in fade-in zoom-in duration-500 mt-2 font-sans">
-    <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden group hover:border-agro-orange/40 transition-all relative">
+  <section className="w-full max-w-[400px] animate-in fade-in zoom-in duration-500 mt-2 font-sans">
+    <div className="bg-white border-2 border-slate-200/80 rounded-xl shadow-xl overflow-hidden group hover:border-agro-orange/40 transition-all relative">
       
-      {/* Detalhe Premium: Fita Colorida no Topo MANTIDA */}
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-agro-green to-agro-orange opacity-90" />
+      {/* Detalhe Premium: Fita Colorida no Topo (h-1.5 mantida) */}
+      <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-agro-green to-agro-orange opacity-90 shadow-sm" />
 
-      {/* Header Padronizado: Linha inferior removida e espaçamento da fonte corrigido */}
-      <div className="px-4 pt-5 pb-1">
-        <h2 className="text-[10px] font-black text-agro-green uppercase tracking-widest">
+      {/* Header Compacto */}
+      <div className="px-5 pt-4 pb-2 border-b border-slate-100 bg-slate-50/30">
+        <h2 className="text-[13px] font-black text-agro-green uppercase tracking-widest">
           {sectionTitle}
         </h2>
       </div>
 
-      <div className="px-4 pb-5 pt-2 grid grid-cols-2 gap-x-4 gap-y-4">
+      {/* Corpo do Card (Mais compactado verticalmente) */}
+      <div className="px-5 py-3.5 grid grid-cols-2 gap-x-5 gap-y-3">
         {children}
       </div>
 
       <Link 
         to={to}
-        state={{ selectedDate }} // PULO DO GATO: Enviando a data no clique!
-        className="w-full py-3 bg-slate-50/80 border-t border-slate-100 flex justify-center items-center group-hover:bg-orange-50 transition-all"
+        state={{ selectedDate }}
+        className="w-full py-2.5 bg-[#F8FAFC] border-t border-slate-100 flex justify-center items-center group-hover:bg-agro-orange/5 transition-all"
       >
-        <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
-          <span className="text-[9px] font-black text-slate-500 group-hover:text-agro-orange uppercase tracking-widest">
-            Detalhes Técnicos
+        <div className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
+          <span className="text-[10px] font-black text-slate-500 group-hover:text-agro-orange uppercase tracking-widest">
+            Relatório Detalhado
           </span>
-          <span className="text-slate-400 group-hover:text-agro-orange text-[12px] font-bold">→</span>
+          <span className="text-slate-400 group-hover:text-agro-orange text-[14px] font-black">→</span>
         </div>
       </Link>
     </div>

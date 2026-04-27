@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 
 // Componentes Reutilizáveis
@@ -9,58 +9,16 @@ import DateSelector from '../../components/QualyFlow/DateSelector';
 // Dados
 import qualyflowMockData from '../../data/mockData.json';
 
-// ===========================================================================
-// COMPONENTE: GRÁFICO DE DESVIO ANIMADO (O Radar do Drone)
-// ===========================================================================
-const AnimatedDeviationBar = ({ variation, absoluteValue, color, maxScale = 25 }) => {
-  const [animWidth, setAnimWidth] = useState(0);
-
-  useEffect(() => {
-    // Calcula a largura proporcional limitada a 100% da metade do gráfico
-    const safeWidth = Math.min((Math.abs(variation) / maxScale) * 100, 100);
-    const timer = setTimeout(() => setAnimWidth(safeWidth), 150);
-    return () => clearTimeout(timer);
-  }, [variation, maxScale]);
-
-  const isNegative = variation < 0;
-  const isZero = variation === 0;
-
-  return (
-    <div className="flex flex-col gap-1 w-full">
-      <div className="flex-1 flex items-center relative h-5 bg-slate-100 rounded-md overflow-hidden shadow-inner border border-slate-200/60">
-        
-        {/* Eixo Central (Zero) */}
-        <div className="absolute left-1/2 top-0 bottom-0 w-0.5 bg-slate-300 z-10 transform -translate-x-1/2" />
-
-        {/* Lado Esquerdo (Variação Negativa) */}
-        <div className="w-1/2 h-full flex justify-end">
-          {isNegative && (
-            <div
-              className="h-full rounded-l-md transition-all duration-[1000ms] ease-out"
-              style={{ width: `${animWidth}%`, backgroundColor: color }}
-            />
-          )}
-        </div>
-
-        {/* Lado Direito (Variação Positiva) */}
-        <div className="w-1/2 h-full flex justify-start">
-          {!isNegative && !isZero && (
-            <div
-              className="h-full rounded-r-md transition-all duration-[1000ms] ease-out"
-              style={{ width: `${animWidth}%`, backgroundColor: color }}
-            />
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const DroneDetails = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [expandedSections, setExpandedSections] = useState({});
   const navigate = useNavigate();
   const location = useLocation();
   const passedDate = location.state?.selectedDate;
+
+  const toggleSection = (id) => {
+    setExpandedSections(prev => ({ ...prev, [id]: !prev[id] }));
+  };
 
   // ===========================================================================
   // 1. GESTÃO DE DATAS
@@ -72,59 +30,40 @@ const DroneDetails = () => {
   }, []);
 
   const [dateIndex, setDateIndex] = useState(() => {
-    if (passedDate && availableDates.includes(passedDate)) {
-      return availableDates.indexOf(passedDate);
-    }
+    if (passedDate && availableDates.includes(passedDate)) return availableDates.indexOf(passedDate);
     return 0;
   });
 
   const selectedDate = availableDates[dateIndex] || "";
 
   // ===========================================================================
-  // 2. MOTOR DE CÁLCULO E AGRUPAMENTO POR DRONE
+  // 2. MOTOR DE CÁLCULO
   // ===========================================================================
   const dronesData = useMemo(() => {
     if (!selectedDate) return [];
-    
-    // Pega as avaliações do dia
     const dayData = qualyflowMockData.filter(i => i.DATA_HORA.startsWith(selectedDate) && i.OCORRENCIA === "Avaliação Drone");
-    
-    // Identifica quais Drones voaram hoje
     const droneNames = [...new Set(dayData.map(i => i.DRONES).filter(Boolean))];
 
     return droneNames.map(drone => {
       const dData = dayData.filter(i => i.DRONES === drone);
-
-      // Vazão Recomendada (Média caso tenha mais de um registro do mesmo drone no dia)
       const vazoes = dData.filter(i => i.INDICADOR === "Vazão Recomendada").map(i => Number(i.VALOR)).filter(v => !isNaN(v));
       const vazaoRec = vazoes.length ? vazoes.reduce((a, b) => a + b, 0) / vazoes.length : 0;
 
-      // Extrai os 4 bicos/coletas
       const calcColeta = (num) => {
         const coletas = dData.filter(i => i.INDICADOR === `${num}ª Coleta`).map(i => Number(i.VALOR)).filter(v => !isNaN(v));
         const media = coletas.length ? coletas.reduce((a, b) => a + b, 0) / coletas.length : 0;
         const varPerc = (vazaoRec > 0 && media > 0) ? ((media - vazaoRec) / vazaoRec) * 100 : 0;
-        
         return { num, media, varPerc };
       };
 
       const coletas = [calcColeta(1), calcColeta(2), calcColeta(3), calcColeta(4)];
-      
-      // Variação Média Geral deste Drone
       const validColetas = coletas.filter(c => c.media > 0);
       const varGeral = validColetas.length ? validColetas.reduce((a, b) => a + b.varPerc, 0) / validColetas.length : 0;
 
-      return {
-        nome: drone,
-        vazaoRec,
-        coletas,
-        varGeral
-      };
+      return { nome: drone, vazaoRec, coletas, varGeral };
     }).sort((a, b) => String(a.nome).localeCompare(String(b.nome), undefined, { numeric: true }));
-
   }, [selectedDate]);
 
-  // Cálculos do Resumo da Frota
   const mediaGeralFrota = useMemo(() => {
     if (dronesData.length === 0) return 0;
     return dronesData.reduce((acc, curr) => acc + curr.varGeral, 0) / dronesData.length;
@@ -141,22 +80,21 @@ const DroneDetails = () => {
   };
 
   const formatSign = (val) => val > 0 ? '+' : '';
-
   const colorGeralFrota = getDeviationColor(mediaGeralFrota);
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-20">
+    <div className="min-h-screen bg-slate-50 font-sans pb-20 text-slate-900">
       <HeaderDrone onMenuOpen={() => setSidebarOpen(true)} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} onNavigate={(p) => console.log(p)} />
 
       <main className="p-4 flex flex-col items-center">
         
-        {/* Seletor de Data */}
-        <div className="w-full max-w-[340px] mb-6 mt-2">
+        {/* Seletor Ajustado para 400px */}
+        <div className="w-full max-w-[400px] mb-5">
           <DateSelector 
             date={selectedDate} 
-            onPrev={() => setDateIndex(di => di + 1)} 
-            onNext={() => setDateIndex(di => di - 1)} 
+            onPrev={() => setDateIndex(di => Math.min(di + 1, availableDates.length - 1))} 
+            onNext={() => setDateIndex(di => Math.max(di - 1, 0))} 
             disablePrev={dateIndex === availableDates.length - 1} 
             disableNext={dateIndex === 0} 
           />
@@ -164,123 +102,112 @@ const DroneDetails = () => {
 
         {/* MENSAGEM QUANDO VAZIO */}
         {dronesData.length === 0 && (
-          <div className="w-full max-w-[340px] text-center p-8 bg-white rounded-xl border border-slate-200 border-dashed text-slate-400 font-bold text-xs uppercase tracking-widest">
-            Nenhum drone avaliado
+          <div className="w-full max-w-[400px] text-center p-8 bg-white rounded-xl border border-slate-200 border-dashed text-slate-400 font-bold text-xs uppercase tracking-widest mt-4">
+            Nenhum drone avaliado nesta data
           </div>
         )}
 
-        <div className="w-full max-w-[340px] flex flex-col gap-6">
+        <div className="w-full max-w-[400px] flex flex-col gap-6 animate-in fade-in duration-500">
           
-          {/* 1. CARD MESTRE: RESUMO DA FROTA */}
+          {/* 1. RESUMO DA FROTA */}
           {dronesData.length > 0 && (
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in slide-in-from-top-4 duration-500 relative">
-              {/* Fita Premium de Destaque */}
-              
-              <div className="p-5 flex flex-col gap-4">
-                <div className="flex justify-between items-center">
-                  <div className="flex flex-col">
-                     <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Visão Geral</span>
-                     <h3 className="text-sm font-black text-slate-700 uppercase leading-none">Resumo</h3>
-                  </div>
-                  <div className="flex flex-col items-end">
-                     <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Avaliados</span>
-                     <span className="text-2xl font-black text-slate-700 leading-none">{dronesData.length}</span>
-                  </div>
-                </div>
-
-                <div className="flex flex-col gap-2 mt-1">
-                   <div className="flex justify-between items-end border-b border-slate-100 pb-2">
-                      <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Desvio Médio Total</span>
-                      <div className="flex items-baseline gap-1">
-                         <span className="text-3xl font-black tracking-tighter leading-none" style={{ color: colorGeralFrota }}>
-                           {formatSign(mediaGeralFrota)}{mediaGeralFrota.toFixed(2)}
-                         </span>
-                         <span className="text-sm font-bold opacity-50 uppercase" style={{ color: colorGeralFrota }}>%</span>
-                      </div>
-                   </div>
-                   {/* Gráfico do Resumo Global */}
-                   <AnimatedDeviationBar variation={mediaGeralFrota} color={colorGeralFrota} />
-                </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col shadow-sm">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Avaliados</span>
+                <span className="text-2xl font-black tracking-tighter text-slate-700">
+                  {dronesData.length} <span className="text-[9px] font-bold text-slate-300 uppercase">Drones</span>
+                </span>
+              </div>
+              <div className="bg-white p-4 rounded-xl border border-slate-200 flex flex-col shadow-sm">
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Desvio Geral</span>
+                <span className="text-2xl font-black tracking-tighter" style={{ color: colorGeralFrota }}>
+                  {formatSign(mediaGeralFrota)}{mediaGeralFrota.toFixed(1)}%
+                </span>
               </div>
             </div>
           )}
 
-          {/* 2. CARDS INDIVIDUAIS DOS DRONES */}
-          {dronesData.map((drone, idx) => {
-            const geralColor = getDeviationColor(drone.varGeral);
-            
-            return (
-              <div key={idx} className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
-                
-                {/* Cabeçalho do Card */}
-                <div className="bg-slate-50 border-b border-slate-100 p-4 flex justify-between items-center relative overflow-hidden">
-                  <div className="absolute top-0 left-0 w-1 h-full" style={{ backgroundColor: geralColor }} />
-                  
-                  <div className="flex flex-col pl-2">
-                    <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Drone</span>
-                    <h3 className="text-sm font-black text-slate-700 uppercase leading-none">{drone.nome}</h3>
-                  </div>
-                  
-                  <div className="flex flex-col items-end">
-                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">Variação %</span>
-                    <div className="flex items-baseline gap-0.5">
-                      <span className="text-2xl font-black tracking-tighter leading-none" style={{ color: geralColor }}>
-                        {formatSign(drone.varGeral)}{drone.varGeral.toFixed(2)}
-                      </span>
-                      <span className="text-[10px] font-bold opacity-50" style={{ color: geralColor }}>%</span>
-                    </div>
-                  </div>
-                </div>
+          {/* 2. LISTAGEM ACORDEÃO DOS DRONES */}
+          {dronesData.length > 0 && (
+            <div className="flex flex-col gap-3.5">
+              <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-2">Monitoramento por Unidade</h3>
+              
+              <div className="flex flex-col gap-2">
+                {dronesData.map((drone, idx) => {
+                  const isExpanded = expandedSections[drone.nome];
+                  const geralColor = getDeviationColor(drone.varGeral);
 
-                {/* Corpo do Card */}
-                <div className="p-4 flex flex-col gap-5">
-                  
-                  {/* Vazão Recomendada Info */}
-                  <div className="flex justify-between items-end border-b border-slate-100 pb-2">
-                     <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Vazão Recomendada</span>
-                     <div className="flex items-baseline gap-1">
-                        <span className="text-lg font-black text-slate-800 leading-none">{drone.vazaoRec.toFixed(2)}</span>
-                        <span className="text-[9px] font-bold text-slate-400">L</span>
-                     </div>
-                  </div>
-
-                  {/* As 4 Coletas */}
-                  <div className="flex flex-col gap-4">
-                    {drone.coletas.map((coleta, cIdx) => {
-                      const color = getDeviationColor(coleta.varPerc);
+                  return (
+                    <div key={idx} className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                       
-                      return (
-                        <div key={cIdx} className="flex flex-col gap-1.5">
-                          
-                          {/* Topo da linha: Rótulo e Valores */}
-                          <div className="flex justify-between items-end">
-                            <span className="text-[10px] font-black text-slate-600 uppercase tracking-widest">
-                              {coleta.num}ª Coleta
-                            </span>
-                            <div className="flex items-center gap-3">
-                              {/* Valor Absoluto Coletado */}
-                              <span className="text-[10px] font-bold text-slate-500">
-                                {coleta.media.toFixed(2)} L
-                              </span>
-                              {/* Percentual */}
-                              <span className="text-[11px] font-black w-10 text-right" style={{ color: color }}>
-                                {formatSign(coleta.varPerc)}{coleta.varPerc.toFixed(2)}%
-                              </span>
-                            </div>
-                          </div>
-
-                          {/* Gráfico de Desvio */}
-                          <AnimatedDeviationBar variation={coleta.varPerc} color={color} />
-                          
+                      <button 
+                        onClick={() => toggleSection(drone.nome)}
+                        className={`w-full p-4 flex justify-between items-center transition-colors z-10 ${
+                          isExpanded ? 'bg-slate-50/80 border-b border-slate-100' : 'bg-white hover:bg-slate-50/50'
+                        }`}
+                      >
+                        <div className="flex flex-col items-start text-left">
+                          <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Equipamento</span>
+                          <h4 className="text-[13px] font-black text-slate-800 uppercase leading-none mb-1">{drone.nome}</h4>
                         </div>
-                      );
-                    })}
-                  </div>
+                        
+                        <div className="flex items-center gap-4">
+                          <div className="flex flex-col items-end leading-none">
+                            <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Desvio</span>
+                            <span className="text-lg font-black tracking-tighter" style={{ color: geralColor }}>
+                              {formatSign(drone.varGeral)}{drone.varGeral.toFixed(1)}%
+                            </span>
+                          </div>
+                          <span className={`text-slate-300 text-[12px] transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`}>▼</span>
+                        </div>
+                      </button>
 
-                </div>
+                      {/* Tabela Interna com Animação Fluida via Grid */}
+                      <div className={`grid transition-all duration-300 ease-in-out ${isExpanded ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
+                        <div className="overflow-hidden">
+                          <div className="p-4 bg-white">
+                            <div className="flex justify-between items-end border-b border-slate-100 pb-2 mb-3">
+                               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Vazão Recomendada</span>
+                               <div className="flex items-baseline gap-1">
+                                  <span className="text-lg font-black text-slate-800 leading-none">{drone.vazaoRec.toFixed(2)}</span>
+                                  <span className="text-[9px] font-bold text-slate-400">L/min</span>
+                               </div>
+                            </div>
+
+                            <table className="w-full border-collapse">
+                              <thead className="bg-slate-50 border-y border-slate-100">
+                                <tr>
+                                  <th className="py-2 px-4 text-[9px] font-black text-slate-400 uppercase text-left">Coleta</th>
+                                  <th className="py-2 px-4 text-[9px] font-black text-slate-400 uppercase text-center">Vazão (L/min)</th>
+                                  <th className="py-2 px-4 text-[9px] font-black text-slate-400 uppercase text-right">Desvio</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {drone.coletas.map((coleta, cIdx) => {
+                                  const bicoColor = getDeviationColor(coleta.varPerc);
+                                  return (
+                                    <tr key={cIdx} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
+                                      <td className="py-3 px-4 text-[11px] font-bold text-slate-500">{coleta.num}ª</td>
+                                      <td className="py-3 px-4 text-[12px] font-black text-center text-slate-700">{coleta.media.toFixed(2)}</td>
+                                      <td className="py-3 px-4 text-[12px] font-black text-right" style={{ color: bicoColor }}>
+                                        {formatSign(coleta.varPerc)}{coleta.varPerc.toFixed(1)}%
+                                      </td>
+                                    </tr>
+                                  );
+                                })}
+                              </tbody>
+                            </table>
+                          </div>
+                        </div>
+                      </div>
+                      
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
+            </div>
+          )}
+
         </div>
       </main>
     </div>

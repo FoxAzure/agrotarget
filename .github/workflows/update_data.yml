@@ -2,7 +2,7 @@ name: Atualizar Dados COA
 
 on:
   schedule:
-    - cron: '15 14 * * *'
+    # Horários de Brasília: 00h, 09h, 10h, 12h e 18h (Convertidos para UTC)
     - cron: '0 3,12,13,15,21 * * *' 
   workflow_dispatch: 
 
@@ -12,10 +12,10 @@ jobs:
     
     steps:
       - name: Puxar o código fonte
-        uses: actions/checkout@v4 # Atualizado para v4 (Node 20+)
+        uses: actions/checkout@v4
 
       - name: Preparar ambiente Python
-        uses: actions/setup-python@v5 # Atualizado para v5 (Node 20+)
+        uses: actions/setup-python@v5
         with:
           python-version: '3.10'
 
@@ -32,4 +32,4 @@ jobs:
           git add src/data/mockData_coa.json
           git add src/data/coa_update.json
           
-          git diff --quiet && git diff --staged --quiet || (git commit -m "chore: dados coa atualizados (auto)" && git push)
+          git diff --quiet && git diff --staged --quiet || (git commit -m "[BOT]: Dados do COA Center Atualizados" && git push)

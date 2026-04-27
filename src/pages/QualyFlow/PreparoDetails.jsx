@@ -149,7 +149,6 @@ const PreparoDetails = () => {
           String(a.campo).localeCompare(String(b.campo), undefined, { numeric: true }) || 
           String(a.lote).localeCompare(String(b.lote), undefined, { numeric: true })
         ),
-        // Novo padrão de texto para o Alvo
         titleTarget: maxVal ? `Entre ${minVal} e ${maxVal}` : `Mínimo ${minVal}`
       };
     };
@@ -242,19 +241,19 @@ const PreparoDetails = () => {
       <button 
         onClick={() => setModalData({ title, data })} 
         disabled={!data.avaliados}
-        className={`bg-white p-3 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between text-left transition-all duration-300 ${data.avaliados ? 'hover:border-agro-green/50 hover:shadow-md cursor-pointer active:scale-95' : 'opacity-60 cursor-not-allowed'}`}
+        className={`bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between text-left transition-all duration-300 ${data.avaliados ? 'hover:border-agro-green/50 hover:shadow-md cursor-pointer active:scale-95' : 'opacity-60 cursor-not-allowed'}`}
       >
-        <div className="flex justify-between items-start mb-2">
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-tight leading-tight w-2/3">{title}</span>
-          <span className="text-[8px] font-bold text-slate-400 text-right bg-slate-50 px-1.5 py-0.5 rounded-md border border-slate-100">{data.titleTarget}</span>
+        <div className="flex justify-between items-start mb-3">
+          <span className="text-[11px] font-black text-slate-500 uppercase tracking-tight leading-tight w-2/3">{title}</span>
+          <span className="text-[10px] font-bold text-slate-400 text-right bg-slate-50 px-2 py-0.5 rounded-md border border-slate-100">{data.titleTarget}</span>
         </div>
         <div className="w-full">
-          <div className="flex justify-between items-end w-full">
+          <div className="flex justify-between items-end w-full mb-1.5">
             <span className="text-2xl font-black tracking-tighter leading-none" style={{ color: color }}>
               {valueText}
             </span>
             {data.avaliados > 0 && (
-              <span className="text-[8px] font-black text-slate-400 uppercase mb-0.5">Av: {data.avaliados}</span>
+              <span className="text-[10px] font-black text-slate-400 uppercase mb-0.5">Av: {data.avaliados}</span>
             )}
           </div>
           {!isDiff && <AnimatedProgressBar value={data.perc} color={color} />}
@@ -264,24 +263,34 @@ const PreparoDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans pb-20">
+    <div className="min-h-screen bg-slate-50 font-sans pb-20 text-slate-900">
       <HeaderPreparo onMenuOpen={() => setSidebarOpen(true)} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} onNavigate={(p) => console.log(p)} />
 
       <main className="p-4 flex flex-col items-center">
-        <DateSelector date={selectedDate} onPrev={() => setDateIndex(di => di + 1)} onNext={() => setDateIndex(di => di - 1)} disablePrev={dateIndex === availableDates.length - 1} disableNext={dateIndex === 0} />
+        
+        {/* Seletor Ajustado para 400px */}
+        <div className="w-full max-w-[400px] mb-5 mt-2">
+          <DateSelector 
+            date={selectedDate} 
+            onPrev={() => setDateIndex(di => di + 1)} 
+            onNext={() => setDateIndex(di => di - 1)} 
+            disablePrev={dateIndex === availableDates.length - 1} 
+            disableNext={dateIndex === 0} 
+          />
+        </div>
 
         {availableFilters.length > 0 && (
-          <div className="w-full max-w-[340px] mb-6 bg-white p-3 rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-top-2">
-            <div className="flex justify-between items-center mb-2 pb-2 border-b border-slate-100">
-              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Lotes Avaliados</span>
+          <div className="w-full max-w-[400px] mb-6 bg-white p-4 rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-top-2">
+            <div className="flex justify-between items-center mb-3 pb-2.5 border-b border-slate-100">
+              <span className="text-[11px] font-black text-slate-500 uppercase tracking-widest">Lotes Avaliados</span>
               <div className="flex gap-2">
-                <button onClick={selectAll} className="text-[9px] font-bold text-agro-green hover:underline">TODOS</button>
+                <button onClick={selectAll} className="text-[10px] font-bold text-agro-green hover:underline uppercase tracking-wider">Todos</button>
                 <span className="text-slate-300">|</span>
-                <button onClick={clearAll} className="text-[9px] font-bold text-red-400 hover:underline">LIMPAR</button>
+                <button onClick={clearAll} className="text-[10px] font-bold text-red-400 hover:underline uppercase tracking-wider">Limpar</button>
               </div>
             </div>
-            <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto custom-scrollbar">
+            <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto custom-scrollbar pr-1">
               {availableFilters.map(filterKey => {
                 const [campo, lote] = filterKey.split('|');
                 const isActive = activeFilters.includes(filterKey);
@@ -289,8 +298,8 @@ const PreparoDetails = () => {
                   <button
                     key={filterKey}
                     onClick={() => toggleFilter(filterKey)}
-                    className={`px-2 py-1 rounded-md text-[9px] font-black uppercase transition-all border ${
-                      isActive ? 'bg-agro-green/10 text-agro-green border-agro-green/30' : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
+                    className={`px-2.5 py-1.5 rounded-lg text-[10px] font-black uppercase transition-all border ${
+                      isActive ? 'bg-agro-green/10 text-agro-green border-agro-green/30 shadow-sm' : 'bg-slate-50 text-slate-400 border-slate-200 hover:bg-slate-100'
                     }`}
                   >
                     {campo} - L{lote}
@@ -301,10 +310,11 @@ const PreparoDetails = () => {
           </div>
         )}
 
-        <div className="w-full max-w-[340px] flex flex-col gap-6">
+        <div className="w-full max-w-[400px] flex flex-col gap-6">
           <div className="flex flex-col gap-2">
             
-            <div className="grid grid-cols-2 gap-2">
+            {/* Grade de KPIs Ajustada para o padrão */}
+            <div className="grid grid-cols-2 gap-3">
               <KpiCard title="Profund. Haste" data={stats.haste} />
               <KpiCard title="Profund. Cana" data={stats.cana} />
               <KpiCard title="Paralelismo Sulcos" data={stats.paralelismo} />
@@ -314,11 +324,11 @@ const PreparoDetails = () => {
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-bottom-4">
-            <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-2 mb-3">
+          <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm animate-in slide-in-from-bottom-4">
+            <h3 className="text-[12px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-100 pb-2.5 mb-3.5">
               Médias Gerais
             </h3>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-3">
               {[
                 { label: 'Profundidade da Haste', avg: stats.haste.avg, unit: 'cm', color: stats.haste.avg !== null ? (stats.haste.avg >= 23 ? '#22c55e' : '#ef4444') : '#94a3b8' },
                 { label: 'Profundidade da Cana', avg: stats.cana.avg, unit: 'cm', color: stats.cana.avg !== null ? (stats.cana.avg >= 18 ? '#22c55e' : '#ef4444') : '#94a3b8' },
@@ -327,11 +337,11 @@ const PreparoDetails = () => {
                 { label: 'Paralelismo da Fita', avg: stats.fitaPar.avg, unit: 'm', color: stats.fitaPar.avg !== null ? (stats.fitaPar.avg >= 2.15 && stats.fitaPar.avg <= 2.25 ? '#22c55e' : '#ef4444') : '#94a3b8' },
                 { label: 'Diferença Média (Fita - Cana)', avg: stats.diffFitaCana.avg, unit: 'cm', color: stats.diffFitaCana.avg !== null ? (stats.diffFitaCana.avg >= 0 ? '#22c55e' : '#ef4444') : '#94a3b8' },
               ].map((row, idx) => (
-                <div key={idx} className="flex justify-between items-end border-b border-slate-50 border-dashed pb-1 last:border-0">
-                  <span className="text-[11px] font-bold text-slate-600 uppercase">{row.label}</span>
+                <div key={idx} className="flex justify-between items-end border-b border-slate-50 border-dashed pb-2 last:border-0 last:pb-0">
+                  <span className="text-[12px] font-bold text-slate-600 uppercase">{row.label}</span>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-[13px] font-black" style={{ color: row.color }}>{formatAvg(row.avg)}</span>
-                    <span className="text-[8px] font-bold text-slate-400 lowercase">{row.unit}</span>
+                    <span className="text-[15px] font-black" style={{ color: row.color }}>{formatAvg(row.avg)}</span>
+                    <span className="text-[10px] font-bold text-slate-400 lowercase">{row.unit}</span>
                   </div>
                 </div>
               ))}
@@ -340,13 +350,14 @@ const PreparoDetails = () => {
         </div>
       </main>
 
+      {/* Modal - Intacto conforme solicitado */}
       {modalData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-sm max-h-[80vh] rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-in zoom-in-95 duration-300">
             <div className="bg-slate-50 px-5 py-4 border-b border-slate-100 flex justify-between items-start gap-4">
               <div className="flex flex-col">
                 <h3 className="text-sm font-black text-slate-800 uppercase leading-tight">{modalData.title}</h3>
-                <span className="text-[9px] font-bold text-slate-400 uppercase mt-1">
+                <span className="text-[10px] font-bold text-slate-400 uppercase mt-1">
                   {modalData.data.isDiffCard ? 'Médias e Diferença em cm' : modalData.data.titleTarget}
                 </span>
               </div>
@@ -393,7 +404,7 @@ const PreparoDetails = () => {
                      <div className="relative flex flex-col gap-2 px-2">
                         <div className="flex flex-col gap-0.5">
                            <div className="flex justify-between items-end">
-                             <span className="text-[9px] font-bold text-slate-400 uppercase">Média Fita</span>
+                             <span className="text-[10px] font-bold text-slate-400 uppercase">Média Fita</span>
                              <span className="text-[10px] font-black text-slate-700">{lote.avgFita.toFixed(1)} cm</span>
                            </div>
                            <AnimatedProgressBar value={lote.avgFita} color="#94a3b8" max={maxBarValue} /> 
@@ -404,7 +415,7 @@ const PreparoDetails = () => {
                         </div>
                         <div className="flex flex-col gap-0.5 mt-2">
                            <div className="flex justify-between items-end">
-                             <span className="text-[9px] font-bold text-slate-400 uppercase">Média Cana</span>
+                             <span className="text-[10px] font-bold text-slate-400 uppercase">Média Cana</span>
                              <span className="text-[10px] font-black text-slate-700">{lote.avgCana.toFixed(1)} cm</span>
                            </div>
                            <AnimatedProgressBar value={lote.avgCana} color="#cbd5e1" max={maxBarValue} /> 

@@ -10,7 +10,7 @@ const ChecklistGotejoCard = ({ stats, to }) => {
 
   if (!current) return null;
 
-  // 1. Classificação Natural dos Lotes (1, 2, 10...) [cite: 2026-02-11]
+  // 1. Classificação Natural dos Lotes (1, 2, 10...)
   const sortedLotes = [...current.lotes].sort((a, b) => {
     return a.lote.toString().localeCompare(b.lote.toString(), undefined, { numeric: true, sensitivity: 'base' });
   });
@@ -29,26 +29,29 @@ const ChecklistGotejoCard = ({ stats, to }) => {
   };
 
   return (
-    <section className="w-full max-w-[340px] animate-in fade-in zoom-in duration-500 mt-2 font-sans">
-      <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden group hover:border-agro-green/30 transition-all relative">
-       <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-agro-green to-agro-orange opacity-90" />
+    <section className="w-full max-w-[400px] animate-in fade-in zoom-in duration-500 mt-2 font-sans">
+      <div className="bg-white border-2 border-slate-200/80 rounded-xl shadow-xl overflow-hidden group hover:border-agro-green/40 transition-all relative">
         
-        <div className="px-4 pt-4 pb-2">
-          <h2 className="text-[10px] font-black text-agro-green uppercase">
+        {/* Fita Premium no Topo (h-1.5) */}
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-agro-green to-agro-orange opacity-90 shadow-sm" />
+        
+        {/* Header Compacto Padronizado */}
+        <div className="px-5 pt-4 pb-2 border-b border-slate-100 bg-slate-50/30">
+          <h2 className="text-[13px] font-black text-agro-green uppercase tracking-widest leading-none">
             CheckList - Gotejo
           </h2>
         </div>
 
-        {/* Novo Seletor Padronizado (Estilo Adubação) [cite: 2026-02-11] */}
-        <div className="px-4 py-2 flex gap-1.5 bg-slate-50/50 border-y border-slate-100 overflow-x-auto scrollbar-hide">
+        {/* Novo Seletor Padronizado (Estilo Adubação/CUC) */}
+        <div className="px-5 py-2.5 flex gap-2 bg-slate-50/50 border-y border-slate-100 overflow-x-auto scrollbar-hide shadow-inner">
           {stats.map((s, i) => (
             <button
               key={i}
               onClick={() => setActiveIdx(i)}
-              className={`text-[8px] font-black px-2.5 py-1 rounded transition-all uppercase tracking-tighter whitespace-nowrap ${
+              className={`text-[9px] font-black px-3 py-1.5 rounded transition-all uppercase tracking-widest whitespace-nowrap ${
                 activeIdx === i 
                   ? 'bg-agro-green text-white shadow-sm' 
-                  : 'bg-white text-slate-400 border border-slate-200 hover:border-agro-green/50'
+                  : 'bg-white text-slate-400 border border-slate-200 hover:border-agro-green/50 hover:text-slate-500'
               }`}
             >
               {s.campo}
@@ -56,8 +59,8 @@ const ChecklistGotejoCard = ({ stats, to }) => {
           ))}
         </div>
 
-        {/* Área do Gráfico - Blindada contra transbordo [cite: 2026-02-11] */}
-        <div className="h-[155px] w-full px-1 mt-1">
+        {/* Área do Gráfico - Blindada contra transbordo */}
+        <div className="h-[155px] w-full px-2 mt-2">
           <ResponsiveContainer width="100%" height="100%">
             <BarChart 
               data={chartData} 
@@ -91,26 +94,29 @@ const ChecklistGotejoCard = ({ stats, to }) => {
           </ResponsiveContainer>
         </div>
 
-        {/* Resumo de Médias */}
-        <div className="px-4 py-3 grid grid-cols-2 gap-4 border-t border-slate-50 bg-slate-50/50">
-          <div className="flex flex-col items-center">
-            <span className="text-[8px] font-black text-slate-400 uppercase">Média Mínima</span>
-            <span className="text-xl font-black tracking-tighter" style={{ color: QUALY_RULES.ChecklistGotejo.pressao(current.avgMin) }}>
+        {/* Resumo de Médias Compacto */}
+        <div className="px-5 py-3.5 grid grid-cols-2 gap-4 border-t border-slate-100 bg-white">
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Média Mínima</span>
+            <span className="text-2xl font-black tracking-tighter leading-none" style={{ color: QUALY_RULES.ChecklistGotejo.pressao(current.avgMin) }}>
               {current.avgMin.toFixed(1)}
             </span>
           </div>
-          <div className="flex flex-col items-center border-l border-slate-200">
-            <span className="text-[8px] font-black text-slate-400 uppercase">Média Máxima</span>
-            <span className="text-xl font-black tracking-tighter" style={{ color: QUALY_RULES.ChecklistGotejo.pressao(current.avgMax) }}>
+          <div className="flex flex-col items-center justify-center border-l border-slate-200">
+            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">Média Máxima</span>
+            <span className="text-2xl font-black tracking-tighter leading-none" style={{ color: QUALY_RULES.ChecklistGotejo.pressao(current.avgMax) }}>
               {current.avgMax.toFixed(1)}
             </span>
           </div>
         </div>
 
-        <Link to={to} className="w-full py-3 bg-white border-t border-slate-100 flex justify-center items-center group-hover:bg-blue-50 transition-all">
-          <div className="flex items-center gap-1.5 opacity-60 group-hover:opacity-100">
-            <span className="text-[9px] font-black text-slate-500 group-hover:text-blue-600 uppercase tracking-[0.2em]">Detalhes Técnicos</span>
-            <span className="text-blue-400 group-hover:text-blue-600 text-[12px] font-bold">→</span>
+        {/* Link Técnico Padronizado (py-2.5) */}
+        <Link to={to} className="w-full py-2.5 bg-[#F8FAFC] border-t border-slate-100 flex justify-center items-center group-hover:bg-agro-green/5 transition-all">
+          <div className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
+            <span className="text-[10px] font-black text-slate-500 group-hover:text-agro-green uppercase tracking-widest">
+              Relatório Detalhado
+            </span>
+            <span className="text-slate-400 group-hover:text-agro-green text-[14px] font-black">→</span>
           </div>
         </Link>
       </div>
