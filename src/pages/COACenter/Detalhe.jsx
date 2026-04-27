@@ -7,61 +7,16 @@ import COASidebar from '../../components/COACenter/COASidebar';
 import COADateSelector from '../../components/COACenter/COADateSelector';
 import COAEquipModal from '../../components/COACenter/COAEquipModal';
 
-// Utilitários de Regras e Dados
-import { COA_RULES, COA_COLORS } from '../../pages/COACenter/coa_rules';
+// Utilitários de Regras e Dados (Motor V8)
+import { 
+  COA_RULES, 
+  COA_COLORS, 
+  COA_CONSTANTS,
+  parseTimeToHours, 
+  formatDecimalToHHMM, 
+  buildEquipModalData 
+} from '../../pages/COACenter/coa_rules';
 import coaMockData from '../../data/mockData_coa.json'; 
-
-// ================================= HELPERS --------------------------------------
-const timeToSeconds = (timeStr) => {
-  if (!timeStr) return 0;
-  
-  let str = String(timeStr).trim().replace(',', '.');
-
-  // 1. EXORCISMO: Se a string contiver a data "zero" do Excel (1900 ou 1899)
-  // Isso acontece quando 24h vira uma data em vez de duração.
-  if (str.includes('1900') || str.includes('1899')) {
-    // Se for exatamente o dia 1 (24h), retornamos 24h em segundos.
-    if (str.includes('1900-01-01') || str.includes('01/01/1900')) {
-      return 24 * 3600;
-    }
-    // Se for o dia 0 (30/12/1899), é zero mesmo.
-    return 0;
-  }
-
-  // 2. Limpeza de "1 days" ou lixos de data que o Python/Pandas costuma mandar
-  if (str.includes('day')) {
-    const parts = str.split('day');
-    const d = parseInt(parts[0]) || 0;
-    const rest = parts[1].replace(/s|,/g, '').trim();
-    const p = rest.split(':');
-    return (d * 24 * 3600) + ((+p[0] || 0) * 3600) + ((+p[1] || 0) * 60) + (+p[2] || 0);
-  }
-
-  // 3. Se for apenas um número decimal (ex: 24.5 h)
-  if (!isNaN(str) && !str.includes(':')) {
-    return parseFloat(str) * 3600;
-  }
-
-  // 4. Formato padrão HH:MM:SS (Garantindo que não pegamos o ano por acidente)
-  // Se houver espaço (ex: "2026-04-25 08:00"), pegamos apenas a parte da direita
-  if (str.includes(' ')) {
-    str = str.split(' ').pop();
-  }
-
-  const p = str.split(':');
-  const h = parseFloat(p[0]) || 0;
-  const m = parseFloat(p[1]) || 0;
-  const s = parseFloat(p[2]) || 0;
-
-  return (h * 3600) + (m * 60) + s;
-};
-
-const secondsToTime = (secs) => {
-  if (!secs || isNaN(secs) || secs <= 0) return "00:00";
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-};
 
 // Componente Interno: Barra de Progresso Suave
 const ProgressBar = ({ label, percent, color }) => {
@@ -120,7 +75,6 @@ const Detalhe = () => {
 
     const rawData = coaMockData.filter(d => d.DATA.startsWith(selectedDate) && d.AREA_MAP === initialArea);
     
-    // CORREÇÃO AQUI: 'desc' virou 'descontos' para não colidir com a descrição
     const areaSum = { total: 0, prod: 0, descontos: 0, sApont: 0, indet: 0, motor: 0, ocioso: 0, ofensores: {}, equips: new Set() };
     const frentesMap = {};
     const equipsMap = {};
@@ -134,19 +88,20 @@ const Detalhe = () => {
       const opName = (row.DESC_OPERACAO || "").toUpperCase();
       const estado = row.ESTADO || "";
       
-      const secs = timeToSeconds(row.HRS_OPERACIONAIS);
-      const motorSecs = timeToSeconds(row.HRS_MOTOR_LIGADO);
+      // Chamando as regras blindadas (agora em HORAS e não segundos)
+      const hrs = parseTimeToHours(row.HRS_OPERACIONAIS);
+      const motorHrs = parseTimeToHours(row.HRS_MOTOR_LIGADO);
       
       const isOcioso = estado === 'F' && grpOp !== 'PRODUTIVO';
-      const ociosoSecs = isOcioso ? motorSecs : 0;
+      const ociosoHrs = isOcioso ? motorHrs : 0;
 
-      if (opName.includes('REFEI') && secs > 4800) {
-        alertasRaw.push({ eqID, eqDesc, frente: fName, tipo: 'REFEIÇÃO CRÍTICA', msg: `Operação de ${opName} registrou ${secondsToTime(secs)}h contínuas.` });
+      // 4800 segundos antes equivalia a ~1.33 horas (vamos usar 1.33h para a refeição crítica)
+      if (opName.includes('REFEI') && hrs > 1.33) {
+        alertasRaw.push({ eqID, eqDesc, frente: fName, tipo: 'REFEIÇÃO CRÍTICA', msg: `Operação de ${opName} registrou ${formatDecimalToHHMM(hrs)}h contínuas.` });
       }
 
       if (!frentesMap[fName]) frentesMap[fName] = { equips: new Set(), total: 0, prod: 0, descontos: 0, sApont: 0, indet: 0, ofensores: {} };
       
-      // CORREÇÃO AQUI: Separando text (desc) de números (descontos)
       if (!equipsMap[eqID]) {
         equipsMap[eqID] = { id: eqID, desc: eqDesc, frente: fName, total: 0, prod: 0, descontos: 0, sApont: 0, indet: 0, improd: 0, motor: 0, ocioso: 0, gruposOp: {} };
       } else if (!equipsMap[eqID].desc && eqDesc) {
@@ -157,44 +112,44 @@ const Detalhe = () => {
       const refE = equipsMap[eqID];
 
       areaSum.equips.add(eqID); refF.equips.add(eqID);
-      areaSum.total += secs; refF.total += secs; refE.total += secs;
-      areaSum.motor += motorSecs; refE.motor += motorSecs;
+      areaSum.total += hrs; refF.total += hrs; refE.total += hrs;
+      areaSum.motor += motorHrs; refE.motor += motorHrs;
       
-      areaSum.ocioso += ociosoSecs; refE.ocioso += ociosoSecs;
+      areaSum.ocioso += ociosoHrs; refE.ocioso += ociosoHrs;
 
-      if (!refE.gruposOp[grpOp]) refE.gruposOp[grpOp] = { totalSecs: 0, operacoes: {} };
-      refE.gruposOp[grpOp].totalSecs += secs;
-      refE.gruposOp[grpOp].operacoes[opName] = (refE.gruposOp[grpOp].operacoes[opName] || 0) + secs;
+      if (!refE.gruposOp[grpOp]) refE.gruposOp[grpOp] = { totalH: 0, operacoes: {} };
+      refE.gruposOp[grpOp].totalH += hrs;
+      refE.gruposOp[grpOp].operacoes[opName] = (refE.gruposOp[grpOp].operacoes[opName] || 0) + hrs;
 
       const isDesc = ['MANUTEN', 'CLIMA', 'SEM TURNO', 'INDUSTRIA', 'FABRICA'].some(x => grpOp.includes(x)) || opName.includes('CHUVA');
       
-      if (grpOp === 'PRODUTIVO') { areaSum.prod += secs; refF.prod += secs; refE.prod += secs; }
-      if (isDesc) { areaSum.descontos += secs; refF.descontos += secs; refE.descontos += secs; }
-      if (grpOp === 'SEM APONTAMENTO') { areaSum.sApont += secs; refF.sApont += secs; refE.sApont += secs; }
-      if (grpOp === 'INDETERMINADO') { areaSum.indet += secs; refF.indet += secs; refE.indet += secs; }
-      if (grpOp === 'IMPRODUTIVO') refE.improd += secs; 
+      if (grpOp === 'PRODUTIVO') { areaSum.prod += hrs; refF.prod += hrs; refE.prod += hrs; }
+      if (isDesc) { areaSum.descontos += hrs; refF.descontos += hrs; refE.descontos += hrs; }
+      if (grpOp === 'SEM APONTAMENTO') { areaSum.sApont += hrs; refF.sApont += hrs; refE.sApont += hrs; }
+      if (grpOp === 'INDETERMINADO') { areaSum.indet += hrs; refF.indet += hrs; refE.indet += hrs; }
+      if (grpOp === 'IMPRODUTIVO') refE.improd += hrs; 
 
-      if (['IMPRODUTIVO', 'AUXILIAR'].includes(grpOp) && secs > 0) {
-        areaSum.ofensores[opName] = (areaSum.ofensores[opName] || 0) + secs;
-        refF.ofensores[opName] = (refF.ofensores[opName] || 0) + secs;
+      if (['IMPRODUTIVO', 'AUXILIAR'].includes(grpOp) && hrs > 0) {
+        areaSum.ofensores[opName] = (areaSum.ofensores[opName] || 0) + hrs;
+        refF.ofensores[opName] = (refF.ofensores[opName] || 0) + hrs;
       }
     });
 
     const areaDisp = areaSum.total - areaSum.descontos;
     const areaStats = {
       qtdEquipamentos: areaSum.equips.size,
-      totalHoras: areaSum.total / 3600,
-      horasDisponiveis: areaDisp / 3600,
-      horasProdutivas: areaSum.prod / 3600,
-      horasSemApontamento: areaSum.sApont / 3600,
-      horasMotor: areaSum.motor / 3600,
-      horasOcioso: areaSum.ocioso / 3600,
+      totalHoras: areaSum.total,
+      horasDisponiveis: areaDisp,
+      horasProdutivas: areaSum.prod,
+      horasSemApontamento: areaSum.sApont,
+      horasMotor: areaSum.motor,
+      horasOcioso: areaSum.ocioso,
       percSemApontamento: areaSum.total > 0 ? (areaSum.sApont / areaSum.total) * 100 : 0,
       percIndeterminado: areaSum.total > 0 ? (areaSum.indet / areaSum.total) * 100 : 0,
       percMotorOcioso: areaSum.total > 0 ? (areaSum.ocioso / areaSum.total) * 100 : 0,
       eficienciaOperacional: areaDisp > 0 ? (areaSum.prod / areaDisp) * 100 : 0,
       eficienciaReal: areaSum.total > 0 ? (areaSum.prod / areaSum.total) * 100 : 0,
-      ofensores: Object.entries(areaSum.ofensores).map(([n, h]) => ({ nome: n, horas: h / 3600 })).sort((a,b) => b.horas - a.horas).slice(0, 3)
+      ofensores: Object.entries(areaSum.ofensores).map(([n, h]) => ({ nome: n, horas: h })).sort((a,b) => b.horas - a.horas).slice(0, 3)
     };
 
     const frentesData = Object.entries(frentesMap).map(([nome, d]) => {
@@ -206,7 +161,7 @@ const Detalhe = () => {
         efReal: d.total > 0 ? (d.prod / d.total) * 100 : 0,
         sApont: d.total > 0 ? (d.sApont / d.total) * 100 : 0,
         indet: d.total > 0 ? (d.indet / d.total) * 100 : 0,
-        ofensores: Object.entries(d.ofensores).map(([n, h]) => ({ nome: n, horas: h / 3600 })).sort((a,b) => b.horas - a.horas).slice(0, 5)
+        ofensores: Object.entries(d.ofensores).map(([n, h]) => ({ nome: n, horas: h })).sort((a,b) => b.horas - a.horas).slice(0, 5)
       };
     }).sort((a,b) => b.efOp - a.efOp);
 
@@ -227,17 +182,18 @@ const Detalhe = () => {
         kpis: {
           efOp: disp > 0 ? (eq.prod / disp) * 100 : 0,
           sApont: sApontPerc,
-          ociosoPerc: ociosoPerc,     
-          ociosoH: eq.ocioso / 3600,  
-          totalH: eq.total / 3600,
-          prodH: eq.prod / 3600,
-          descontosH: eq.descontos / 3600, // Passando o valor corrigido
-          motorH: eq.motor / 3600
+          ociosoPerc: ociosoPerc,    
+          ociosoH: eq.ocioso,  
+          totalH: eq.total,
+          prodH: eq.prod,
+          descontosH: eq.descontos, 
+          motorH: eq.motor
         }
       };
     });
 
     return { 
+      rawData, // Repassando os dados brutos filtrados para abastecer o Modal depois
       areaStats, 
       frentes: frentesData, 
       equips: equipsData, 
@@ -464,8 +420,10 @@ const Detalhe = () => {
                                   {Number(eq.kpis.ociosoPerc || 0).toFixed(1)}%
                                 </span>
                               </div>
+                              
+                              {/* Aqui o botão usa a nova engine do Modal! */}
                               <button 
-                                onClick={() => setModalEquip(eq)}
+                                onClick={() => setModalEquip(buildEquipModalData(masterData.rawData, eq.id))}
                                 className="w-6 h-6 flex items-center justify-center rounded-lg border border-slate-700 text-slate-400 hover:text-white hover:bg-slate-700 transition-colors font-serif italic font-bold ml-1"
                               >
                                 i
@@ -476,7 +434,7 @@ const Detalhe = () => {
                           {isOpen && (
                             <div className="bg-[#0A0D14] p-3 border-t border-slate-800/80 flex flex-col gap-1.5">
                               {Object.entries(eq.gruposOp)
-                                .sort(([, a], [, b]) => b.totalSecs - a.totalSecs)
+                                .sort(([, a], [, b]) => b.totalH - a.totalH) // Usando horas decimais
                                 .map(([grpName, grpData], idx) => {
                                   const isProd = grpName === 'PRODUTIVO';
                                   return (
@@ -485,7 +443,7 @@ const Detalhe = () => {
                                         {grpName}
                                       </span>
                                       <span className="text-[11px] font-black" style={{ color: isProd ? COA_COLORS.dentro : COA_COLORS.neutro }}>
-                                        {secondsToTime(grpData.totalSecs)} h
+                                        {formatDecimalToHHMM(grpData.totalH)} h
                                       </span>
                                     </div>
                                   );

@@ -8,6 +8,7 @@ const COASidebar = ({ isOpen, onClose }) => {
   const menuItems = [
     { label: "Operações", path: "/coacenter/operacoes" },
     { label: "Motor Ocioso", path: "/coacenter/motorocioso" },
+    { label: "Comboios", path: "/coacenter/comboio" },
     //{ label: "Horas de Corte", path: "/coacenter/horascorte" },
     //{ label: "Velocidade", path: "/coacenter/velocidade" },
   ];

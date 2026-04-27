@@ -18,6 +18,8 @@ import COACenterHome from './pages/COACenter/COACenterHome';
 import Operacoes from './pages/COACenter/Operacoes';
 import Detalhe from './pages/COACenter/Detalhe';
 import MotorOcioso from './pages/COACenter/MotorOcioso';
+import COADataAudit from './pages/COACenter/COADataAudit';
+import Comboio from './pages/COACenter/Comboio';
 
 // ================================= HELPERS (COMPONENTES) ================================= //
 
@@ -120,6 +122,8 @@ function App() {
       <Route path="/coacenter/operacoes" element={<Operacoes />} />
       <Route path="/coacenter/detalhe" element={<Detalhe />} />
       <Route path='/coacenter/motorocioso' element={<MotorOcioso />} />
+      <Route path='/coacenter/audit' element={<COADataAudit />} />
+      <Route path='/coacenter/comboio' element={<Comboio />} />
     </Routes>
   );
 }

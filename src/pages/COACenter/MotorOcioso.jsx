@@ -1,25 +1,19 @@
 import React, { useState, useMemo } from 'react';
 import coaMockData from '../../data/mockData_coa.json';
+
+// Componentes de Interface
 import COAOciosoHeader from '../../components/COACenter/COAOciosoHeader';
+import COASidebar from '../../components/COACenter/COASidebar'; // <-- Adicionado
 import COADateSelector from '../../components/COACenter/COADateSelector';
-import { COA_RULES, COA_COLORS } from '../../pages/COACenter/coa_rules';
 
-// ================================= HELPERS --------------------------------------
-const timeToSeconds = (t) => {
-  if (!t || typeof t !== 'string') return 0;
-  const p = t.split(':');
-  return (+p[0] || 0) * 3600 + (+p[1] || 0) * 60 + (+p[2] || 0);
-};
-
-const secondsToTime = (secs) => {
-  if (secs <= 0) return "00:00:00";
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  const s = secs % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
-};
-
-const META_OCIOSO = 5.0;
+// Motor de Regras
+import { 
+  COA_RULES, 
+  COA_COLORS,
+  METAS, 
+  parseTimeToHours, 
+  formatDecimalToHHMM 
+} from '../../pages/COACenter/coa_rules';
 
 // Componente Interno: Barra de Progresso Suave
 const ProgressBar = ({ label, percent, color, extraText }) => (
@@ -86,11 +80,11 @@ const OciosoModal = ({ data, onClose }) => {
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-[#11151D] p-3 rounded-xl border border-slate-700/50 flex flex-col">
               <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Motor Ligado</span>
-              <span className="text-lg font-black text-white leading-none">{secondsToTime(data.motor)} <span className="text-xs text-slate-500">h</span></span>
+              <span className="text-lg font-black text-white leading-none">{formatDecimalToHHMM(data.motor)} <span className="text-xs text-slate-500">h</span></span>
             </div>
             <div className="bg-[#11151D] p-3 rounded-xl border border-slate-700/50 flex flex-col">
               <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Motor Ocioso</span>
-              <span className="text-lg font-black text-red-400 leading-none">{secondsToTime(data.ocioso)} <span className="text-xs text-red-500/50">h</span></span>
+              <span className="text-lg font-black text-red-400 leading-none">{formatDecimalToHHMM(data.ocioso)} <span className="text-xs text-red-500/50">h</span></span>
             </div>
           </div>
 
@@ -127,7 +121,7 @@ const OciosoModal = ({ data, onClose }) => {
                     <div className="flex flex-col items-end">
                       <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Ocioso</span>
                       <span className="text-xs font-black text-red-400">
-                        {secondsToTime(grpData.ocioso)} h
+                        {formatDecimalToHHMM(grpData.ocioso)} h
                       </span>
                     </div>
                   </button>
@@ -142,10 +136,10 @@ const OciosoModal = ({ data, onClose }) => {
                               {opName}
                             </span>
                             <span className="text-[11px] font-black text-red-500/80">
-                              {secondsToTime(opVal.ocioso)} h
+                              {formatDecimalToHHMM(opVal.ocioso)} h
                             </span>
                           </div>
-                      ))}
+                        ))}
                     </div>
                   )}
                 </div>
@@ -160,6 +154,8 @@ const OciosoModal = ({ data, onClose }) => {
 };
 
 const MotorOcioso = () => {
+  // --- ESTADOS DE CONTROLE ---
+  const [isSidebarOpen, setSidebarOpen] = useState(false); // <-- Adicionado
   const [selectedDate, setSelectedDate] = useState("");
   const [modalData, setModalData] = useState(null);
   const [searchEquip, setSearchEquip] = useState(""); 
@@ -172,7 +168,7 @@ const MotorOcioso = () => {
 
   if (!selectedDate && availableDates.length > 0) setSelectedDate(availableDates[0]);
 
-  // 2. Processamento dos Dados
+  // 2. Processamento dos Dados com a Engine V8
   const report = useMemo(() => {
     if (!selectedDate) return { resumo: {}, areas: [] };
 
@@ -184,16 +180,15 @@ const MotorOcioso = () => {
     raw.forEach(item => {
       const area = item.AREA_MAP || "NÃO MAPEADO";
       const eqID = item.COD_EQUIP || "N/A";
-      const estado = item.ESTADO || "";
-      const grupo = (item.DESC_GRUPO_OPERACAO || "").toUpperCase();
-      const operacao = (item.DESC_OPERACAO || "").toUpperCase();
+      const estado = (item.ESTADO || "").toUpperCase().trim();
+      const grupo = (item.DESC_GRUPO_OPERACAO || "INDETERMINADO").toUpperCase().trim();
+      const operacao = (item.DESC_OPERACAO || "NÃO INFORMADA").toUpperCase().trim();
 
-      const opsSecs = timeToSeconds(item.HRS_OPERACIONAIS);
-      const motorSecs = timeToSeconds(item.HRS_MOTOR_LIGADO);
+      const opsHrs = parseTimeToHours(item.HRS_OPERACIONAIS);
+      const motorHrs = parseTimeToHours(item.HRS_MOTOR_LIGADO);
       
-      // REGRA DE OURO DO OCIOSO
       const isOcioso = estado === 'F' && grupo !== 'PRODUTIVO';
-      const ociosoSecs = isOcioso ? motorSecs : 0;
+      const ociosoHrs = isOcioso ? motorHrs : 0;
 
       if (!areaMap[area]) areaMap[area] = { nome: area, totalOps: 0, totalMotor: 0, totalOcioso: 0, equips: {} };
       if (!areaMap[area].equips[eqID]) {
@@ -210,33 +205,29 @@ const MotorOcioso = () => {
       const a = areaMap[area];
       const eq = a.equips[eqID];
 
-      // Somatórios Área
-      a.totalOps += opsSecs;
-      a.totalMotor += motorSecs;
-      a.totalOcioso += ociosoSecs;
+      a.totalOps += opsHrs;
+      a.totalMotor += motorHrs;
+      a.totalOcioso += ociosoHrs;
 
-      // Somatórios Máquina
-      eq.totalOps += opsSecs;
-      eq.motor += motorSecs;
-      eq.ocioso += ociosoSecs;
+      eq.totalOps += opsHrs;
+      eq.motor += motorHrs;
+      eq.ocioso += ociosoHrs;
 
-      // Estrutura para o Modal
       if (!eq.detalhe[grupo]) eq.detalhe[grupo] = { total: 0, motor: 0, ocioso: 0, ops: {} };
       const g = eq.detalhe[grupo];
-      g.total += opsSecs;
-      g.motor += motorSecs;
-      g.ocioso += ociosoSecs;
+      g.total += opsHrs;
+      g.motor += motorHrs;
+      g.ocioso += ociosoHrs;
 
       if (!g.ops[operacao]) g.ops[operacao] = { total: 0, motor: 0, ocioso: 0 };
-      g.ops[operacao].total += opsSecs;
-      g.ops[operacao].motor += motorSecs;
-      g.ops[operacao].ocioso += ociosoSecs;
+      g.ops[operacao].total += opsHrs;
+      g.ops[operacao].motor += motorHrs;
+      g.ops[operacao].ocioso += ociosoHrs;
 
-      globalOcioso += ociosoSecs;
-      globalOps += opsSecs;
+      globalOcioso += ociosoHrs;
+      globalOps += opsHrs;
     });
 
-    // Fechamento e Cálculos de Percentual (Sempre sobre HRS_OPERACIONAIS)
     const areasFinal = Object.values(areaMap).map(a => {
       a.perc = a.totalOps > 0 ? (a.totalOcioso / a.totalOps) * 100 : 0;
 
@@ -249,7 +240,7 @@ const MotorOcioso = () => {
 
     return {
       resumo: {
-        totalOcioso: secondsToTime(globalOcioso),
+        totalOcioso: formatDecimalToHHMM(globalOcioso),
         percGlobal: globalOps > 0 ? (globalOcioso / globalOps) * 100 : 0
       },
       areas: areasFinal
@@ -272,7 +263,15 @@ const MotorOcioso = () => {
 
   return (
     <div className="min-h-screen bg-[#06090F] text-slate-300 font-sans pb-20">
-      <COAOciosoHeader />
+      {/* 1. HEADER COM GATILHO PARA MENU */}
+      <COAOciosoHeader onMenuOpen={() => setSidebarOpen(true)} />
+
+      {/* 2. COMPONENTE DA SIDEBAR RENDERIZADO */}
+      <COASidebar 
+        isOpen={isSidebarOpen} 
+        onClose={() => setSidebarOpen(false)} 
+        onNavigate={() => {}} 
+      />
       
       <main className="p-4 flex flex-col items-center gap-6">
         <COADateSelector 
@@ -318,7 +317,7 @@ const MotorOcioso = () => {
                 <div className="flex gap-4 text-right">
                   <div className="flex flex-col">
                     <span className="text-[8px] font-black text-slate-500 uppercase">Tempo Ocioso</span>
-                    <span className="text-xs font-black text-red-400">{secondsToTime(area.totalOcioso)}</span>
+                    <span className="text-xs font-black text-red-400">{formatDecimalToHHMM(area.totalOcioso)}</span>
                   </div>
                   <div className="flex flex-col">
                     <span className="text-[8px] font-black text-slate-500 uppercase">% Ocioso</span>
@@ -332,7 +331,7 @@ const MotorOcioso = () => {
               {/* LISTA DE EQUIPAMENTOS DA ÁREA */}
               <div className="p-3 flex flex-col gap-2">
                 {area.equips.map(eq => {
-                  const isAcimaDaMeta = eq.perc > META_OCIOSO;
+                  const isAcimaDaMeta = eq.perc > (METAS.MOTOR_OC_VERDE * 100);
                   
                   return (
                     <button 
@@ -347,13 +346,12 @@ const MotorOcioso = () => {
                       
                       <div className="flex items-center gap-4">
                         <div className="flex flex-col items-end">
-                          {/* Substituído Total Ops por Motor Ligado como você pediu */}
                           <span className="text-[8px] font-black text-slate-600 uppercase">Motor Lig.</span>
-                          <span className="text-[10px] font-black text-slate-300">{secondsToTime(eq.motor)}</span>
+                          <span className="text-[10px] font-black text-slate-300">{formatDecimalToHHMM(eq.motor)}</span>
                         </div>
                         <div className="flex flex-col items-end w-14">
                           <span className="text-[8px] font-black text-slate-600 uppercase">Ocioso</span>
-                          <span className="text-[11px] font-black text-red-400">{secondsToTime(eq.ocioso)}</span>
+                          <span className="text-[11px] font-black text-red-400">{formatDecimalToHHMM(eq.ocioso)}</span>
                         </div>
                         <div className="flex flex-col items-end w-10">
                           <span className="text-[8px] font-black text-slate-600 uppercase">%</span>
@@ -378,7 +376,7 @@ const MotorOcioso = () => {
         </div>
       </main>
 
-      {/* MODAL DE DETALHAMENTO INVOCADO AQUI */}
+      {/* MODAL DE DETALHAMENTO */}
       {modalData && <OciosoModal data={modalData} onClose={() => setModalData(null)} />}
       
     </div>

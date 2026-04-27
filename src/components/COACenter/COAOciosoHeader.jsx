@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import coacenterLogo from '../../gallery/logo/coacenter.png';
 
-const COAOperacoesHeader = ({ onMenuOpen }) => {
+const COAOciosoHeader = ({ onMenuOpen }) => {
   const navigate = useNavigate();
 
   return (
@@ -38,4 +38,4 @@ const COAOperacoesHeader = ({ onMenuOpen }) => {
   );
 };
 
-export default COAOperacoesHeader;
+export default COAOciosoHeader;

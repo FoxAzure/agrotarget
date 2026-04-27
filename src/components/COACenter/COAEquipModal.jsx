@@ -1,13 +1,9 @@
 import React, { useState } from 'react';
-import { COA_RULES, COA_COLORS } from '../../pages/COACenter/coa_rules';
-
-// Helper para tempo blindado contra undefined/NaN
-const secondsToTime = (secs) => {
-  if (!secs || isNaN(secs) || secs <= 0) return "00:00";
-  const h = Math.floor(secs / 3600);
-  const m = Math.floor((secs % 3600) / 60);
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-};
+import { 
+  COA_RULES, 
+  COA_COLORS, 
+  formatDecimalToHHMM 
+} from '../../pages/COACenter/coa_rules';
 
 // Componente Interno: Barra de Progresso Suave blindada
 const ProgressBar = ({ label, percent, color, extraText }) => {
@@ -38,43 +34,35 @@ const COAEquipModal = ({ isOpen, onClose, equipData }) => {
 
   const { id, desc, kpis = {}, gruposOp = {} } = equipData;
 
-  // --- LIMPANDO O NOME: Prevenção caso a base ainda mande algum lixo na string
-  const cleanDesc = desc ? desc.replace(/\d{5,}$/, '').trim() : 'SEM DESCRIÇÃO';
+  // Variáveis diretas vindas do cérebro (coa_rules)
+  const {
+    totalH = 0,
+    dispH = 0,
+    prodH = 0,
+    motorH = 0,
+    ociosoH = 0,
+    efOp = 0,
+    efReal = 0,
+    percSApont = 0,
+    percIndet = 0,
+    percMotorOcioso = 0
+  } = kpis;
 
-  // --- CÁLCULOS DERIVADOS COM REDE DE SEGURANÇA ---
-  const totalH = kpis.totalH || 0;
-  const descontosH = kpis.descontosH || 0;
-  const prodH = kpis.prodH || 0;
-  
-  const totalSecs = totalH * 3600;
-  
-  // Math.max evita NaN e números negativos acidentais
-  const dispH = Math.max(0, totalH - descontosH); 
-  const efReal = totalH > 0 ? (prodH / totalH) * 100 : 0;
-  const efOpCor = COA_RULES.eficienciaOp(kpis.efOp || 0);
-
-  const indetSecs = gruposOp['INDETERMINADO']?.totalSecs || 0;
-  const indetPerc = totalSecs > 0 ? (indetSecs / totalSecs) * 100 : 0;
-  
-  const motorH = kpis.motorH || totalH || 0; 
-  const ociosoH = kpis.ociosoH || 0; 
-  const sApont = kpis.sApont || 0;
-  
-  const percMotorOcioso = totalH > 0 ? (ociosoH / totalH) * 100 : 0;
+  const efOpCor = COA_RULES.eficienciaOp(efOp);
 
   // --- OFENSORES (Top 10) ---
   const ofensores = [];
   Object.entries(gruposOp).forEach(([grpName, grpData]) => {
     if (['IMPRODUTIVO', 'AUXILIAR'].includes(grpName)) {
-      Object.entries(grpData.operacoes).forEach(([opName, secs]) => {
-        ofensores.push({ nome: opName, horas: (secs || 0) / 3600 });
+      Object.entries(grpData.operacoes).forEach(([opName, horas]) => {
+        ofensores.push({ nome: opName, horas: horas || 0 });
       });
     }
   });
   const top10Ofensores = ofensores.sort((a, b) => b.horas - a.horas).slice(0, 10);
 
   // --- GRUPOS ORDENADOS PARA BARRAS ---
-  const sortedGroups = Object.entries(gruposOp).sort((a, b) => (b[1].totalSecs || 0) - (a[1].totalSecs || 0));
+  const sortedGroups = Object.entries(gruposOp).sort((a, b) => (b[1].totalH || 0) - (a[1].totalH || 0));
 
   // --- HANDLER DO ACORDEÃO ---
   const toggleGroup = (grpName) => {
@@ -101,7 +89,7 @@ const COAEquipModal = ({ isOpen, onClose, equipData }) => {
                 {id}
               </h2>
               <span className="text-xs font-bold text-slate-500 uppercase">
-                {cleanDesc}
+                {desc}
               </span>
             </div>
           </div>
@@ -127,13 +115,13 @@ const COAEquipModal = ({ isOpen, onClose, equipData }) => {
                     stroke={efOpCor} 
                     strokeWidth="12" 
                     strokeLinecap="round"
-                    strokeDasharray={`${(Math.min(kpis.efOp || 0, 100) / 100) * 126} 126`} 
+                    strokeDasharray={`${(Math.min(efOp, 100) / 100) * 126} 126`} 
                     className="transition-all duration-1000 ease-out"
                   />
                 </svg>
                 <div className="flex flex-col items-center justify-center mt-8">
                   <span className="text-2xl font-black tracking-tighter leading-none" style={{ color: efOpCor, textShadow: `0 0 10px ${efOpCor}40` }}>
-                    {Number(kpis.efOp || 0).toFixed(1)}%
+                    {Number(efOp).toFixed(1)}%
                   </span>
                   <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mt-1">Eficiência Op.</span>
                 </div>
@@ -164,11 +152,11 @@ const COAEquipModal = ({ isOpen, onClose, equipData }) => {
               </div>
               <div className="bg-[#11151D] p-2.5 rounded-lg border border-slate-700/50 flex flex-col">
                 <span className="text-[8px] font-black text-slate-500 uppercase">Sem Apont.</span>
-                <span className={`text-sm font-black ${sApont <= 2 ? 'text-emerald-400' : 'text-red-400'}`}>{Number(sApont).toFixed(1)}%</span>
+                <span className={`text-sm font-black ${percSApont <= (COA_RULES.SEM_APONT_VERDE || 2) ? 'text-emerald-400' : 'text-red-400'}`}>{Number(percSApont).toFixed(1)}%</span>
               </div>
               <div className="bg-[#11151D] p-2.5 rounded-lg border border-slate-700/50 flex flex-col">
                 <span className="text-[8px] font-black text-slate-500 uppercase">Indeterminado</span>
-                <span className={`text-sm font-black ${indetPerc <= 10 ? 'text-emerald-400' : 'text-red-400'}`}>{Number(indetPerc).toFixed(1)}%</span>
+                <span className={`text-sm font-black ${percIndet <= 10 ? 'text-emerald-400' : 'text-red-400'}`}>{Number(percIndet).toFixed(1)}%</span>
               </div>
             </div>
           </div>
@@ -188,7 +176,7 @@ const COAEquipModal = ({ isOpen, onClose, equipData }) => {
             </h3>
             {sortedGroups.map(([grpName, grpData]) => {
               const isProd = grpName === 'PRODUTIVO';
-              const percent = totalSecs > 0 ? (grpData.totalSecs / totalSecs) * 100 : 0;
+              const percent = totalH > 0 ? (grpData.totalH / totalH) * 100 : 0;
               const barColor = isProd ? COA_COLORS.dentro : COA_COLORS.neutro;
 
               return (
@@ -198,7 +186,7 @@ const COAEquipModal = ({ isOpen, onClose, equipData }) => {
                       {grpName}
                     </span>
                     <span className="text-[10px] font-black text-slate-200">
-                      {secondsToTime(grpData.totalSecs)} h
+                      {formatDecimalToHHMM(grpData.totalH)} h
                     </span>
                   </div>
                   <div className="w-full h-2 bg-[#0A0D14] rounded-full overflow-hidden border border-slate-700/80">
@@ -233,7 +221,7 @@ const COAEquipModal = ({ isOpen, onClose, equipData }) => {
                       </span>
                     </div>
                     <span className="text-xs font-black text-slate-400">
-                      {secondsToTime(grpData.totalSecs)} h
+                      {formatDecimalToHHMM(grpData.totalH)} h
                     </span>
                   </button>
 
@@ -241,13 +229,13 @@ const COAEquipModal = ({ isOpen, onClose, equipData }) => {
                     <div className="bg-[#0A0D14] p-3 border-t border-slate-700/50 flex flex-col gap-1.5">
                       {Object.entries(grpData.operacoes)
                         .sort(([, a], [, b]) => b - a)
-                        .map(([opName, secs], idx) => (
+                        .map(([opName, horas], idx) => (
                           <div key={idx} className="flex justify-between items-center py-1.5 px-2 border-b border-slate-800/50 last:border-0 rounded hover:bg-[#161B22] transition-colors">
                             <span className={`text-[10px] font-bold uppercase tracking-widest ${isProd ? 'text-emerald-500' : 'text-slate-500'}`}>
                               {opName}
                             </span>
                             <span className={`text-[11px] font-black ${isProd ? 'text-emerald-400' : 'text-slate-300'}`}>
-                              {secondsToTime(secs)} h
+                              {formatDecimalToHHMM(horas)} h
                             </span>
                           </div>
                       ))}
