@@ -12,6 +12,11 @@ import CucDetails from './pages/QualyFlow/CucDetails';
 import PreparoDetails from './pages/QualyFlow/PreparoDetails';
 import DroneDetails from './pages/QualyFlow/DroneDetails';
 import CompostoDetails from './pages/QualyFlow/CompostoDetails';
+import CBDetails from './pages/QualyFlow/CBDetails';
+import CheckListDetails from './pages/QualyFlow/CheckListDetails';
+import SementeDetails from './pages/QualyFlow/SementeDetails';
+import AdubSulDetails from './pages/QualyFlow/AdubSulDetails';
+import AdubCobDetails from './pages/QualyFlow/AdubCobDetails';
 
 // Importando Páginas do COA Center
 import COACenterHome from './pages/COACenter/COACenterHome';
@@ -109,14 +114,14 @@ function App() {
       <Route path="/qualyflow/preparo" element={<PreparoDetails />} />
       <Route path="/qualyflow/drone" element={<DroneDetails />} />
 
-      <Route path="/qualyflow/semente" element={<EmDesenvolvimento />} />
-      <Route path="/qualyflow/adubcob" element={<EmDesenvolvimento />} />
-      <Route path="/qualyflow/adubsulc" element={<EmDesenvolvimento />} />
+      <Route path="/qualyflow/semente" element={<SementeDetails />} />
+      <Route path="/qualyflow/adubcob" element={<AdubCobDetails />} />
+      <Route path="/qualyflow/adubsulc" element={<AdubSulDetails />} />
       <Route path="/qualyflow/composto" element={<CompostoDetails />} />
       <Route path="/qualyflow/plantiomanual" element={<EmDesenvolvimento />} />
       <Route path="/qualyflow/plantio" element={<EmDesenvolvimento />} />
-      <Route path="/qualyflow/checklist" element={<EmDesenvolvimento />} />
-      <Route path="/qualyflow/casabomba" element={<EmDesenvolvimento />} />
+      <Route path="/qualyflow/checklist" element={<CheckListDetails />} />
+      <Route path="/qualyflow/casabomba" element={<CBDetails />} />
       
       <Route path="/coacenter" element={<COACenterHome />} />
       <Route path="/coacenter/operacoes" element={<Operacoes />} />

@@ -290,21 +290,21 @@ const QualyFlowHome = () => {
           {ORDEM_DOS_CARDS.map(cardNome => {
             switch(cardNome) {
               case 'CasaBomba': 
-                return stats.hasCasaBomba && <CasaBombaCard key="cb" stats={stats.casaBomba} to="/qualyflow/casabomba" />;
+                return stats.hasCasaBomba && <CasaBombaCard key="cb" stats={stats.casaBomba} to="/qualyflow/casabomba"  selectedDate={selectedDate} />;
               case 'ChecklistGotejo': 
-                return stats.hasChecklistGotejo && <ChecklistGotejoCard key="chk" stats={stats.checklistGotejo} to="/qualyflow/checklist" />;
+                return stats.hasChecklistGotejo && <ChecklistGotejoCard key="chk" stats={stats.checklistGotejo} to="/qualyflow/checklist"  selectedDate={selectedDate} />;
               case 'CUC': 
                 return stats.hasCuc && <CucCard key="cuc" stats={stats.cuc} to="/qualyflow/cuc" selectedDate={selectedDate} />;
               case 'Semente': 
-                return stats.hasSemente && <SementeCard key="sem" stats={stats.semente} to="/qualyflow/semente" />;
+                return stats.hasSemente && <SementeCard key="sem" stats={stats.semente} to="/qualyflow/semente"  selectedDate={selectedDate} />;
               case 'Composto': 
                 return stats.hasComposto && <CompostoCard key="comp" stats={stats.composto} to="/qualyflow/composto" selectedDate={selectedDate} />;
               case 'Drone': 
                 return stats.hasDrone && <DroneCard key="drn" stats={stats.drone} to="/qualyflow/drone" selectedDate={selectedDate}/>;
               case 'AdubCob': 
-                return stats.hasAdubCob && <AdubacaoCard key="adc" title="Adubação de Cobertura" stats={stats.adubCob} to="/qualyflow/adubcob" />;
+                return stats.hasAdubCob && <AdubacaoCard key="adc" title="Adubação de Cobertura" stats={stats.adubCob} to="/qualyflow/adubcob"  selectedDate={selectedDate} />;
               case 'AdubSulc': 
-                return stats.hasAdubSulc && <AdubacaoCard key="ads" title="Adubação de Sulcamento" stats={stats.adubSulc} to="/qualyflow/adubsulc" />;
+                return stats.hasAdubSulc && <AdubacaoCard key="ads" title="Adubação de Sulcamento" stats={stats.adubSulc} to="/qualyflow/adubsulc"  selectedDate={selectedDate} />;
               case 'Preparo': 
                 return stats.hasPreparo && (
                   <UnifiedModuleCard key="prep" sectionTitle="Preparo de Solo" to="/qualyflow/preparo" selectedDate={selectedDate}>
