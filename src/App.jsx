@@ -17,6 +17,7 @@ import CheckListDetails from './pages/QualyFlow/CheckListDetails';
 import SementeDetails from './pages/QualyFlow/SementeDetails';
 import AdubSulDetails from './pages/QualyFlow/AdubSulDetails';
 import AdubCobDetails from './pages/QualyFlow/AdubCobDetails';
+import PlatioMecDetails from './pages/QualyFlow/PlatioMecDetails';
 
 // Importando Páginas do COA Center
 import COACenterHome from './pages/COACenter/COACenterHome';
@@ -25,6 +26,16 @@ import Detalhe from './pages/COACenter/Detalhe';
 import MotorOcioso from './pages/COACenter/MotorOcioso';
 import COADataAudit from './pages/COACenter/COADataAudit';
 import Comboio from './pages/COACenter/Comboio';
+
+
+
+//================================== Novas Ferramentas ===================================== //
+
+//AgroTools -> Calculadoras da Qualidade
+//Atlas -> Cartilha de Operações
+//RainSync -> Controle das Chuvas
+//DripControl -> Montagem de Gotejo
+
 
 // ================================= HELPERS (COMPONENTES) ================================= //
 
@@ -119,7 +130,7 @@ function App() {
       <Route path="/qualyflow/adubsulc" element={<AdubSulDetails />} />
       <Route path="/qualyflow/composto" element={<CompostoDetails />} />
       <Route path="/qualyflow/plantiomanual" element={<EmDesenvolvimento />} />
-      <Route path="/qualyflow/plantio" element={<EmDesenvolvimento />} />
+      <Route path="/qualyflow/plantio" element={<PlatioMecDetails />} />
       <Route path="/qualyflow/checklist" element={<CheckListDetails />} />
       <Route path="/qualyflow/casabomba" element={<CBDetails />} />
       
