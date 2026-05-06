@@ -94,7 +94,7 @@ const CucDetails = () => {
       const emissoresLabels = Array.from({length: 12}, (_, i) => `${i+1}º Emissor`);
 
       // -------------------------------------------------------------
-      // CÁLCULO GERAL DO CAMPO (Idêntico ao QualyFlowHome)
+      // CÁLCULO GERAL DO CAMPO
       // -------------------------------------------------------------
       const valuesCampo = dfHistorico.filter(i => emissoresLabels.includes(i.INDICADOR)).map(i => Number(i.VALOR) || 0);
       const nC = valuesCampo.length;
@@ -111,7 +111,7 @@ const CucDetails = () => {
       const vazaoGeral = meanC * 0.02;
 
       // -------------------------------------------------------------
-      // CÁLCULO POR LOTE (Com Correção do .reduce)
+      // CÁLCULO POR LOTE
       // -------------------------------------------------------------
       const listaLotes = [...new Set(dfHistorico.map(i => i.LOTE).filter(Boolean))];
       const lotes = listaLotes.map(loteNome => {
@@ -131,7 +131,6 @@ const CucDetails = () => {
           cucLote = (1 - (s_absL / (nL * meanL))) * 100;
         }
         
-        // CORREÇÃO: Usando reduce para somar todos os entupidos daquele lote específico!
         const entupAbsoluto = dfLote.filter(i => i.INDICADOR === "Emissores Entupidos").reduce((a, b) => a + (Number(b.VALOR) || 0), 0);
         const entupPerc = nL > 0 ? (entupAbsoluto / nL) * 100 : 0;
 
@@ -199,7 +198,7 @@ const CucDetails = () => {
 
       <main className="p-4 flex flex-col items-center">
 
-        {/* Seletor de Data - Ajustado para 400px */}
+        {/* Seletor de Data */}
         <div className="w-full max-w-[400px] mb-6 mt-2">
           <DateSelector 
             date={selectedDate} 
@@ -216,10 +215,9 @@ const CucDetails = () => {
         </div>
 
         {camposCuc.length > 0 && (
-          /* Container Principal Ajustado para 400px */
           <div className="w-full max-w-[400px] flex flex-col gap-6">
             
-            {/* Lista de Campos - Formato Tabela */}
+            {/* Lista de Campos */}
             <div className="flex flex-col gap-3">
               {camposCuc.map((campo, i) => (
                 <button
@@ -258,11 +256,10 @@ const CucDetails = () => {
               ))}
             </div>
 
-            {/* Area de Lotes e Gráficos do Campo Ativo */}
+            {/* Area de Lotes */}
             {activeCampo && (
               <div key={`detalhes-${activeIdx}`} className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
                 
-                {/* 1. Boxes dos Lotes */}
                 <div className="grid grid-cols-3 gap-3">
                   {activeCampo.lotes.map((lote, i) => (
                     <button
@@ -281,10 +278,7 @@ const CucDetails = () => {
                   ))}
                 </div>
 
-                {/* 2. Gráfico Dinâmico por Lote com Abas */}
                 <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-5">
-                  
-                  {/* Seletor de Abas */}
                   <div className="flex bg-slate-100 p-1.5 rounded-lg">
                     <button onClick={() => setChartTab('cuc')} className={`flex-1 text-[10px] font-black uppercase py-2 rounded-md transition-all ${chartTab === 'cuc' ? 'bg-white shadow-sm text-agro-green' : 'text-slate-400 hover:text-slate-500'}`}>CUC</button>
                     <button onClick={() => setChartTab('vazao')} className={`flex-1 text-[10px] font-black uppercase py-2 rounded-md transition-all ${chartTab === 'vazao' ? 'bg-white shadow-sm text-agro-green' : 'text-slate-400 hover:text-slate-500'}`}>Vazão</button>
@@ -339,25 +333,32 @@ const CucDetails = () => {
         )}
       </main>
 
-      {/* MODAL DOS EMISSORES BLINDADO CONTRA OVERFLOW */}
+      {/* ========================================================================= */}
+      {/* MODAL DOS EMISSORES REFEITO PARA GARANTIR POSICIONAMENTO E RESPONSIVIDADE */}
+      {/* ========================================================================= */}
       {selectedLoteData && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
-          <div className="bg-white w-full max-w-[380px] rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            {/* Header ajustado com truncate e flex-shrink-0 no botão */}
-            <div className="bg-slate-50 px-5 py-4 border-b border-slate-100 flex justify-between items-center gap-3">
+        <div 
+          className="fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4"
+          style={{ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0 }}
+        >
+          {/* Container do card blindado com flex-col para scroll interno caso vaze a altura */}
+          <div className="bg-white w-full max-w-[380px] max-h-[90vh] flex flex-col rounded-3xl shadow-2xl relative overflow-hidden">
+            
+            {/* Header fixo no topo do modal */}
+            <div className="bg-slate-50 px-5 py-4 border-b border-slate-100 flex justify-between items-center gap-3 shrink-0">
               <h3 className="text-sm font-black text-slate-700 uppercase truncate">
                 {selectedLoteData.extra1}ª - {selectedLoteData.campo} - Lote: {selectedLoteData.nome}
               </h3>
               <button 
                 onClick={() => setSelectedLoteData(null)} 
-                className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-slate-500 hover:bg-red-100 hover:text-red-500 transition-all font-black text-xs"
+                className="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-slate-500 hover:bg-red-100 hover:text-red-500 transition-all font-black text-xs"
               >
                 X
               </button>
             </div>
             
-            {/* Espaçamento interno reduzido para acomodar a grid com segurança */}
-            <div className="p-5">
+            {/* Corpo rolável se precisar */}
+            <div className="p-5 overflow-y-auto">
               <div className="grid grid-cols-6 gap-1.5 mb-5">
                 {selectedLoteData.emissores.map((em, i) => (
                   <div key={i} className={`w-full h-11 flex items-center justify-center rounded-lg text-xs font-black shadow-sm ${getEmitterColor(em.valor)}`}>
