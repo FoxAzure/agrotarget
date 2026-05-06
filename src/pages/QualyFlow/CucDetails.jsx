@@ -71,6 +71,18 @@ const CucDetails = () => {
     setSelectedLoteData(null);
   }, [selectedDate]);
 
+  // Bloqueia o scroll do fundo da página quando o modal estiver aberto (Truque de mestre para Mobile)
+  useEffect(() => {
+    if (selectedLoteData) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'auto';
+    }
+    return () => {
+      document.body.style.overflow = 'auto';
+    };
+  }, [selectedLoteData]);
+
   // ===========================================================================
   // 2. PROCESSAMENTO DATA-READY (CALIBRAÇÃO FINA CORRIGIDA)
   // ===========================================================================
@@ -93,9 +105,7 @@ const CucDetails = () => {
 
       const emissoresLabels = Array.from({length: 12}, (_, i) => `${i+1}º Emissor`);
 
-      // -------------------------------------------------------------
       // CÁLCULO GERAL DO CAMPO
-      // -------------------------------------------------------------
       const valuesCampo = dfHistorico.filter(i => emissoresLabels.includes(i.INDICADOR)).map(i => Number(i.VALOR) || 0);
       const nC = valuesCampo.length;
       const meanC = nC > 0 ? valuesCampo.reduce((a, b) => a + b, 0) / nC : 0;
@@ -110,9 +120,7 @@ const CucDetails = () => {
       const entupGeralPerc = nC > 0 ? (entupGeralAbs / nC) * 100 : 0;
       const vazaoGeral = meanC * 0.02;
 
-      // -------------------------------------------------------------
       // CÁLCULO POR LOTE
-      // -------------------------------------------------------------
       const listaLotes = [...new Set(dfHistorico.map(i => i.LOTE).filter(Boolean))];
       const lotes = listaLotes.map(loteNome => {
         const dfLote = dfHistorico.filter(i => i.LOTE === loteNome);
@@ -334,17 +342,17 @@ const CucDetails = () => {
       </main>
 
       {/* ========================================================================= */}
-      {/* MODAL DOS EMISSORES REFEITO PARA GARANTIR POSICIONAMENTO E RESPONSIVIDADE */}
+      {/* MODAL DOS EMISSORES BLINDADO PARA MOBILE REAL */}
       {/* ========================================================================= */}
       {selectedLoteData && (
-        <div 
-          className="fixed top-0 left-0 w-screen h-screen z-[9999] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm px-4"
-          style={{ position: 'fixed', top: 0, right: 0, bottom: 0, left: 0 }}
-        >
-          {/* Container do card blindado com flex-col para scroll interno caso vaze a altura */}
-          <div className="bg-white w-full max-w-[380px] max-h-[90vh] flex flex-col rounded-3xl shadow-2xl relative overflow-hidden">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-slate-900/70 backdrop-blur-sm touch-none">
+          {/* Card interno com uso de dvh e limitação de scroll interno */}
+          <div 
+            className="bg-white w-full max-w-[380px] flex flex-col rounded-3xl shadow-2xl relative overflow-hidden"
+            style={{ maxHeight: 'calc(100dvh - 2rem)' }}
+          >
             
-            {/* Header fixo no topo do modal */}
+            {/* Header fixo do modal */}
             <div className="bg-slate-50 px-5 py-4 border-b border-slate-100 flex justify-between items-center gap-3 shrink-0">
               <h3 className="text-sm font-black text-slate-700 uppercase truncate">
                 {selectedLoteData.extra1}ª - {selectedLoteData.campo} - Lote: {selectedLoteData.nome}
@@ -357,7 +365,7 @@ const CucDetails = () => {
               </button>
             </div>
             
-            {/* Corpo rolável se precisar */}
+            {/* Área de rolagem segura que não vaza da tela */}
             <div className="p-5 overflow-y-auto">
               <div className="grid grid-cols-6 gap-1.5 mb-5">
                 {selectedLoteData.emissores.map((em, i) => (

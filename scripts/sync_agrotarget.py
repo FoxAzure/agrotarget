@@ -8,7 +8,7 @@ API_URL = "https://script.google.com/macros/s/AKfycbxXfBE-x9Opx4KOkPbT2eWOnObwUv
 DB_PATH = "src/data/qualyflow.db"
 JSON_OUTPUT = "src/data/mockData.json"
 JSON_UPDATE_PATH = "src/data/qualy_update.json"
-DIAS_EXPORTACAO = 30
+DIAS_EXPORTACAO = 25
 
 import requests
 import sqlite3
