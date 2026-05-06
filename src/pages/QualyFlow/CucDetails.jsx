@@ -163,7 +163,7 @@ const CucDetails = () => {
   // HELPERS VISUAIS E REGRAS DE CORES
   // ===========================================================================
   const getCucColor = (cuc) => {
-    if (cuc >= 90) return 'text-green-600'; // Um pouco mais escuro para ler melhor no pastel
+    if (cuc >= 90) return 'text-green-600'; 
     if (cuc >= 80) return 'text-yellow-600';
     return 'text-red-600';
   };
@@ -179,7 +179,6 @@ const CucDetails = () => {
   };
 
   const getLoteCardStyle = (cuc) => {
-    // Cores pasteis realçadas: fundos com mais presença e bordas reforçadas
     if (cuc >= 90) return 'border-green-400 bg-green-100/60 hover:bg-green-200/60';
     if (cuc >= 80) return 'border-yellow-400 bg-yellow-100/60 hover:bg-yellow-200/60';
     return 'border-red-400 bg-red-100/60 hover:bg-red-200/60';
@@ -202,13 +201,18 @@ const CucDetails = () => {
 
         {/* Seletor de Data - Ajustado para 400px */}
         <div className="w-full max-w-[400px] mb-6 mt-2">
-          <DateSelector date={selectedDate} onPrev={() => setDateIndex(di => di + 1)} onNext={() => setDateIndex(di => di - 1)} disablePrev={dateIndex === availableDates.length - 1} disableNext={dateIndex === 0} />
-            
+          <DateSelector 
+            date={selectedDate} 
+            onPrev={() => setDateIndex(di => di + 1)} 
+            onNext={() => setDateIndex(di => di - 1)} 
+            disablePrev={dateIndex === availableDates.length - 1} 
+            disableNext={dateIndex === 0}
             availableDates={availableDates}
             onSelectDate={(novaData) => {
               const idx = availableDates.indexOf(novaData);
               if (idx !== -1) setDateIndex(idx);
             }}
+          />
         </div>
 
         {camposCuc.length > 0 && (
@@ -222,7 +226,6 @@ const CucDetails = () => {
                   key={i}
                   onClick={() => setActiveIdx(i)}
                   className={`w-full flex justify-between items-center p-4 rounded-xl border transition-all ${
-                    // Realce no botão ativo com borda-2 e fundo mais presente
                     activeIdx === i ? 'border-agro-green border-2 bg-green-50/80 shadow-md' : 'border-slate-200 bg-white hover:border-slate-300 shadow-sm'
                   }`}
                 >
@@ -259,7 +262,7 @@ const CucDetails = () => {
             {activeCampo && (
               <div key={`detalhes-${activeIdx}`} className="flex flex-col gap-6 animate-in fade-in slide-in-from-bottom-2 duration-500">
                 
-                {/* 1. Boxes dos Lotes - Gap levemente aumentado para acomodar 400px */}
+                {/* 1. Boxes dos Lotes */}
                 <div className="grid grid-cols-3 gap-3">
                   {activeCampo.lotes.map((lote, i) => (
                     <button
@@ -336,20 +339,26 @@ const CucDetails = () => {
         )}
       </main>
 
-      {/* MODAL DOS EMISSORES */}
+      {/* MODAL DOS EMISSORES BLINDADO CONTRA OVERFLOW */}
       {selectedLoteData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white w-full max-w-[380px] rounded-3xl shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="bg-slate-50 px-5 py-4 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="text-sm font-black text-slate-700 uppercase">
+            {/* Header ajustado com truncate e flex-shrink-0 no botão */}
+            <div className="bg-slate-50 px-5 py-4 border-b border-slate-100 flex justify-between items-center gap-3">
+              <h3 className="text-sm font-black text-slate-700 uppercase truncate">
                 {selectedLoteData.extra1}ª - {selectedLoteData.campo} - Lote: {selectedLoteData.nome}
               </h3>
-              
-              <button onClick={() => setSelectedLoteData(null)} className="w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-slate-500 hover:bg-red-100 hover:text-red-500 transition-all font-black text-xs">X</button>
+              <button 
+                onClick={() => setSelectedLoteData(null)} 
+                className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-slate-200 text-slate-500 hover:bg-red-100 hover:text-red-500 transition-all font-black text-xs"
+              >
+                X
+              </button>
             </div>
             
-            <div className="p-6">
-              <div className="grid grid-cols-6 gap-2 mb-6">
+            {/* Espaçamento interno reduzido para acomodar a grid com segurança */}
+            <div className="p-5">
+              <div className="grid grid-cols-6 gap-1.5 mb-5">
                 {selectedLoteData.emissores.map((em, i) => (
                   <div key={i} className={`w-full h-11 flex items-center justify-center rounded-lg text-xs font-black shadow-sm ${getEmitterColor(em.valor)}`}>
                     {em.valor}
@@ -357,7 +366,7 @@ const CucDetails = () => {
                 ))}
               </div>
               
-              <div className="flex justify-between items-center bg-slate-50 p-5 rounded-2xl border border-slate-200 shadow-sm">
+              <div className="flex justify-between items-center bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm">
                  <div className="flex flex-col">
                     <span className="text-[9px] font-black text-slate-400 uppercase">CUC %</span>
                     <span className={`text-3xl font-black tracking-tighter leading-none mt-1 ${getCucColor(selectedLoteData.cuc)}`}>{selectedLoteData.cuc.toFixed(1)}%</span>

@@ -1,9 +1,9 @@
 # ================================= DOCUMENTATION ------------------------------------------ #
 # Script: Sync AgroTarget (SQLite + JSON Inline)
-# Purpose: Sincroniza API com SQLite, faxina espaços invisíveis, trata números BR, exporta JSON limpo e gera status de update.
+# Purpose: Sincroniza API com SQLite, trata números BR, exporta JSON (últimas 40 datas trabalhadas) e gera status.
 # Relationships: tb_AgroTarget (SQLite dinâmico)
 # ================================= VARIABLES ---------------------------------------------- #
-ENABLE_API = True  # Mude para True quando quiser voltar a usar a API do Google
+ENABLE_API = False  # Mude para True quando quiser voltar a usar a API do Google
 API_URL = "https://script.google.com/macros/s/AKfycbxXfBE-x9Opx4KOkPbT2eWOnObwUvIjy1bLODWBs0dHxMdQBeUteoZuP2KRmsQN2vniug/exec"
 DB_PATH = "src/data/qualyflow.db"
 JSON_OUTPUT = "src/data/mockData.json"
@@ -127,31 +127,36 @@ def execute():
         if dt_obj:
             datas_validas.append((dt_obj, d[0]))
             
+    # Ordenadas da mais recente (índice 0) para a mais antiga
     datas_validas.sort(key=lambda x: x[0], reverse=True)
     
     if len(datas_validas) > 50:
         datas_para_excluir = [d[1] for d in datas_validas[50:]]
         placeholders_del = ", ".join(["?"] * len(datas_para_excluir))
         
-        # Deleta as linhas
         cursor.execute(f"DELETE FROM tb_AgroTarget WHERE DATA_APONTAMENTO IN ({placeholders_del})", datas_para_excluir)
         
-        # =========================================================================
-        # MÁGICA DA UMEKO AQUI: Forçar o SQLite a liberar o espaço físico no disco!
-        # =========================================================================
         conn.commit()
         cursor.execute("VACUUM")
         
         print(f"Faxina concluída e arquivo compactado! Registros de {len(datas_para_excluir)} datas antigas foram varridos do mapa.")
     else:
-        # Se não teve deleção, a gente roda um VACUUM de precaução caso o arquivo já estivesse grande antes
         conn.commit()
         cursor.execute("VACUUM")
         print("O banco está fininho! Menos de 50 datas cadastradas, mas dei uma compactada de segurança.")
 
-    print(f"Filtrando os últimos {DIAS_EXPORTACAO} dias para o dashboard...")
-    limite_data_obj = datetime.now() - timedelta(days=DIAS_EXPORTACAO)
+    print(f"Filtrando as últimas {DIAS_EXPORTACAO} datas trabalhadas para o dashboard...")
     
+    # ================= LÓGICA DE CORTE POR DATAS TRABALHADAS =================
+    if len(datas_validas) > 0:
+        # Pega a 40ª data da lista (ou a última, se tiver menos de 40 no banco)
+        idx_corte = min(DIAS_EXPORTACAO, len(datas_validas)) - 1
+        limite_data_obj = datas_validas[idx_corte][0]
+    else:
+        # Fallback caso o banco esteja literalmente vazio
+        limite_data_obj = datetime.now() - timedelta(days=DIAS_EXPORTACAO)
+    # =========================================================================
+
     cursor.execute("SELECT * FROM tb_AgroTarget")
     col_names = [description[0] for description in cursor.description]
     all_rows = cursor.fetchall()
@@ -161,6 +166,7 @@ def execute():
         row_dict = dict(zip(col_names, row))
         data_apontamento = get_valid_date(row_dict.get('DATA_APONTAMENTO', ''))
         
+        # Só entra se a data de apontamento for maior ou igual à nossa 40ª data trabalhada
         if data_apontamento and data_apontamento >= limite_data_obj:
             cleaned_row = format_export_row(row_dict)
             rows_export.append(cleaned_row)

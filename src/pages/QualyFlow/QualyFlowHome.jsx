@@ -148,11 +148,14 @@ const QualyFlowHome = () => {
     // -------------------------------------------------------------------------
     // MÓDULO: CASA DE BOMBA (EB)
     // -------------------------------------------------------------------------
-    const ebRaw = filteredData.filter(i => ["Captação", "Limpeza e Organização", "Fertirrigação"].includes((i.OCORRENCIA || "").trim()));
-    const listaEbs = [...new Set(ebRaw.map(i => i.NOME_EB).filter(Boolean))];
+    const ebRaw = filteredData.filter(i => 
+      (i.NIVEL_1 || "").includes("CASAS DE BOMBAS") && 
+      ["Captação", "Limpeza e Organização", "Fertirrigação"].includes((i.OCORRENCIA || "").trim())
+    );
+    const listaEbs = [...new Set(ebRaw.map(i => i.NRO_EB).filter(Boolean))];
 
     const ebStats = listaEbs.map(nro => {
-      const dfEb = ebRaw.filter(i => i.NOME_EB === nro);
+      const dfEb = ebRaw.filter(i => i.NRO_EB === nro);
       const totalTelas = dfEb.find(i => (i.INDICADOR || "").trim() === "Total de Telas")?.VALOR || 0;
       const telasProblema = dfEb.filter(i => ["Tela Danificada", "Tela Faltando", "Tela Suja"].includes((i.INDICADOR || "").trim())).reduce((a, b) => a + (Number(b.VALOR) || 0), 0);
       const telasPerc = totalTelas > 0 ? (1 - (telasProblema / totalTelas)) * 100 : 100;
@@ -179,7 +182,6 @@ const QualyFlowHome = () => {
       const listaLotes = [...new Set(dfCampo.map(i => i.LOTE).filter(Boolean))];
 
       const lotesProcessados = listaLotes.map(lote => {
-        // Correção crítica: comparando como string limpa
         const dfLote = dfCampo.filter(i => String(i.LOTE || "").trim() === String(lote).trim());
         const regMin = dfLote.find(i => (i.OCORRENCIA || "").trim() === "Regulagem das Pressões" && (i.INDICADOR || "").trim() === "Minima Regulada")?.VALOR;
         const norMin = dfLote.find(i => (i.OCORRENCIA || "").trim() === "Pressão dos Lotes" && (i.INDICADOR || "").trim() === "Minima")?.VALOR;
@@ -311,7 +313,7 @@ const QualyFlowHome = () => {
       hasSemente: filteredData.some(i => (i.OCORRENCIA || "").trim() === "Avaliação de Gemas - Semente"),
       hasComposto: compostoStats.length > 0,
       hasDrone: droneRaw.length > 0,
-      hasCasaBomba: filteredData.some(i => (i.OCORRENCIA || "").trim() === "Captação"), 
+      hasCasaBomba: filteredData.some(i => (i.NIVEL_1 || "").includes("CASAS DE BOMBAS") && (i.OCORRENCIA || "").trim() === "Captação"), 
       hasChecklistGotejo: checklistGotejo.length > 0,
       hasAdubCob: filteredData.some(i => (i.OCORRENCIA || "").trim().toUpperCase().includes("COBERTURA")),
       hasAdubSulc: filteredData.some(i => (i.OCORRENCIA || "").trim().toUpperCase().includes("SULCAMENTO")),
@@ -404,7 +406,7 @@ const QualyFlowHome = () => {
                 );
               case 'PlantioManual': 
                 return stats.hasPlantioManual && (
-                  <UnifiedModuleCard key="plntman" sectionTitle="Plantio Manual" to="/qualyflow/plantiomanual">
+                  <UnifiedModuleCard key="plntman" sectionTitle="Plantio Manual" to="/qualyflow/plantioman">
                     <IndicatorRow title="Gemas Viáveis" value={stats.plantioManual.gemasPerc} unit="%" color={QUALY_RULES.PlantioManual_Viaveis.meta(stats.plantioManual.gemasPerc)} />
                     <IndicatorRow title="Falha" value={stats.plantioManual.falhaPerc} unit="%" color={QUALY_RULES.PlantioManual_Falha.meta(stats.plantioManual.falhaPerc)} />
                     <IndicatorRow title="Gemas/m" value={stats.plantioManual.gemasMetro} unit="un" color={QUALY_RULES.PlantioManual_GemasMetro.meta(stats.plantioManual.gemasMetro)} />
