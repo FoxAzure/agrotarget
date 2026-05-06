@@ -203,6 +203,12 @@ const CucDetails = () => {
         {/* Seletor de Data - Ajustado para 400px */}
         <div className="w-full max-w-[400px] mb-6 mt-2">
           <DateSelector date={selectedDate} onPrev={() => setDateIndex(di => di + 1)} onNext={() => setDateIndex(di => di - 1)} disablePrev={dateIndex === availableDates.length - 1} disableNext={dateIndex === 0} />
+            
+            availableDates={availableDates}
+            onSelectDate={(novaData) => {
+              const idx = availableDates.indexOf(novaData);
+              if (idx !== -1) setDateIndex(idx);
+            }}
         </div>
 
         {camposCuc.length > 0 && (

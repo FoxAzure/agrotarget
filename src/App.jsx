@@ -1,6 +1,9 @@
 import React from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 
+// Importando o nosso novo espião de rolagem!
+import ScrollToTop from './components/Config/ScrollToTop'; // <-- Verifique se o caminho está certinho!
+
 // Importando as logos
 import qualyflowLogo from './gallery/logo/qualyflow.png';
 import coacenterLogo from './gallery/logo/coacenter.png';
@@ -18,6 +21,8 @@ import SementeDetails from './pages/QualyFlow/SementeDetails';
 import AdubSulDetails from './pages/QualyFlow/AdubSulDetails';
 import AdubCobDetails from './pages/QualyFlow/AdubCobDetails';
 import PlatioMecDetails from './pages/QualyFlow/PlatioMecDetails';
+import PerdasDetails from './pages/QualyFlow/PerdasDetails';
+import PlatioManDetails from './pages/QualyFlow/PlatioManDetails';
 
 // Importando Páginas do COA Center
 import COACenterHome from './pages/COACenter/COACenterHome';
@@ -27,7 +32,7 @@ import MotorOcioso from './pages/COACenter/MotorOcioso';
 import COADataAudit from './pages/COACenter/COADataAudit';
 import Comboio from './pages/COACenter/Comboio';
 
-
+import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
 
 //================================== Novas Ferramentas ===================================== //
 
@@ -35,7 +40,6 @@ import Comboio from './pages/COACenter/Comboio';
 //Atlas -> Cartilha de Operações
 //RainSync -> Controle das Chuvas
 //DripControl -> Montagem de Gotejo
-
 
 // ================================= HELPERS (COMPONENTES) ================================= //
 
@@ -97,7 +101,7 @@ function Hub() {
   );
 }
 
-// Página Rascunho da aplicação COA Center (Deixaremos aqui até separarmos em pasta igual fizemos com o QualyFlow)
+// Página Rascunho da aplicação COA Center
 function COACenterPage() {
   const navigate = useNavigate();
   return (
@@ -116,31 +120,41 @@ function COACenterPage() {
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<Hub />} />
+    // Colocamos as rotas e o ScrollToTop dentro de um Fragmento vazio (<> </>)
+    <>
+      {/* Aqui a Umeko age nas sombras toda vez que a rota muda */}
+      <ScrollToTop />
       
-      {/* Aqui a mágica acontece: apontamos a rota para a sua nova página modularizada! */}
-      <Route path="/qualyflow" element={<QualyFlowHome />} />
-      <Route path="/qualyflow/cuc" element={<CucDetails />} />
-      <Route path="/qualyflow/preparo" element={<PreparoDetails />} />
-      <Route path="/qualyflow/drone" element={<DroneDetails />} />
+      <Routes>
+        <Route path="/" element={<Hub />} />
+        
+        {/* Aqui a mágica acontece: apontamos a rota para a sua nova página modularizada! */}
+        <Route path="/qualyflow" element={<QualyFlowHome />} />
+        <Route path="/qualyflow/cuc" element={<CucDetails />} />
+        <Route path="/qualyflow/preparo" element={<PreparoDetails />} />
+        <Route path="/qualyflow/drone" element={<DroneDetails />} />
 
-      <Route path="/qualyflow/semente" element={<SementeDetails />} />
-      <Route path="/qualyflow/adubcob" element={<AdubCobDetails />} />
-      <Route path="/qualyflow/adubsulc" element={<AdubSulDetails />} />
-      <Route path="/qualyflow/composto" element={<CompostoDetails />} />
-      <Route path="/qualyflow/plantiomanual" element={<EmDesenvolvimento />} />
-      <Route path="/qualyflow/plantio" element={<PlatioMecDetails />} />
-      <Route path="/qualyflow/checklist" element={<CheckListDetails />} />
-      <Route path="/qualyflow/casabomba" element={<CBDetails />} />
-      
-      <Route path="/coacenter" element={<COACenterHome />} />
-      <Route path="/coacenter/operacoes" element={<Operacoes />} />
-      <Route path="/coacenter/detalhe" element={<Detalhe />} />
-      <Route path='/coacenter/motorocioso' element={<MotorOcioso />} />
-      <Route path='/coacenter/audit' element={<COADataAudit />} />
-      <Route path='/coacenter/comboio' element={<Comboio />} />
-    </Routes>
+        <Route path="/qualyflow/semente" element={<SementeDetails />} />
+        <Route path="/qualyflow/adubcob" element={<AdubCobDetails />} />
+        <Route path="/qualyflow/adubsulc" element={<AdubSulDetails />} />
+        <Route path="/qualyflow/composto" element={<CompostoDetails />} />
+        <Route path="/qualyflow/plantioman" element={<PlatioManDetails />} />
+        <Route path="/qualyflow/plantiomec" element={<PlatioMecDetails />} />
+        <Route path="/qualyflow/checklist" element={<CheckListDetails />} />
+        <Route path="/qualyflow/casabomba" element={<CBDetails />} />
+        <Route path="/qualyflow/perdasmec" element={<PerdasDetails />} />
+        
+        <Route path="/coacenter" element={<COACenterHome />} />
+        <Route path="/coacenter/operacoes" element={<Operacoes />} />
+        <Route path="/coacenter/detalhe" element={<Detalhe />} />
+        <Route path='/coacenter/motorocioso' element={<MotorOcioso />} />
+        <Route path='/coacenter/audit' element={<COADataAudit />} />
+        <Route path='/coacenter/comboio' element={<Comboio />} />
+
+        {/* ROTA PADRÃO (CATCH-ALL) - Deve ser sempre a última! */}
+        <Route path="*" element={<PaginaNaoEncontrada />} />
+      </Routes>
+    </>
   );
 }
 

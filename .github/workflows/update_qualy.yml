@@ -1,0 +1,39 @@
+name: QualyFlow Sync Bot
+
+on:
+  schedule:
+    - cron: '0 3,10,20,21,23 * * *'    # 0h, 7h, 17h, 18h, 20h
+    - cron: '15 20 * * *'             # 17:15
+    - cron: '30 20 * * *'             # 17:30
+  workflow_dispatch: 
+
+jobs:
+  sync-process:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Puxar o código fonte
+        uses: actions/checkout@v4
+
+      - name: Preparar ambiente Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar biblioteca requests
+        run: pip install requests
+
+      - name: Executar o Extrator da Umeko
+        run: python scripts/sync_agrotarget.py
+
+      - name: Commit e Push para a Vercel compilar
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          
+          # Adicionando os arquivos atualizados (DB, Dados e Update)
+          git add src/data/qualyflow.db
+          git add src/data/mockData.json
+          git add src/data/qualy_update.json
+          
+          git diff --quiet && git diff --staged --quiet || (git commit -m "[BOT]: Dados do QualyFlow Atualizados" && git push)

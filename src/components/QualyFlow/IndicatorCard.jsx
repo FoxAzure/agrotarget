@@ -41,7 +41,8 @@ const IndicatorRow = ({ title, value, unit, color }) => {
 // ADICIONADO: selectedDate nas props
 const UnifiedModuleCard = ({ sectionTitle, children, to, selectedDate }) => (
   <section className="w-full max-w-[400px] animate-in fade-in zoom-in duration-500 mt-2 font-sans">
-    <div className="bg-white border-2 border-slate-200/80 rounded-xl shadow-xl overflow-hidden group hover:border-agro-orange/40 transition-all relative">
+    {/* Ajustado hover da borda do card para agro-green */}
+    <div className="bg-white border-2 border-slate-200/80 rounded-xl shadow-xl overflow-hidden group hover:border-agro-green/40 transition-all relative">
       
       {/* Detalhe Premium: Fita Colorida no Topo (h-1.5 mantida) */}
       <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-agro-green to-agro-orange opacity-90 shadow-sm" />
@@ -58,16 +59,17 @@ const UnifiedModuleCard = ({ sectionTitle, children, to, selectedDate }) => (
         {children}
       </div>
 
+      {/* Ajustados hovers de fundo e de texto para agro-green */}
       <Link 
         to={to}
         state={{ selectedDate }}
-        className="w-full py-2.5 bg-[#F8FAFC] border-t border-slate-100 flex justify-center items-center group-hover:bg-agro-orange/5 transition-all"
+        className="w-full py-2.5 bg-[#F8FAFC] border-t border-slate-100 flex justify-center items-center group-hover:bg-agro-green/5 transition-all"
       >
         <div className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
-          <span className="text-[10px] font-black text-slate-500 group-hover:text-agro-orange uppercase tracking-widest">
+          <span className="text-[10px] font-black text-slate-500 group-hover:text-agro-green uppercase tracking-widest">
             Relatório Detalhado
           </span>
-          <span className="text-slate-400 group-hover:text-agro-orange text-[14px] font-black">→</span>
+          <span className="text-slate-400 group-hover:text-agro-green text-[14px] font-black">→</span>
         </div>
       </Link>
     </div>

@@ -110,6 +110,12 @@ const AdubCobDetails = () => {
             onNext={() => setDateIndex(di => Math.max(di - 1, 0))} 
             disablePrev={dateIndex === availableDates.length - 1} 
             disableNext={dateIndex === 0} 
+
+            availableDates={availableDates}
+            onSelectDate={(novaData) => {
+              const idx = availableDates.indexOf(novaData);
+              if (idx !== -1) setDateIndex(idx);
+            }}
           />
         </div>
 

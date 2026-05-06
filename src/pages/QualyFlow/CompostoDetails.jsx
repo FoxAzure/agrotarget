@@ -156,6 +156,12 @@ const CompostoDetails = () => {
             onNext={() => setDateIndex(di => Math.max(di - 1, 0))} 
             disablePrev={dateIndex === availableDates.length - 1} 
             disableNext={dateIndex === 0} 
+
+            availableDates={availableDates}
+            onSelectDate={(novaData) => {
+              const idx = availableDates.indexOf(novaData);
+              if (idx !== -1) setDateIndex(idx);
+            }}
           />
         </div>
 
@@ -204,7 +210,7 @@ const CompostoDetails = () => {
                     </div>
                     <div className="flex items-center gap-4">
                         <div className="flex flex-col items-end leading-none">
-                            <span className="text-lg font-black tracking-tighter" style={{ color: impl.tonColor }}>{impl.mediaTon.toFixed(1)}</span>
+                            <span className="text-lg font-black tracking-tighter" style={{ color: impl.tonColor }}>{impl.mediaTon.toFixed(2)}</span>
                             <span className="text-[10px] font-black tracking-tighter mt-1" style={{ color: impl.varColor }}>
                                 {impl.mediaVar > 0 ? '+' : ''}{impl.mediaVar.toFixed(1)}%
                             </span>
@@ -228,7 +234,7 @@ const CompostoDetails = () => {
                           {impl.pontos.map((p, pIdx) => (
                             <tr key={pIdx} className="border-b border-slate-50 last:border-0 hover:bg-slate-50/50 transition-colors">
                               <td className="py-2.5 px-4 text-[11px] font-bold text-slate-500">{p.ordem}</td>
-                              <td className="py-2.5 px-4 text-[12px] font-black text-center" style={{ color: p.tonColor }}>{p.valor.toFixed(1)}</td>
+                              <td className="py-2.5 px-4 text-[12px] font-black text-center" style={{ color: p.tonColor }}>{p.valor.toFixed(2)}</td>
                               <td className="py-2.5 px-4 text-[12px] font-black text-right" style={{ color: p.varColor }}>
                                 {p.variacao > 0 ? '+' : ''}{p.variacao.toFixed(1)}%
                               </td>
@@ -262,8 +268,8 @@ const CompostoDetails = () => {
                   {visaoGeral.map((item, idx) => (
                     <tr key={idx} className="border-b border-slate-50 border-dashed last:border-0 transition-colors hover:bg-slate-50/80">
                       <td className="py-3 text-[11px] font-black text-slate-700 uppercase">{item.campo}</td>
-                      <td className="py-3 text-[11px] font-bold text-slate-500 uppercase">L {item.lote}</td>
-                      <td className="py-3 text-[12px] font-black text-center" style={{ color: item.tonColor }}>{item.mediaTon.toFixed(1)}</td>
+                      <td className="py-3 text-[11px] font-bold text-slate-500 uppercase">{item.lote}</td>
+                      <td className="py-3 text-[12px] font-black text-center" style={{ color: item.tonColor }}>{item.mediaTon.toFixed(2)}</td>
                       <td className="py-3 text-[12px] font-black text-right" style={{ color: item.varColor }}>
                         {item.mediaVar > 0 ? '+' : ''}{item.mediaVar.toFixed(1)}%
                       </td>

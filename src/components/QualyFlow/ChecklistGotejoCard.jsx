@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { BarChart, Bar, XAxis, YAxis, ReferenceLine, ResponsiveContainer, Cell, CartesianGrid } from 'recharts';
 import { QUALY_RULES } from '../../pages/QualyFlow/rules';
 
-const ChecklistGotejoCard = ({ stats, to }) => {
+// ADICIONADO: selectedDate nas props
+const ChecklistGotejoCard = ({ stats, to, selectedDate }) => {
   const [activeIdx, setActiveIdx] = useState(0);
   const current = stats[activeIdx];
   const { colors } = QUALY_RULES.ChecklistGotejo;
@@ -111,7 +112,12 @@ const ChecklistGotejoCard = ({ stats, to }) => {
         </div>
 
         {/* Link Técnico Padronizado (py-2.5) */}
-        <Link to={to} className="w-full py-2.5 bg-[#F8FAFC] border-t border-slate-100 flex justify-center items-center group-hover:bg-agro-green/5 transition-all">
+        {/* ADICIONADO: state={{ selectedDate }} para passar a data */}
+        <Link 
+          to={to} 
+          state={{ selectedDate }} 
+          className="w-full py-2.5 bg-[#F8FAFC] border-t border-slate-100 flex justify-center items-center group-hover:bg-agro-green/5 transition-all"
+        >
           <div className="flex items-center gap-2 opacity-70 group-hover:opacity-100 transition-opacity">
             <span className="text-[10px] font-black text-slate-500 group-hover:text-agro-green uppercase tracking-widest">
               Relatório Detalhado

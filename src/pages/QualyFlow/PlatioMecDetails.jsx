@@ -336,7 +336,13 @@ const PlatioMecDetails = () => {
             onPrev={() => setDateIndex(di => Math.min(di + 1, availableDates.length - 1))} 
             onNext={() => setDateIndex(di => Math.max(di - 1, 0))} 
             disablePrev={dateIndex === availableDates.length - 1} 
-            disableNext={dateIndex === 0} 
+            disableNext={dateIndex === 0}
+
+            availableDates={availableDates}
+            onSelectDate={(novaData) => {
+              const idx = availableDates.indexOf(novaData);
+              if (idx !== -1) setDateIndex(idx);
+            }}
           />
         </div>
 
@@ -537,7 +543,7 @@ const PlatioMecDetails = () => {
                               <div className="overflow-hidden">
                                 <div className="p-3 flex flex-col gap-3">
                                    <div className="flex bg-slate-200/50 p-1 rounded-lg">
-                                      {['Viáveis', 'Totais', 'Rebolos'].map(tab => (
+                                      {['Gemas Viáveis', 'Gemas Totais', 'Rebolos'].map(tab => (
                                         <button 
                                           key={tab} 
                                           onClick={() => setActiveTabGemas(prev => ({...prev, [p.n]: tab}))}

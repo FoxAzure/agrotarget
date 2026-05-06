@@ -34,6 +34,12 @@ const Sidebar = ({ isOpen, onClose }) => {
       ]
     },
     {
+      title: "Colheita",
+      items: [
+        { label: "Perdas Mecanizada", path: "/qualyflow/perdasmec" },
+      ]
+    },
+    {
       title: "Tratos Culturais",
       items: [
         { label: "Avaliação Drone", path: "/qualyflow/drone" },

@@ -13,7 +13,7 @@ const HeaderPlantioMec = ({ onMenuOpen }) => {
         <div className="flex items-center gap-2">
           <img src={qualyLogo} alt="Qualy" className="w-8 h-8 object-contain" />
           <h1 className="text-lg font-black text-agro-green uppercase tracking-tighter">
-            Plantio Mec
+            Plantio Mecanizado
           </h1>
         </div>
 
