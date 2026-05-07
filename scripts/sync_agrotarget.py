@@ -3,7 +3,7 @@
 # Purpose: Sincroniza API com SQLite, trata números BR, exporta JSON (últimas 40 datas trabalhadas) e gera status.
 # Relationships: tb_AgroTarget (SQLite dinâmico)
 # ================================= VARIABLES ---------------------------------------------- #
-ENABLE_API = False  # Mude para True quando quiser voltar a usar a API do Google
+ENABLE_API = True  # Mude para True quando quiser voltar a usar a API do Google
 API_URL = "https://script.google.com/macros/s/AKfycbxXfBE-x9Opx4KOkPbT2eWOnObwUvIjy1bLODWBs0dHxMdQBeUteoZuP2KRmsQN2vniug/exec"
 DB_PATH = "src/data/qualyflow.db"
 JSON_OUTPUT = "src/data/mockData.json"
