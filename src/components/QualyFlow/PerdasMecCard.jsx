@@ -26,7 +26,7 @@ const PerdasMecCard = ({ stats, selectedDate }) => {
         {/* HEADER */}
         <div className="px-5 pt-5 pb-3 flex justify-between items-center border-b border-slate-100 bg-slate-50/30">
           <h2 className="text-[13px] font-black text-agro-green uppercase tracking-widest">
-            Perdas na Colheita Mecanizada
+            Perdas Mecanizada
           </h2>
           <span className="text-[10px] font-bold text-slate-500 bg-white px-2.5 py-1 rounded border border-slate-200 shadow-sm">
              {campos.length} CAMPOS
@@ -57,7 +57,7 @@ const PerdasMecCard = ({ stats, selectedDate }) => {
             <div className="flex justify-between items-center py-2.5 border-b border-slate-200">
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Perdas</span>
               <span className="text-[15px] font-black tracking-tight" style={{ color: LOCAL_RULES.Perda(kpis.perdas) }}>
-                {kpis.perdas.toFixed(1)}%
+                {kpis.perdas.toFixed(2)}%
               </span>
             </div>
             <div className="flex justify-between items-center py-2.5 border-b border-slate-200">
@@ -75,7 +75,7 @@ const PerdasMecCard = ({ stats, selectedDate }) => {
             <div className="flex justify-between items-center py-2.5 border-b border-slate-200">
               <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Arranquio de Rizomas</span>
               <span className="text-[15px] font-black tracking-tight" style={{ color: LOCAL_RULES.Arranquio(kpis.arranquio) }}>
-                {kpis.arranquio.toFixed(1)}%
+                {kpis.arranquio.toFixed(2)}%
               </span>
             </div>
           </div>
@@ -106,13 +106,13 @@ const PerdasMecCard = ({ stats, selectedDate }) => {
                     {c.nome}
                   </span>
                   <span className="text-center text-[12px] font-black tracking-tighter" style={{ color: LOCAL_RULES.Perda(perdaNum) }}>
-                    {perdaNum.toFixed(1)}%
+                    {perdaNum.toFixed(2)}%
                   </span>
                   <span className="text-center text-[12px] font-black tracking-tighter" style={{ color: pisoColor }}>
                     {pisoNum.toFixed(1)}%
                   </span>
                   <span className="text-right text-[12px] font-black tracking-tighter" style={{ color: LOCAL_RULES.Arranquio(arranNum) }}>
-                    {arranNum.toFixed(1)}%
+                    {arranNum.toFixed(2)}%
                   </span>
                 </div>
               );
