@@ -1,9 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import coaMockData from '../../data/mockData_coa.json';
 
 // Componentes de Interface
 import COAOciosoHeader from '../../components/COACenter/COAOciosoHeader';
-import COASidebar from '../../components/COACenter/COASidebar'; // <-- Adicionado
+import COASidebar from '../../components/COACenter/COASidebar';
 import COADateSelector from '../../components/COACenter/COADateSelector';
 
 // Motor de Regras
@@ -155,10 +155,14 @@ const OciosoModal = ({ data, onClose }) => {
 
 const MotorOcioso = () => {
   // --- ESTADOS DE CONTROLE ---
-  const [isSidebarOpen, setSidebarOpen] = useState(false); // <-- Adicionado
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState("");
   const [modalData, setModalData] = useState(null);
   const [searchEquip, setSearchEquip] = useState(""); 
+  
+  // Estados para controlar os botões retráteis
+  const [expandedAreas, setExpandedAreas] = useState({});
+  const [expandedFrentes, setExpandedFrentes] = useState({});
 
   // 1. Datas Disponíveis
   const availableDates = useMemo(() => {
@@ -168,6 +172,18 @@ const MotorOcioso = () => {
 
   if (!selectedDate && availableDates.length > 0) setSelectedDate(availableDates[0]);
 
+  // Efeito matador: Fechar todas as áreas e frentes quando a data mudar
+  useEffect(() => {
+    setExpandedAreas({});
+    setExpandedFrentes({});
+  }, [selectedDate]);
+
+  const toggleArea = (id) => setExpandedAreas(prev => ({ ...prev, [id]: !prev[id] }));
+  const toggleFrente = (id) => setExpandedFrentes(prev => ({ ...prev, [id]: !prev[id] }));
+
+  // Adicione novas áreas que deseja ocultar neste array
+  const AREAS_IGNORADAS = ["EMPACOTAMENTO"];
+
   // 2. Processamento dos Dados com a Engine V8
   const report = useMemo(() => {
     if (!selectedDate) return { resumo: {}, areas: [] };
@@ -175,10 +191,15 @@ const MotorOcioso = () => {
     const raw = coaMockData.filter(i => i.DATA.startsWith(selectedDate));
     const areaMap = {};
     let globalOcioso = 0;
-    let globalOps = 0; // 100% = Soma Operacional
+    let globalOps = 0;
 
     raw.forEach(item => {
-      const area = item.AREA_MAP || "NÃO MAPEADO";
+      const area = (item.AREA_MAP || "NÃO MAPEADO").trim().toUpperCase();
+      
+      // Regra de Exclusão de Áreas
+      if (AREAS_IGNORADAS.includes(area)) return;
+
+      const frente = (item.GRUPO_EQUIP || "SEM FRENTE").toUpperCase().trim();
       const eqID = item.COD_EQUIP || "N/A";
       const estado = (item.ESTADO || "").toUpperCase().trim();
       const grupo = (item.DESC_GRUPO_OPERACAO || "INDETERMINADO").toUpperCase().trim();
@@ -190,9 +211,14 @@ const MotorOcioso = () => {
       const isOcioso = estado === 'F' && grupo !== 'PRODUTIVO';
       const ociosoHrs = isOcioso ? motorHrs : 0;
 
-      if (!areaMap[area]) areaMap[area] = { nome: area, totalOps: 0, totalMotor: 0, totalOcioso: 0, equips: {} };
-      if (!areaMap[area].equips[eqID]) {
-        areaMap[area].equips[eqID] = { 
+      if (!areaMap[area]) areaMap[area] = { nome: area, totalOps: 0, totalMotor: 0, totalOcioso: 0, frentes: {} };
+      const a = areaMap[area];
+
+      if (!a.frentes[frente]) a.frentes[frente] = { nome: frente, totalOps: 0, totalMotor: 0, totalOcioso: 0, equips: {} };
+      const f = a.frentes[frente];
+
+      if (!f.equips[eqID]) {
+        f.equips[eqID] = { 
           id: eqID, 
           desc: item.DESC_EQUIP || "", 
           totalOps: 0, 
@@ -201,13 +227,15 @@ const MotorOcioso = () => {
           detalhe: {} 
         };
       }
-
-      const a = areaMap[area];
-      const eq = a.equips[eqID];
+      const eq = f.equips[eqID];
 
       a.totalOps += opsHrs;
       a.totalMotor += motorHrs;
       a.totalOcioso += ociosoHrs;
+
+      f.totalOps += opsHrs;
+      f.totalMotor += motorHrs;
+      f.totalOcioso += ociosoHrs;
 
       eq.totalOps += opsHrs;
       eq.motor += motorHrs;
@@ -231,12 +259,18 @@ const MotorOcioso = () => {
     const areasFinal = Object.values(areaMap).map(a => {
       a.perc = a.totalOps > 0 ? (a.totalOcioso / a.totalOps) * 100 : 0;
 
-      const equipsProcessados = Object.values(a.equips)
-        .map(e => ({ ...e, perc: e.totalOps > 0 ? (e.ocioso / e.totalOps) * 100 : 0 }))
-        .sort((a, b) => b.ocioso - a.ocioso); 
+      const frentesProcessadas = Object.values(a.frentes).map(f => {
+        f.perc = f.totalOps > 0 ? (f.totalOcioso / f.totalOps) * 100 : 0;
+        
+        const equipsProcessados = Object.values(f.equips)
+          .map(e => ({ ...e, perc: e.totalOps > 0 ? (e.ocioso / e.totalOps) * 100 : 0 }))
+          .sort((e1, e2) => e2.ocioso - e1.ocioso);
 
-      return { ...a, equips: equipsProcessados };
-    }).sort((a, b) => b.totalOcioso - a.totalOcioso); 
+        return { ...f, equips: equipsProcessados };
+      }).sort((f1, f2) => f2.totalOcioso - f1.totalOcioso);
+
+      return { ...a, frentes: frentesProcessadas };
+    }).sort((a, b) => b.totalOcioso - a.totalOcioso);
 
     return {
       resumo: {
@@ -253,20 +287,28 @@ const MotorOcioso = () => {
     const lowerSearch = searchEquip.toLowerCase().trim();
 
     return report.areas.map(area => {
-      const filteredEquips = area.equips.filter(eq => 
-        eq.id.toLowerCase().includes(lowerSearch) || 
-        eq.desc.toLowerCase().includes(lowerSearch)
-      );
-      return { ...area, equips: filteredEquips };
-    }).filter(area => area.equips.length > 0);
+      const filteredFrentes = area.frentes.map(frente => {
+        const equipsFiltrados = frente.equips.filter(eq => 
+          eq.id.toLowerCase().includes(lowerSearch) || 
+          eq.desc.toLowerCase().includes(lowerSearch) ||
+          frente.nome.toLowerCase().includes(lowerSearch)
+        );
+        return { ...frente, equips: equipsFiltrados };
+      }).filter(frente => frente.equips.length > 0);
+
+      // Se a pesquisa for pelo nome da Área, mostra a área inteira
+      if (area.nome.toLowerCase().includes(lowerSearch) && filteredFrentes.length === 0) {
+        return area;
+      }
+
+      return { ...area, frentes: filteredFrentes };
+    }).filter(area => area.frentes.length > 0 || area.nome.toLowerCase().includes(lowerSearch));
   }, [report.areas, searchEquip]);
 
   return (
     <div className="min-h-screen bg-[#06090F] text-slate-300 font-sans pb-20">
-      {/* 1. HEADER COM GATILHO PARA MENU */}
       <COAOciosoHeader onMenuOpen={() => setSidebarOpen(true)} />
 
-      {/* 2. COMPONENTE DA SIDEBAR RENDERIZADO */}
       <COASidebar 
         isOpen={isSidebarOpen} 
         onClose={() => setSidebarOpen(false)} 
@@ -296,77 +338,124 @@ const MotorOcioso = () => {
         <div className="w-full max-w-lg bg-[#161B22] p-3 rounded-xl border border-slate-700/80 shadow-md">
           <input 
             type="text" 
-            placeholder="Pesquisar equipamento ou descrição..."
+            placeholder="Pesquisar área, frente, equipamento..."
             value={searchEquip}
             onChange={(e) => setSearchEquip(e.target.value)}
             className="w-full bg-[#0A0D14] border border-slate-700 text-slate-200 font-bold rounded-lg px-3 py-2 outline-none focus:border-red-500 text-xs placeholder:text-slate-600"
           />
         </div>
 
-        {/* LISTAGEM POR ÁREA E EQUIPAMENTOS */}
+        {/* LISTAGEM POR ÁREA -> FRENTE -> EQUIPAMENTOS */}
         <div className="w-full max-w-lg flex flex-col gap-6">
-          {filteredAreas.map(area => (
-            <div key={area.nome} className="bg-[#11151D] border border-slate-800 rounded-xl overflow-hidden shadow-xl">
-              
-              {/* CABEÇALHO DA ÁREA */}
-              <div className="bg-[#161B22] p-4 border-b border-slate-800 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <div className="w-1.5 h-4 bg-red-500 rounded-full" />
-                  <h3 className="text-[13px] font-black text-slate-100 uppercase tracking-widest">{area.nome}</h3>
-                </div>
-                <div className="flex gap-4 text-right">
-                  <div className="flex flex-col">
-                    <span className="text-[8px] font-black text-slate-500 uppercase">Tempo Ocioso</span>
-                    <span className="text-xs font-black text-red-400">{formatDecimalToHHMM(area.totalOcioso)}</span>
-                  </div>
-                  <div className="flex flex-col">
-                    <span className="text-[8px] font-black text-slate-500 uppercase">% Ocioso</span>
-                    <span className="text-xs font-black" style={{ color: COA_RULES.motorOcioso(area.perc) }}>
-                      {area.perc.toFixed(1)}%
-                    </span>
-                  </div>
-                </div>
-              </div>
+          {filteredAreas.map(area => {
+            const isAreaOpen = expandedAreas[area.nome];
 
-              {/* LISTA DE EQUIPAMENTOS DA ÁREA */}
-              <div className="p-3 flex flex-col gap-2">
-                {area.equips.map(eq => {
-                  const isAcimaDaMeta = eq.perc > (METAS.MOTOR_OC_VERDE * 100);
-                  
-                  return (
-                    <button 
-                      key={eq.id}
-                      onClick={() => setModalData(eq)}
-                      className="bg-[#0A0D14] border border-slate-800/80 p-3 rounded-lg flex justify-between items-center hover:bg-[#161B22] hover:border-red-500/30 transition-all group"
-                    >
-                      <div className="flex flex-col items-start text-left">
-                        <span className="text-[11px] font-black text-slate-200">{eq.id}</span>
-                        <span className="text-[9px] font-bold text-slate-500 uppercase truncate w-32">{eq.desc}</span>
-                      </div>
-                      
-                      <div className="flex items-center gap-4">
-                        <div className="flex flex-col items-end">
-                          <span className="text-[8px] font-black text-slate-600 uppercase">Motor Lig.</span>
-                          <span className="text-[10px] font-black text-slate-300">{formatDecimalToHHMM(eq.motor)}</span>
-                        </div>
-                        <div className="flex flex-col items-end w-14">
-                          <span className="text-[8px] font-black text-slate-600 uppercase">Ocioso</span>
-                          <span className="text-[11px] font-black text-red-400">{formatDecimalToHHMM(eq.ocioso)}</span>
-                        </div>
-                        <div className="flex flex-col items-end w-10">
-                          <span className="text-[8px] font-black text-slate-600 uppercase">%</span>
-                          <span className={`text-[11px] font-black ${isAcimaDaMeta ? 'text-red-400' : 'text-emerald-500'}`}>
-                            {eq.perc.toFixed(1)}%
-                          </span>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-              </div>
+            return (
+              <div key={area.nome} className={`bg-[#11151D] border rounded-xl overflow-hidden shadow-xl transition-colors duration-300 ${isAreaOpen ? 'border-slate-700' : 'border-slate-800'}`}>
+                
+                {/* CABEÇALHO DA ÁREA (Agora é um botão retrátil) */}
+                <button 
+                  onClick={() => toggleArea(area.nome)}
+                  className="w-full bg-[#161B22] p-4 border-b border-slate-800 flex justify-between items-center hover:bg-slate-800/40 transition-colors group cursor-pointer"
+                >
+                  <div className="flex items-center gap-3">
+                    <span className={`text-[12px] transition-transform duration-300 ${isAreaOpen ? 'rotate-90 text-emerald-400' : 'text-slate-500 group-hover:text-slate-400'}`}>▶</span>
+                    <div className="w-1.5 h-4 bg-red-500 rounded-full" />
+                    <h3 className="text-[13px] font-black text-slate-100 uppercase tracking-widest">{area.nome}</h3>
+                  </div>
+                  <div className="flex gap-4 text-right">
+                    <div className="flex flex-col">
+                      <span className="text-[8px] font-black text-slate-500 uppercase">Tempo Ocioso</span>
+                      <span className="text-xs font-black text-red-400">{formatDecimalToHHMM(area.totalOcioso)}</span>
+                    </div>
+                    <div className="flex flex-col w-12">
+                      <span className="text-[8px] font-black text-slate-500 uppercase">% Ocioso</span>
+                      <span className="text-xs font-black" style={{ color: COA_RULES.motorOcioso(area.perc) }}>
+                        {area.perc.toFixed(1)}%
+                      </span>
+                    </div>
+                  </div>
+                </button>
 
-            </div>
-          ))}
+                {/* CONTEÚDO DA ÁREA (FRENTES E EQUIPAMENTOS) */}
+                {isAreaOpen && (
+                  <div className="p-3 flex flex-col gap-3">
+                    {area.frentes.map(frente => {
+                      const frenteId = `${area.nome}-${frente.nome}`;
+                      const isOpen = expandedFrentes[frenteId];
+
+                      return (
+                        <div key={frente.nome} className={`border rounded-xl overflow-hidden transition-all duration-300 ${isOpen ? 'border-slate-700/80 shadow-lg shadow-black/50 bg-[#0A0D14]' : 'border-slate-800/80 bg-[#0A0D14] shadow-sm'}`}>
+                          
+                          {/* HEADER DA FRENTE (Botão) */}
+                          <button 
+                            onClick={() => toggleFrente(frenteId)}
+                            className={`w-full flex justify-between items-center p-3.5 transition-colors ${isOpen ? 'bg-slate-800/50 border-b border-slate-700/60' : 'bg-[#0A0D14] hover:bg-[#161B22]'}`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className={`text-[10px] transition-transform duration-300 ${isOpen ? 'rotate-90 text-emerald-400' : 'text-slate-500'}`}>▶</span>
+                              <h4 className={`text-[11px] font-black uppercase tracking-widest ${isOpen ? 'text-white' : 'text-slate-200'}`}>{frente.nome}</h4>
+                            </div>
+                            <div className="flex gap-4 text-right">
+                              <div className="flex flex-col">
+                                <span className="text-[8px] font-black text-slate-500 uppercase">Motor Ocioso</span>
+                                <span className="text-xs font-black text-red-400">{formatDecimalToHHMM(frente.totalOcioso)}</span>
+                              </div>
+                              <div className="flex flex-col w-12">
+                                <span className="text-[8px] font-black text-slate-500 uppercase">% Ocioso</span>
+                                <span className="text-xs font-black" style={{ color: COA_RULES.motorOcioso(frente.perc) }}>
+                                  {frente.perc.toFixed(1)}%
+                                </span>
+                              </div>
+                            </div>
+                          </button>
+
+                          {/* CORPO DA FRENTE (Equipamentos) */}
+                          {isOpen && (
+                            <div className="p-3.5 bg-slate-400/25 flex flex-col gap-2.5 shadow-inner">
+                              {frente.equips.map(eq => {
+                                const isAcimaDaMeta = eq.perc > (METAS.MOTOR_OC_VERDE * 100);
+                                
+                                return (
+                                  <button 
+                                    key={eq.id}
+                                    onClick={() => setModalData(eq)}
+                                    className="bg-[#0A0D14] border border-slate-700/60 p-3 rounded-lg flex justify-between items-center hover:bg-[#161B22] hover:border-red-500/30 transition-all group shadow-sm"
+                                  >
+                                    <div className="flex flex-col items-start text-left">
+                                      <span className="text-[11px] font-black text-slate-200">{eq.id}</span>
+                                      <span className="text-[9px] font-bold text-slate-500 uppercase truncate w-24 md:w-32">{eq.desc}</span>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-4">
+                                      <div className="flex flex-col items-end">
+                                        <span className="text-[8px] font-black text-slate-600 uppercase">Motor Lig.</span>
+                                        <span className="text-[10px] font-black text-slate-300">{formatDecimalToHHMM(eq.motor)}</span>
+                                      </div>
+                                      <div className="flex flex-col items-end w-12">
+                                        <span className="text-[8px] font-black text-slate-600 uppercase">Ocioso</span>
+                                        <span className="text-[11px] font-black text-red-400">{formatDecimalToHHMM(eq.ocioso)}</span>
+                                      </div>
+                                      <div className="flex flex-col items-end w-10">
+                                        <span className="text-[8px] font-black text-slate-600 uppercase">%</span>
+                                        <span className={`text-[11px] font-black ${isAcimaDaMeta ? 'text-red-400' : 'text-emerald-500'}`}>
+                                          {eq.perc.toFixed(1)}%
+                                        </span>
+                                      </div>
+                                    </div>
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
           {filteredAreas.length === 0 && (
             <div className="text-center p-8 border border-dashed border-slate-700 rounded-xl">
