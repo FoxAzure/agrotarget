@@ -11,7 +11,7 @@ const COAOciosoHeader = ({ onMenuOpen }) => {
         
         {/* Logo e Título */}
         <div className="flex items-center gap-2">
-          <img src={coacenterLogo} alt="COA" className="w-8 h-8 object-contain" />
+          <img src={coacenterLogo} alt="COA" className="w-12 h-12 object-contain" />
           <h1 className="text-lg font-black text-slate-200 uppercase tracking-tighter leading-none">
             Motor Ocioso
           </h1>

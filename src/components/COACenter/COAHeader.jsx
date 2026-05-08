@@ -10,7 +10,7 @@ const COAHeader = ({ onMenuOpen }) => {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo e Nome */}
         <div className="flex items-center gap-2">
-          <img src={coacenterLogo} alt="COA Center" className="w-8 h-8 object-contain" />
+          <img src={coacenterLogo} alt="COA Center" className="w-12 h-12 object-contain" />
           <h1 className="text-lg font-black text-slate-200 uppercase tracking-tighter">
             COA<span className="text-emerald-500">Center</span>
           </h1>

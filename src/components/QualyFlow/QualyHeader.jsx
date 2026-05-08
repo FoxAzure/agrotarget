@@ -10,7 +10,7 @@ const QualyHeader = ({ onMenuOpen }) => {
       <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
         {/* Logo e Nome */}
         <div className="flex items-center gap-2">
-          <img src={qualyLogo} alt="Qualy" className="w-8 h-8 object-contain" />
+          <img src={qualyLogo} alt="Qualy" className="w-12 h-12 object-contain" />
           <h1 className="text-lg font-black text-agro-green uppercase tracking-tighter">
             Qualy<span className="text-agro-orange">Flow</span>
           </h1>
