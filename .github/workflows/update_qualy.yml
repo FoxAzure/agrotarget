@@ -2,15 +2,17 @@ name: QualyFlow Sync Bot
 
 on:
   schedule:
-    - cron: '0 3,10,20,21,23 * * *'    # 0h, 7h, 17h, 18h, 20h
-    - cron: '15 20 * * *'             # 17:15
-    - cron: '30 20 * * *'             # 17:30
-  workflow_dispatch: 
+    # 07:00, 13:00, 19:00, 20:00 BRT (10:00, 16:00, 22:00, 23:00 UTC)
+    - cron: '0 10,16,22,23 * * *'
+    # Janela de pico: 17h, 17:15, 17:30, 17:45 BRT (20h UTC nos minutos correspondentes)
+    - cron: '0,15,30,45 20 * * *'
+    # 23:00 BRT (02:00 UTC do dia seguinte)
+    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
   sync-process:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Puxar o código fonte
         uses: actions/checkout@v4
@@ -30,10 +32,7 @@ jobs:
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          
-          # Adicionando os arquivos atualizados (DB, Dados e Update)
           git add src/data/qualyflow.db
           git add src/data/mockData.json
           git add src/data/qualy_update.json
-          
           git diff --quiet && git diff --staged --quiet || (git commit -m "[BOT]: Dados do QualyFlow Atualizados" && git push)

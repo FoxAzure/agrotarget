@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Arquivos temporários do SQLite (Lixo de processamento barrado!)
+*.db-wal
+*.db-shm

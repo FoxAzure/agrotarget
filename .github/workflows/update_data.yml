@@ -2,16 +2,17 @@ name: Atualizar Dados COA
 
 on:
   schedule:
-    # Horários cravados de Brasília: 00h, 12h e 18h (Convertidos para UTC: 03h, 15h, 21h)
-    - cron: '0 3,15,21 * * *' 
-    # Horários de pico de Brasília: 09h e 10h a cada 15 minutos (Convertidos para UTC: 12h e 13h)
-    - cron: '0,15,30,45 12,13 * * *'
+    # 08:00 BRT
+    - cron: '0 11 * * *'
+    # 09:00 até 12:00 BRT a cada 15 minutos (12:00 às 15:00 UTC)
+    - cron: '0,15,30,45 12,13,14,15 * * *'
+    # 18:00, 22:00 e 02:00 BRT (21:00, 01:00, 05:00 UTC)
+    - cron: '0 1,5,21 * * *'
   workflow_dispatch:
 
 jobs:
   atualizar-base:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Puxar o código fonte
         uses: actions/checkout@v4
@@ -33,5 +34,4 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add src/data/mockData_coa.json
           git add src/data/coa_update.json
-          
           git diff --quiet && git diff --staged --quiet || (git commit -m "[BOT]: Dados do COA Center Atualizados" && git push)

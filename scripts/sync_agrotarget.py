@@ -1,14 +1,15 @@
 # ================================= DOCUMENTATION ------------------------------------------ #
 # Script: Sync AgroTarget (SQLite + JSON Inline)
-# Purpose: Sincroniza API com SQLite, trata números BR, exporta JSON (últimas 40 datas trabalhadas) e gera status.
+# Purpose: Sincroniza API com SQLite, impede duplicidade por DATA_ATUALIZACAO, mantém 50 dias e exporta 25.
 # Relationships: tb_AgroTarget (SQLite dinâmico)
 # ================================= VARIABLES ---------------------------------------------- #
-ENABLE_API = True  # Mude para True quando quiser voltar a usar a API do Google
+ENABLE_API = True
 API_URL = "https://script.google.com/macros/s/AKfycbxXfBE-x9Opx4KOkPbT2eWOnObwUvIjy1bLODWBs0dHxMdQBeUteoZuP2KRmsQN2vniug/exec"
 DB_PATH = "src/data/qualyflow.db"
 JSON_OUTPUT = "src/data/mockData.json"
 JSON_UPDATE_PATH = "src/data/qualy_update.json"
 DIAS_EXPORTACAO = 25
+DIAS_MANUTENCAO_BANCO = 50
 
 import requests
 import sqlite3
@@ -27,24 +28,23 @@ def parse_br_date(date_str, is_datetime=False):
         return ""
     try:
         if is_datetime:
-            d = datetime.strptime(str(date_str), "%d/%m/%Y %H:%M:%S")
+            d = datetime.strptime(str(date_str).strip(), "%d/%m/%Y %H:%M:%S")
             return d.strftime("%Y-%m-%d %H:%M:%S")
         else:
-            d = datetime.strptime(str(date_str).split(" ")[0], "%d/%m/%Y")
+            d = datetime.strptime(str(date_str).split(" ")[0].strip(), "%d/%m/%Y")
             return d.strftime("%Y-%m-%d")
     except Exception:
         return str(date_str)
 
-def get_valid_date(date_str):
-    if not date_str:
-        return None
-    try:
-        if "-" in str(date_str):
-            return datetime.strptime(str(date_str).split(" ")[0], "%Y-%m-%d")
-        else:
-            return datetime.strptime(str(date_str).split(" ")[0], "%d/%m/%Y")
-    except:
-        return None
+def carregar_ultimo_timestamp_gravado():
+    if os.path.exists(JSON_UPDATE_PATH):
+        try:
+            with open(JSON_UPDATE_PATH, 'r', encoding='utf-8') as f:
+                info = json.load(f)
+                return info.get("DATA_ATUALIZACAO_PLANILHA", "")
+        except:
+            return ""
+    return ""
 
 def setup_database(cursor, sample_row):
     cols = []
@@ -85,92 +85,108 @@ def execute():
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
+    
+    dados_novos_processados = False
+    timestamp_planilha_atual = ""
 
     if ENABLE_API:
-        print("Umeko conectando à API Agrovale...")
+        print("Umeko conectando à API de Qualidade da Agrovale...")
         try:
             response = requests.get(API_URL, timeout=60)
+            response.raise_for_status()
             dados = response.json()
-            if dados:
-                setup_database(cursor, dados[0])
-                colunas = list(dados[0].keys())
-                colunas_str = ", ".join([f'"{c}"' for c in colunas])
-                placeholders = ", ".join(["?"] * len(colunas))
-                update_set = ", ".join([f'"{c}" = excluded."{c}"' for c in colunas if c != 'ID'])
-                
-                sql_upsert = f"""
-                    INSERT INTO tb_AgroTarget ({colunas_str})
-                    VALUES ({placeholders})
-                    ON CONFLICT(ID) DO UPDATE SET
-                    {update_set}
-                    WHERE excluded.DATA_ATUALIZACAO > tb_AgroTarget.DATA_ATUALIZACAO
-                """
-                
-                for row in dados:
-                    row['DATA_APONTAMENTO'] = parse_br_date(row.get('DATA_APONTAMENTO', ''), is_datetime=False)
-                    row['DATA_ATUALIZACAO'] = parse_br_date(row.get('DATA_ATUALIZACAO', ''), is_datetime=True)
-                    valores = [row.get(c, "") for c in colunas]
-                    cursor.execute(sql_upsert, valores)
-                print("Upsert concluído!")
-        except Exception as e:
-            print(f"Erro na API: {e}")
-    else:
-        print("Umeko informa: API desativada. Trabalhando apenas com o SQLite local.")
-
-    print("Umeko fazendo a faxina no banco de dados...")
-    cursor.execute("SELECT DISTINCT DATA_APONTAMENTO FROM tb_AgroTarget")
-    datas_banco = cursor.fetchall()
-    
-    datas_validas = []
-    for d in datas_banco:
-        dt_obj = get_valid_date(d[0])
-        if dt_obj:
-            datas_validas.append((dt_obj, d[0]))
             
-    # Ordenadas da mais recente (índice 0) para a mais antiga
-    datas_validas.sort(key=lambda x: x[0], reverse=True)
-    
-    if len(datas_validas) > 50:
-        datas_para_excluir = [d[1] for d in datas_validas[50:]]
-        placeholders_del = ", ".join(["?"] * len(datas_para_excluir))
-        
-        cursor.execute(f"DELETE FROM tb_AgroTarget WHERE DATA_APONTAMENTO IN ({placeholders_del})", datas_para_excluir)
-        
-        conn.commit()
-        cursor.execute("VACUUM")
-        
-        print(f"Faxina concluída e arquivo compactado! Registros de {len(datas_para_excluir)} datas antigas foram varridos do mapa.")
+            if dados and isinstance(dados, list):
+                setup_database(cursor, dados[0])
+                
+                # Validação inteligente por DATA_ATUALIZACAO do primeiro registro
+                timestamp_planilha_atual = parse_br_date(dados[0].get('DATA_ATUALIZACAO', ''), is_datetime=True)
+                timestamp_anterior = carregar_ultimo_timestamp_gravado()
+                
+                print(f"Timestamp API: {timestamp_planilha_atual} | Último Processado: {timestamp_anterior}")
+                
+                if timestamp_planilha_atual and timestamp_planilha_atual == timestamp_anterior:
+                    print("Umeko verificou: Nenhuma modificação recente na API de Qualidade. Pulando inserção.")
+                else:
+                    colunas = list(dados[0].keys())
+                    colunas_str = ", ".join([f'"{c}"' for c in colunas])
+                    placeholders = ", ".join(["?"] * len(colunas))
+                    update_set = ", ".join([f'"{c}" = excluded."{c}"' for c in colunas if c != 'ID'])
+                    
+                    sql_upsert = f"""
+                        INSERT INTO tb_AgroTarget ({colunas_str})
+                        VALUES ({placeholders})
+                        ON CONFLICT(ID) DO UPDATE SET
+                        {update_set}
+                        WHERE excluded.DATA_ATUALIZACAO > tb_AgroTarget.DATA_ATUALIZACAO
+                    """
+                    
+                    for row in dados:
+                        row['DATA_APONTAMENTO'] = parse_br_date(row.get('DATA_APONTAMENTO', ''), is_datetime=False)
+                        row['DATA_ATUALIZACAO'] = parse_br_date(row.get('DATA_ATUALIZACAO', ''), is_datetime=True)
+                        valores = [row.get(c, "") for c in colunas]
+                        cursor.execute(sql_upsert, valores)
+                    
+                    conn.commit()
+                    dados_novos_processados = True
+                    print("Upsert da Qualidade executado com sucesso!")
+            else:
+                print("Nenhum dado recebido da API de Qualidade.")
+        except Exception as e:
+            print(f"Erro na API de Qualidade: {e}")
     else:
-        conn.commit()
-        cursor.execute("VACUUM")
-        print("O banco está fininho! Menos de 50 datas cadastradas, mas dei uma compactada de segurança.")
+        print("Umeko informa: API desativada. Usando apenas a base local do SQLite.")
 
-    print(f"Filtrando as últimas {DIAS_EXPORTACAO} datas trabalhadas para o dashboard...")
+    # --- FAXINA INTELIGENTE (Mantém apenas as últimas 50 datas com dados) ---
+    print("Umeko fazendo a faxina cirúrgica no banco de dados...")
+    try:
+        cursor.execute("""
+            SELECT DISTINCT DATA_APONTAMENTO FROM tb_AgroTarget 
+            WHERE DATA_APONTAMENTO != '' AND DATA_APONTAMENTO IS NOT NULL
+            ORDER BY DATA_APONTAMENTO DESC 
+            LIMIT ?
+        """, (DIAS_MANUTENCAO_BANCO,))
+        
+        datas_para_manter = [row[0] for row in cursor.fetchall()]
+        
+        if datas_para_manter:
+            placeholders_keep = ", ".join(["?"] * len(datas_para_manter))
+            sql_delete = f"""
+                DELETE FROM tb_AgroTarget 
+                WHERE DATA_APONTAMENTO NOT IN ({placeholders_keep}) 
+                  AND DATA_APONTAMENTO != '' 
+                  AND DATA_APONTAMENTO IS NOT NULL
+            """
+            cursor.execute(sql_delete, datas_para_manter)
+            conn.commit()
+            cursor.execute("VACUUM")
+            print(f"Faxina terminada! Mantivemos apenas os registros vinculados às {len(datas_para_manter)} últimas datas reais.")
+    except Exception as e:
+        print(f"Aviso na limpeza do banco: {e}")
+
+    # --- EXPORTAÇÃO DOS 25 DIAS TRABALHADOS PARA O JSON ---
+    print(f"Filtrando os últimos {DIAS_EXPORTACAO} dias de apontamento para gerar o JSON...")
+    cursor.execute("""
+        SELECT DISTINCT DATA_APONTAMENTO FROM tb_AgroTarget 
+        WHERE DATA_APONTAMENTO != '' AND DATA_APONTAMENTO IS NOT NULL
+        ORDER BY DATA_APONTAMENTO DESC 
+        LIMIT ?
+    """, (DIAS_EXPORTACAO,))
     
-    # ================= LÓGICA DE CORTE POR DATAS TRABALHADAS =================
-    if len(datas_validas) > 0:
-        # Pega a 40ª data da lista (ou a última, se tiver menos de 40 no banco)
-        idx_corte = min(DIAS_EXPORTACAO, len(datas_validas)) - 1
-        limite_data_obj = datas_validas[idx_corte][0]
-    else:
-        # Fallback caso o banco esteja literalmente vazio
-        limite_data_obj = datetime.now() - timedelta(days=DIAS_EXPORTACAO)
-    # =========================================================================
-
-    cursor.execute("SELECT * FROM tb_AgroTarget")
-    col_names = [description[0] for description in cursor.description]
-    all_rows = cursor.fetchall()
+    datas_json = [row[0] for row in cursor.fetchall()]
     
     rows_export = []
-    for row in all_rows:
-        row_dict = dict(zip(col_names, row))
-        data_apontamento = get_valid_date(row_dict.get('DATA_APONTAMENTO', ''))
+    if datas_json:
+        cursor.execute("SELECT * FROM tb_AgroTarget")
+        col_names = [description[0] for description in cursor.description]
+        all_rows = cursor.fetchall()
         
-        # Só entra se a data de apontamento for maior ou igual à nossa 40ª data trabalhada
-        if data_apontamento and data_apontamento >= limite_data_obj:
-            cleaned_row = format_export_row(row_dict)
-            rows_export.append(cleaned_row)
+        for row in all_rows:
+            row_dict = dict(zip(col_names, row))
+            if row_dict.get('DATA_APONTAMENTO') in datas_json:
+                rows_export.append(format_export_row(row_dict))
 
+    # Escreve o arquivo formatado inline
     with open(JSON_OUTPUT, 'w', encoding='utf-8') as f:
         f.write("[\n")
         for i, entry in enumerate(rows_export):
@@ -182,17 +198,18 @@ def execute():
                 f.write("\n")
         f.write("]")
 
-    update_info = {
-        "DATA_HORA": get_brasilia_time()
-    }
-    with open(JSON_UPDATE_PATH, 'w', encoding='utf-8') as f:
-        json.dump(update_info, f, ensure_ascii=False, indent=2)
+    # Atualiza o arquivo de status se novos dados foram injetados ou se ele não existia
+    if dados_novos_processados or not os.path.exists(JSON_UPDATE_PATH):
+        update_info = {
+            "DATA_HORA": get_brasilia_time(),
+            "DATA_ATUALIZACAO_PLANILHA": timestamp_planilha_atual if timestamp_planilha_atual else get_brasilia_time()
+        }
+        with open(JSON_UPDATE_PATH, 'w', encoding='utf-8') as f:
+            json.dump(update_info, f, ensure_ascii=False, indent=2)
+        print(f"Status da Qualidade atualizado: {update_info['DATA_HORA']}")
 
-    conn.commit()
     conn.close()
-    
-    print(f"Pronto! {len(rows_export)} linhas compactadas, tratadas e salvas em {JSON_OUTPUT}.")
-    print(f"Status de atualização salvo em {JSON_UPDATE_PATH} -> {update_info['DATA_HORA']}")
+    print(f"Processo concluído. {len(rows_export)} linhas exportadas para o JSON.")
 
 if __name__ == "__main__":
     execute()
