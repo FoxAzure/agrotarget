@@ -1,6 +1,6 @@
 # ================================= DOCUMENTATION ------------------------------------------ #
 # Script: Sync AgroTarget (SQLite + JSON Inline)
-# Purpose: Sincroniza API com SQLite, impede duplicidade por DATA_ATUALIZACAO, mantém 50 dias e exporta 25.
+# Purpose: Sincroniza API com SQLite mantendo datas em DD/MM/AAAA, filtra dias via Python e exporta.
 # Relationships: tb_AgroTarget (SQLite dinâmico)
 # ================================= VARIABLES ---------------------------------------------- #
 ENABLE_API = True
@@ -19,22 +19,44 @@ from datetime import datetime, timedelta, timezone
 
 # ================================= HELPERS ------------------------------------------------ #
 def get_brasilia_time():
-    """ Retorna a data e hora atual cravada no fuso de Brasília (UTC-3) """
+    """ Retorna a data e hora atual cravada no fuso de Brasília (UTC-3) no formato BR """
     brt_tz = timezone(timedelta(hours=-3))
-    return datetime.now(brt_tz).strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.now(brt_tz).strftime("%d/%m/%Y %H:%M:%S")
 
 def parse_br_date(date_str, is_datetime=False):
+    """ Garante que a string que vai para o banco fique no formato BR puro (DD/MM/AAAA) """
     if not date_str:
         return ""
     try:
+        date_clean = str(date_str).strip()
         if is_datetime:
-            d = datetime.strptime(str(date_str).strip(), "%d/%m/%Y %H:%M:%S")
-            return d.strftime("%Y-%m-%d %H:%M:%S")
+            if "-" in date_clean and "T" not in date_clean:
+                d = datetime.strptime(date_clean, "%Y-%m-%d %H:%M:%S")
+                return d.strftime("%d/%m/%Y %H:%M:%S")
+            elif "T" in date_clean:
+                d = datetime.strptime(date_clean.split(".")[0], "%Y-%m-%dT%H:%M:%S")
+                return d.strftime("%d/%m/%Y %H:%M:%S")
         else:
-            d = datetime.strptime(str(date_str).split(" ")[0].strip(), "%d/%m/%Y")
-            return d.strftime("%Y-%m-%d")
+            date_only = date_clean.split(" ")[0].split("T")[0]
+            if "-" in date_only:
+                d = datetime.strptime(date_only, "%Y-%m-%d")
+                return d.strftime("%d/%m/%Y")
     except Exception:
-        return str(date_str)
+        pass
+    return str(date_str).strip()
+
+def get_valid_date(date_str):
+    """ Converte a string do banco em um objeto datetime apenas para ordenação na memória """
+    if not date_str:
+        return None
+    try:
+        date_clean = str(date_str).split(" ")[0].strip()
+        if "-" in date_clean:
+            return datetime.strptime(date_clean, "%Y-%m-%d")
+        else:
+            return datetime.strptime(date_clean, "%d/%m/%Y")
+    except:
+        return None
 
 def carregar_ultimo_timestamp_gravado():
     if os.path.exists(JSON_UPDATE_PATH):
@@ -99,7 +121,6 @@ def execute():
             if dados and isinstance(dados, list):
                 setup_database(cursor, dados[0])
                 
-                # Validação inteligente por DATA_ATUALIZACAO do primeiro registro
                 timestamp_planilha_atual = parse_br_date(dados[0].get('DATA_ATUALIZACAO', ''), is_datetime=True)
                 timestamp_anterior = carregar_ultimo_timestamp_gravado()
                 
@@ -118,7 +139,6 @@ def execute():
                         VALUES ({placeholders})
                         ON CONFLICT(ID) DO UPDATE SET
                         {update_set}
-                        WHERE excluded.DATA_ATUALIZACAO > tb_AgroTarget.DATA_ATUALIZACAO
                     """
                     
                     for row in dados:
@@ -137,43 +157,37 @@ def execute():
     else:
         print("Umeko informa: API desativada. Usando apenas a base local do SQLite.")
 
-    # --- FAXINA INTELIGENTE (Mantém apenas as últimas 50 datas com dados) ---
+    # --- FAXINA INTELIGENTE (Tratando as strings na memória) ---
     print("Umeko fazendo a faxina cirúrgica no banco de dados...")
     try:
-        cursor.execute("""
-            SELECT DISTINCT DATA_APONTAMENTO FROM tb_AgroTarget 
-            WHERE DATA_APONTAMENTO != '' AND DATA_APONTAMENTO IS NOT NULL
-            ORDER BY DATA_APONTAMENTO DESC 
-            LIMIT ?
-        """, (DIAS_MANUTENCAO_BANCO,))
+        cursor.execute("SELECT DISTINCT DATA_APONTAMENTO FROM tb_AgroTarget WHERE DATA_APONTAMENTO != '' AND DATA_APONTAMENTO IS NOT NULL")
+        datas_banco = cursor.fetchall()
         
-        datas_para_manter = [row[0] for row in cursor.fetchall()]
+        datas_validas = []
+        for d in datas_banco:
+            dt_obj = get_valid_date(d[0])
+            if dt_obj:
+                datas_validas.append((dt_obj, d[0]))
+                
+        # Ordenadas da mais recente para a mais antiga (usando o objeto temporal real)
+        datas_validas.sort(key=lambda x: x[0], reverse=True)
         
-        if datas_para_manter:
-            placeholders_keep = ", ".join(["?"] * len(datas_para_manter))
-            sql_delete = f"""
-                DELETE FROM tb_AgroTarget 
-                WHERE DATA_APONTAMENTO NOT IN ({placeholders_keep}) 
-                  AND DATA_APONTAMENTO != '' 
-                  AND DATA_APONTAMENTO IS NOT NULL
-            """
-            cursor.execute(sql_delete, datas_para_manter)
+        # Mantém 50 dias no banco de forma segura
+        if len(datas_validas) > DIAS_MANUTENCAO_BANCO:
+            datas_para_excluir = [d[1] for d in datas_validas[DIAS_MANUTENCAO_BANCO:]]
+            placeholders_del = ", ".join(["?"] * len(datas_para_excluir))
+            cursor.execute(f"DELETE FROM tb_AgroTarget WHERE DATA_APONTAMENTO IN ({placeholders_del})", datas_para_excluir)
             conn.commit()
             cursor.execute("VACUUM")
-            print(f"Faxina terminada! Mantivemos apenas os registros vinculados às {len(datas_para_manter)} últimas datas reais.")
+            print(f"Faxina terminada! {len(datas_para_excluir)} datas antigas varridas do mapa.")
     except Exception as e:
         print(f"Aviso na limpeza do banco: {e}")
 
     # --- EXPORTAÇÃO DOS 25 DIAS TRABALHADOS PARA O JSON ---
     print(f"Filtrando os últimos {DIAS_EXPORTACAO} dias de apontamento para gerar o JSON...")
-    cursor.execute("""
-        SELECT DISTINCT DATA_APONTAMENTO FROM tb_AgroTarget 
-        WHERE DATA_APONTAMENTO != '' AND DATA_APONTAMENTO IS NOT NULL
-        ORDER BY DATA_APONTAMENTO DESC 
-        LIMIT ?
-    """, (DIAS_EXPORTACAO,))
     
-    datas_json = [row[0] for row in cursor.fetchall()]
+    # Pegamos os top 25 a partir da lista já tratada e ordenada na memória
+    datas_json = [d[1] for d in datas_validas[:DIAS_EXPORTACAO]]
     
     rows_export = []
     if datas_json:
@@ -198,7 +212,7 @@ def execute():
                 f.write("\n")
         f.write("]")
 
-    # Atualiza o arquivo de status se novos dados foram injetados ou se ele não existia
+    # Atualiza o arquivo de status 
     if dados_novos_processados or not os.path.exists(JSON_UPDATE_PATH):
         update_info = {
             "DATA_HORA": get_brasilia_time(),
@@ -209,7 +223,7 @@ def execute():
         print(f"Status da Qualidade atualizado: {update_info['DATA_HORA']}")
 
     conn.close()
-    print(f"Processo concluído. {len(rows_export)} linhas exportadas para o JSON.")
+    print(f"Processo concluído. {len(rows_export)} linhas com o seu padrão de data exportadas para o JSON.")
 
 if __name__ == "__main__":
     execute()
