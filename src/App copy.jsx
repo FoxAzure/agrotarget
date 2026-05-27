@@ -1,16 +1,48 @@
 import React from 'react';
 import { Routes, Route, Link, useNavigate } from 'react-router-dom';
 
-// Importando o nosso espião de rolagem
-import ScrollToTop from './components/Config/ScrollToTop';
+// Importando o nosso novo espião de rolagem!
+import ScrollToTop from './components/Config/ScrollToTop'; // <-- Verifique se o caminho está certinho!
 
 // Importando as logos
 import qualyflowLogo from './gallery/logo/qualyflow.png';
 import coacenterLogo from './gallery/logo/coacenter.png';
 
-// Importando a página principal do QualyFlow
+// Importando a nova página modularizada do QualyFlow
+import EmDesenvolvimento from './pages/QualyFlow/EmDesenvolvimento';
 import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
+import CucDetails from './pages/QualyFlow/CucDetails';
+import PreparoDetails from './pages/QualyFlow/PreparoDetails';
+import DroneDetails from './pages/QualyFlow/DroneDetails';
+import CompostoDetails from './pages/QualyFlow/CompostoDetails';
+import CBDetails from './pages/QualyFlow/CBDetails';
+import CheckListDetails from './pages/QualyFlow/CheckListDetails';
+import SementeDetails from './pages/QualyFlow/SementeDetails';
+import AdubSulDetails from './pages/QualyFlow/AdubSulDetails';
+import AdubCobDetails from './pages/QualyFlow/AdubCobDetails';
+import PlatioMecDetails from './pages/QualyFlow/PlatioMecDetails';
+import PerdasDetails from './pages/QualyFlow/PerdasDetails';
+import PlatioManDetails from './pages/QualyFlow/PlatioManDetails';
+
+// Importando Páginas do COA Center
+import COACenterHome from './pages/COACenter/COACenterHome';
+import Operacoes from './pages/COACenter/Operacoes';
+import Detalhe from './pages/COACenter/Detalhe';
+import MotorOcioso from './pages/COACenter/MotorOcioso';
+import COADataAudit from './pages/COACenter/COADataAudit';
+import Comboio from './pages/COACenter/Comboio';
+
 import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
+
+
+import RelatorioAtividades from './pages/QualyFlow/RelatorioAtividades';
+
+//================================== Novas Ferramentas ===================================== //
+
+//AgroTools -> Calculadoras da Qualidade
+//Atlas -> Cartilha de Operações
+//RainSync -> Controle das Chuvas
+//DripControl -> Montagem de Gotejo
 
 // ================================= HELPERS (COMPONENTES) ================================= //
 
@@ -32,7 +64,7 @@ const ModuleCard = ({ title, logoSrc, to }) => (
 
 // ================================= PÁGINAS (ROTAS) ================================= //
 
-// Página 1: O Hub AgroTarget
+// Página 1: O seu Hub AgroTarget intacto
 function Hub() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 no-scrollbar selection:bg-agro-orange/20">
@@ -91,28 +123,42 @@ function COACenterPage() {
 
 function App() {
   return (
+    // Colocamos as rotas e o ScrollToTop dentro de um Fragmento vazio (<> </>)
     <>
+      {/* Aqui a Umeko age nas sombras toda vez que a rota muda */}
       <ScrollToTop />
       
       <Routes>
         <Route path="/" element={<Hub />} />
         
-        {/* Rota do QualyFlow ligada à nova Home conectada ao Supabase */}
-        <Route path="/qualyflow" element={<QualyFlowHome />} />
         
-        {/* Rota do COA Center ligada à sua página rascunho interna */}
-        <Route path="/coacenter" element={<COACenterPage />} />
 
-        {/* ATENÇÃO: Deixei essas rotas comentadas porque os imports delas não existem no momento.
-          Quando você for criar as páginas de detalhe e do COA de novo, é só descomentar aqui e lá em cima!
-        */}
-        {/* <Route path="/coacenter/operacoes" element={<Operacoes />} /> */}
-        {/* <Route path="/coacenter/detalhe" element={<Detalhe />} /> */}
-        {/* <Route path='/coacenter/motorocioso' element={<MotorOcioso />} /> */}
-        {/* <Route path='/coacenter/audit' element={<COADataAudit />} /> */}
-        {/* <Route path='/coacenter/comboio' element={<Comboio />} /> */}
+        {/* Aqui a mágica acontece: apontamos a rota para a sua nova página modularizada! */}
+        <Route path="/qualyflow" element={<QualyFlowHome />} />
+        <Route path="/qualyflow/cuc" element={<CucDetails />} />
+        <Route path="/qualyflow/preparo" element={<PreparoDetails />} />
+        <Route path="/qualyflow/drone" element={<DroneDetails />} />
 
-        {/* ROTA PADRÃO (CATCH-ALL) */}
+        <Route path="/qualyflow/semente" element={<SementeDetails />} />
+        <Route path="/qualyflow/adubcob" element={<AdubCobDetails />} />
+        <Route path="/qualyflow/adubsulc" element={<AdubSulDetails />} />
+        <Route path="/qualyflow/composto" element={<CompostoDetails />} />
+        <Route path="/qualyflow/plantioman" element={<PlatioManDetails />} />
+        <Route path="/qualyflow/plantiomec" element={<PlatioMecDetails />} />
+        <Route path="/qualyflow/checklist" element={<CheckListDetails />} />
+        <Route path="/qualyflow/casabomba" element={<CBDetails />} />
+        <Route path="/qualyflow/perdasmec" element={<PerdasDetails />} />
+        
+        <Route path="/coacenter" element={<COACenterHome />} />
+        <Route path="/coacenter/operacoes" element={<Operacoes />} />
+        <Route path="/coacenter/detalhe" element={<Detalhe />} />
+        <Route path='/coacenter/motorocioso' element={<MotorOcioso />} />
+        <Route path='/coacenter/audit' element={<COADataAudit />} />
+        <Route path='/coacenter/comboio' element={<Comboio />} />
+
+        <Route path="/qualyflow/relatorio" element={<RelatorioAtividades />}/>
+
+        {/* ROTA PADRÃO (CATCH-ALL) - Deve ser sempre a última! */}
         <Route path="*" element={<PaginaNaoEncontrada />} />
       </Routes>
     </>

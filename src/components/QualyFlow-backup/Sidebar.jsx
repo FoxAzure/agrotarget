@@ -3,8 +3,11 @@ import { useNavigate } from 'react-router-dom';
 
 const Sidebar = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
+  
+  // Estado para controlar qual grupo está aberto (Acordeão)
   const [openGroup, setOpenGroup] = useState(null);
 
+  // Estrutura de dados fácil de alterar e expandir
   const menuGroups = [
     {
       title: "Irrigação",
@@ -51,6 +54,7 @@ const Sidebar = ({ isOpen, onClose }) => {
   };
 
   const toggleGroup = (groupTitle) => {
+    // Lógica: se clicar no que já está aberto, fecha. Se for outro, abre ele e fecha o resto.
     setOpenGroup(openGroup === groupTitle ? null : groupTitle);
   };
 
@@ -58,38 +62,35 @@ const Sidebar = ({ isOpen, onClose }) => {
     <>
       {isOpen && (
         <div 
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 transition-opacity" 
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40 transition-opacity" 
           onClick={onClose} 
         />
       )}
 
-      <aside className={`fixed top-0 right-0 h-full bg-white z-[60] shadow-2xl transition-transform duration-300 transform 
+      <aside className={`fixed top-0 right-0 h-full bg-white z-50 shadow-2xl transition-transform duration-300 transform 
         ${isOpen ? 'translate-x-0' : 'translate-x-full'} 
-        w-[80%] md:w-[320px] border-l border-slate-200 flex flex-col font-sans`}>
+        w-[80%] md:w-[22%] border-l border-slate-100 flex flex-col`}>
         
-        {/* Topo do Sidebar */}
-        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-[var(--q-bg)]">
+        <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-white">
           <div className="flex flex-col">
-            <span className="text-[14px] font-black uppercase tracking-[0.1em] text-[var(--q-green)] leading-none">
-              Qualy<span className="text-[var(--q-orange)]">Flow</span>
+            <span className="text-[10px] font-black text-agro-green uppercase tracking-[0.2em] leading-none">
+              QualyFlow
             </span>
           </div>
-          <button onClick={onClose} className="text-[var(--q-gray)] hover:text-[var(--q-danger)] font-bold text-3xl transition-colors leading-none mb-1">
-            ×
-          </button>
+          <button onClick={onClose} className="text-agro-orange hover:text-red-500 font-bold text-2xl">×</button>
         </div>
 
-        {/* Menu Acordeão */}
-        <nav className="p-4 flex flex-col gap-3 overflow-y-auto no-scrollbar flex-1">
+        <nav className="p-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar flex-1">
           {menuGroups.map((group) => (
             <div key={group.title} className="flex flex-col gap-1">
-              {/* Botão Retrátil Poderoso */}
+              {/* Botão Retrátil (Pastel Green) */}
               <button
                 onClick={() => toggleGroup(group.title)}
-                className={`w-full flex justify-between items-center p-3.5 rounded-xl text-[12px] font-black uppercase tracking-wider transition-all
+                className={`w-full flex justify-between items-center p-3 rounded-xl text-[11px] font-black uppercase tracking-wider transition-all
                   ${openGroup === group.title 
-                    ? 'bg-[var(--q-green)] text-white shadow-md' 
-                    : 'bg-white text-[var(--q-dark)] border border-slate-200 hover:border-[var(--q-green)]'}`}
+                    ? 'bg-emerald-100 text-agro-green border-emerald-200' 
+                    : 'bg-emerald-50/60 text-slate-600 border-transparent hover:bg-emerald-50'} 
+                  border`}
               >
                 {group.title}
                 <span className={`transition-transform duration-300 font-bold ${openGroup === group.title ? 'rotate-180' : ''}`}>
@@ -97,17 +98,17 @@ const Sidebar = ({ isOpen, onClose }) => {
                 </span>
               </button>
 
-              {/* Sub-itens com Animação */}
-              <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300
+              {/* Sub-itens com animação simples */}
+              <div className={`flex flex-col gap-1 overflow-hidden transition-all duration-300 px-1
                 ${openGroup === group.title ? 'max-h-60 opacity-100 mt-1 mb-2' : 'max-h-0 opacity-0'}`}>
                 {group.items.map((item) => (
                   <button
                     key={item.label}
                     onClick={() => handleNavigation(item.path)}
-                    className="w-full text-left py-3 px-4 rounded-lg text-xs font-bold text-[var(--q-gray)] hover:text-[var(--q-orange)] hover:bg-[var(--q-bg)] transition-all flex justify-between items-center group"
+                    className="w-full text-left p-3 rounded-lg text-xs font-bold text-slate-500 hover:text-agro-green hover:bg-slate-50 transition-all border border-transparent hover:border-slate-100 flex justify-between items-center group"
                   >
                     {item.label}
-                    <span className="opacity-0 group-hover:opacity-100 text-[10px] text-[var(--q-orange)] transform group-hover:translate-x-1 transition-all">→</span>
+                    <span className="opacity-0 group-hover:opacity-100 text-[10px]">→</span>
                   </button>
                 ))}
               </div>
@@ -115,13 +116,11 @@ const Sidebar = ({ isOpen, onClose }) => {
           ))}
         </nav>
 
-        {/* Rodapé do Sidebar */}
-        <div className="p-6 border-t border-slate-100 bg-[var(--q-bg)]">
-          <div className="flex flex-col gap-1 text-center">
-            <span className="text-micro text-[var(--q-gray)]">
-              Qualidade Agrícola
+        <div className="p-6 border-t border-slate-100 bg-slate-50/50">
+          <div className="flex flex-col gap-1">
+            <span className="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em]">
+              Qualidade Agrícola • Agrovale
             </span>
-            <span className="text-[10px] font-bold text-[var(--q-dark)]">Agrovale</span>
           </div>
         </div>
       </aside>

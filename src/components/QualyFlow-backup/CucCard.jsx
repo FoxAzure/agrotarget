@@ -4,6 +4,7 @@ import { QUALY_RULES, COLORS } from '../../pages/QualyFlow/rules';
 
 const AnimatedProgressBar = ({ value, color }) => {
   const [width, setWidth] = useState(0);
+
   useEffect(() => {
     const timer = setTimeout(() => setWidth(value), 150);
     return () => clearTimeout(timer);
@@ -23,61 +24,63 @@ const AnimatedProgressBar = ({ value, color }) => {
   );
 };
 
-// Agora o Card recebe a lista de dados da View do Supabase para a data selecionada
-const CucCard = ({ dataList, to, selectedDate, id }) => {
-  if (!dataList || dataList.length === 0) return null;
-
-  // Calcula os totais dinamicamente com base nos dados reais do banco
-  const totais = {
-    avaliados: dataList.reduce((acc, curr) => acc + (Number(curr.emissores_avaliados) || 0), 0),
-    entupidos: dataList.reduce((acc, curr) => acc + (Number(curr.emissores_entupidos) || 0), 0),
-    camposCount: dataList.length
-  };
+const CucCard = ({ stats, to, selectedDate }) => {
+  const { totais, campos } = stats;
 
   return (
-    <section id={id} className="w-full animate-in fade-in zoom-in duration-500 mt-4 font-sans scroll-mt-24">
-      <div className="qualy-card group">
+    // LARGURA PADRONIZADA: max-w-[400px] para alinhar com o COA Center
+    <section className="w-full max-w-[400px] animate-in fade-in zoom-in duration-500 mt-2 font-sans">
+      <div className="bg-white border-2 border-slate-200/80 rounded-xl shadow-xl overflow-hidden group hover:border-agro-green/40 transition-all relative">
+
+        {/* BARRA SUPERIOR: Aumentada para 6px (h-1.5) para mais destaque */}
         <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-agro-green to-agro-orange opacity-90 shadow-sm" />
 
+        {/* Header Padronizado com o COA */}
         <div className="px-5 pt-5 pb-3 flex justify-between items-center border-b border-slate-100 bg-slate-50/30">
-          <h2 className="text-title">CUC - Gotejo</h2>
+          <h2 className="text-[13px] font-black text-agro-green uppercase tracking-widest">
+            CUC - Gotejo
+          </h2>
           <span className="text-[10px] font-bold text-slate-500 bg-white px-2.5 py-1 rounded border border-slate-200 shadow-sm">
-             {totais.camposCount} CAMPOS
+             {campos.length} CAMPOS
           </span>
         </div>
 
+        {/* Banner de Métricas (Destaque) */}
         <div className="px-5 py-4 flex justify-between bg-slate-50/80 border-b border-slate-100 shadow-inner gap-4">
           <div className="flex flex-col">
-            <span className="text-micro mb-1">Emissores Avaliados</span>
-            <span className="text-highlight text-slate-700">{totais.avaliados}</span>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Emissores Avaliados</span>
+            <span className="text-2xl font-black text-slate-700 tracking-tighter leading-none">
+              {totais.avaliados}
+            </span>
           </div>
           <div className="flex flex-col items-end">
-            <span className="text-micro mb-1">Emissores Entupidos</span>
-            <span className="text-highlight" style={{ color: totais.entupidos > 0 ? COLORS.fora : COLORS.dentro }}>
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Emissores Entupidos</span>
+            <span className="text-2xl font-black tracking-tighter leading-none" style={{ color: totais.entupidos > 0 ? COLORS.fora : COLORS.dentro }}>
               {totais.entupidos}
             </span>
           </div>
         </div>
 
+        {/* Listagem Técnica */}
         <div className="px-5 py-5 flex flex-col gap-4">
+          
           <div className="grid grid-cols-4 pb-2 border-b border-slate-200">
-            <span className="text-left text-micro">Campo</span>
-            <span className="text-center text-micro">CUC %</span>
-            <span className="text-center text-micro">Vazão</span>
-            <span className="text-right text-micro">Entup %</span>
+            <span className="text-left text-[9px] font-black text-slate-400 uppercase tracking-wider">Campo</span>
+            <span className="text-center text-[9px] font-black text-slate-400 uppercase tracking-wider">CUC %</span>
+            <span className="text-center text-[9px] font-black text-slate-400 uppercase tracking-wider">Vazão</span>
+            <span className="text-right text-[9px] font-black text-slate-400 uppercase tracking-wider">Entup %</span>
           </div>
 
-          {dataList.map((c, idx) => {
-            // Pegando os dados diretos da View Materializada
-            const cucNum = Number(c.cuc_perc) || 0;
+          {campos.map((c, idx) => {
+            const cucNum = Number(c.cuc) || 0;
             const vazaoNum = Number(c.vazao) || 0;
-            const entupNum = Number(c.entupidos_perc) || 0;
+            const entupNum = Number(c.entupPerc) || 0;
 
             return (
               <div key={idx} className="flex flex-col gap-1.5">
                 <div className="grid grid-cols-4 items-end">
-                  <span className="text-left text-[12px] font-black text-slate-700 uppercase truncate pr-1" title={c.campo}>
-                    {c.campo}
+                  <span className="text-left text-[12px] font-black text-slate-700 uppercase truncate pr-1">
+                    {c.nome}
                   </span>
                   <span className="text-center text-[13px] font-black tracking-tighter" style={{ color: QUALY_RULES.CUC.meta(cucNum) }}>
                     {cucNum.toFixed(2)}%
@@ -90,12 +93,14 @@ const CucCard = ({ dataList, to, selectedDate, id }) => {
                     {entupNum.toFixed(1)}%
                   </span>
                 </div>
+                
                 <AnimatedProgressBar value={cucNum} color={QUALY_RULES.CUC.meta(cucNum)} />
               </div>
             );
           })}
         </div>
 
+        {/* Botão de Ação: Nome Atualizado e py-3.5 */}
         <Link 
           to={to}
           state={{ selectedDate }}

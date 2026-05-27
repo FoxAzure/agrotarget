@@ -1,0 +1,73 @@
+/* src/pages/QualyFlow/Style.css */
+
+:root {
+  /* Paleta Core AgroTarget */
+  --q-green: #17A54C;
+  --q-green-dark: #117A37;
+  --q-orange: #D35400;
+  --q-orange-light: #FDEBD0;
+  --q-dark: #2C3E50;
+  --q-gray: #94A3B8;
+  --q-bg: #F8FAFC;
+  
+  /* Status Colors */
+  --q-success: #27AE60;
+  --q-warning: #F1C40F;
+  --q-danger: #C0392B;
+}
+
+/* =======================================================
+   TIPOGRAFIA PADRONIZADA (Chega de fontes aleatórias!)
+======================================================== */
+.text-micro {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 900;
+  color: var(--q-gray);
+}
+
+.text-title {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 900;
+  color: var(--q-green);
+}
+
+.text-highlight {
+  font-size: 24px;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 1;
+}
+
+/* =======================================================
+   ESTRUTURA DE CARDS (O Padrão QualyFlow)
+======================================================== */
+.qualy-card {
+  width: 100%;
+  max-width: 400px;
+  background-color: #FFFFFF;
+  border: 2px solid rgba(226, 232, 240, 0.8);
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+  margin: 0 auto;
+}
+
+.qualy-card:hover {
+  border-color: rgba(23, 165, 76, 0.3);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+
+/* Oculta barra de rolagem nos menus horizontais, mas permite o scroll */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
