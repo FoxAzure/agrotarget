@@ -11,6 +11,7 @@ import coacenterLogo from './gallery/logo/coacenter.png';
 // Importando a página principal do QualyFlow
 import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
 import PerdasDetails from './pages/QualyFlow/PerdasDetails';
+import CucDetail from './pages/QualyFlow/details/CucDetail';
 import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
 
 // Importando Páginas do COA Center
@@ -108,6 +109,7 @@ function App() {
         
         <Route path="/qualyflow" element={<QualyFlowHome />} />
         <Route path="/qualyflow/perdasmec" element={<PerdasDetails />} />
+        <Route path="/qualyflow/cuc" element={<CucDetail />} />
 
         <Route path="/coacenter" element={<COACenterHome />} />
         <Route path="/coacenter/operacoes" element={<Operacoes />} />
