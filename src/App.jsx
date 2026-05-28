@@ -12,6 +12,14 @@ import coacenterLogo from './gallery/logo/coacenter.png';
 import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
 import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
 
+// Importando Páginas do COA Center
+import COACenterHome from './pages/COACenter/COACenterHome';
+import Operacoes from './pages/COACenter/Operacoes';
+import Detalhe from './pages/COACenter/Detalhe';
+import MotorOcioso from './pages/COACenter/MotorOcioso';
+import COADataAudit from './pages/COACenter/COADataAudit';
+import Comboio from './pages/COACenter/Comboio';
+
 // ================================= HELPERS (COMPONENTES) ================================= //
 
 const ModuleCard = ({ title, logoSrc, to }) => (
@@ -97,20 +105,14 @@ function App() {
       <Routes>
         <Route path="/" element={<Hub />} />
         
-        {/* Rota do QualyFlow ligada à nova Home conectada ao Supabase */}
         <Route path="/qualyflow" element={<QualyFlowHome />} />
         
-        {/* Rota do COA Center ligada à sua página rascunho interna */}
-        <Route path="/coacenter" element={<COACenterPage />} />
-
-        {/* ATENÇÃO: Deixei essas rotas comentadas porque os imports delas não existem no momento.
-          Quando você for criar as páginas de detalhe e do COA de novo, é só descomentar aqui e lá em cima!
-        */}
-        {/* <Route path="/coacenter/operacoes" element={<Operacoes />} /> */}
-        {/* <Route path="/coacenter/detalhe" element={<Detalhe />} /> */}
-        {/* <Route path='/coacenter/motorocioso' element={<MotorOcioso />} /> */}
-        {/* <Route path='/coacenter/audit' element={<COADataAudit />} /> */}
-        {/* <Route path='/coacenter/comboio' element={<Comboio />} /> */}
+        <Route path="/coacenter" element={<COACenterHome />} />
+        <Route path="/coacenter/operacoes" element={<Operacoes />} />
+        <Route path="/coacenter/detalhe" element={<Detalhe />} />
+        <Route path='/coacenter/motorocioso' element={<MotorOcioso />} />
+        <Route path='/coacenter/audit' element={<COADataAudit />} />
+        <Route path='/coacenter/comboio' element={<Comboio />} />
 
         {/* ROTA PADRÃO (CATCH-ALL) */}
         <Route path="*" element={<PaginaNaoEncontrada />} />
