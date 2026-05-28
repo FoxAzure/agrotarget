@@ -71,3 +71,45 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+
+/* =======================================================
+   ANIMAÇÕES QUALYFLOW (Tickers e Indicadores)
+======================================================== */
+
+/* Letreiro Contínuo (Bolsa de Valores) */
+.ticker-wrap {
+  width: 100%;
+  overflow: hidden;
+  background-color: #F8FAFC;
+  border-top: 1px solid #E2E8F0;
+  border-bottom: 1px solid #E2E8F0;
+  display: flex;
+  white-space: nowrap;
+}
+
+.ticker-content {
+  display: flex;
+  gap: 2rem;
+  padding: 0.5rem 1rem;
+  animation: ticker 25s linear infinite;
+}
+
+.ticker-wrap:hover .ticker-content {
+  animation-play-state: paused;
+}
+
+@keyframes ticker {
+  0% { transform: translateX(10%); }
+  100% { transform: translateX(-100%); }
+}
+
+/* Seta Pulsante de Performance */
+.animate-subtle-bounce {
+  animation: subtle-bounce 2s infinite ease-in-out;
+}
+
+@keyframes subtle-bounce {
+  0%, 100% { transform: translateY(-15%); }
+  50% { transform: translateY(15%); }
+}

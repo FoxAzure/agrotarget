@@ -1,34 +1,19 @@
-// src/pages/QualyFlow/rules.js
-
 export const COLORS = {
-  dentro: '#17A54C', // Verde QualyFlow
-  fora: '#C0392B',   // Vermelho Alerta
-  alerta: '#D4AC0D'  // Amarelo Atenção
+  dentro: 'var(--q-success)', 
+  fora: 'var(--q-danger)',   
+  alerta: 'var(--q-warning)'  
 };
 
 export const QUALY_RULES = {
   CUC: {
-    // Regra CUC %: >= 90 Verde | >= 80 Amarelo | < 80 Vermelho
-    meta: (val) => {
-      if (val >= 90) return '#17A54C'; 
-      if (val >= 80) return '#D4AC0D'; 
-      return '#C0392B'; 
-    },
-    // Regra de Vazão (L/h)
-    vazaoMeta: (val) => {
-      if (val > 1.2) return '#21618C'; // Azul (Excesso)
-      if (val > 1.1) return '#D4AC0D'; // Amarelo
-      if (val >= 0.9) return '#17A54C'; // Verde (Ideal)
-      if (val >= 0.8) return '#D35400'; // Laranja
-      return '#C0392B'; // Vermelho (Crítico)
-    },
-    // Regra de Entupimento %
-    entupimentoMeta: (val) => {
-      if (val > 10) return '#C0392B'; // Acima de 10% é vermelho
-      return '#17A54C'; // Abaixo ou igual a 10% é verde
-    }
+    meta: (val) => val >= 90 ? 'var(--q-success)' : val >= 80 ? 'var(--q-warning)' : 'var(--q-danger)',
+    vazaoMeta: (val) => val > 1.2 ? '#21618C' : val > 1.1 ? 'var(--q-warning)' : val >= 0.9 ? 'var(--q-success)' : val >= 0.8 ? 'var(--q-orange)' : 'var(--q-danger)',
+    entupimentoMeta: (val) => val > 10 ? 'var(--q-danger)' : 'var(--q-success)'
+  },
+  Perdas: {
+    perdaMeta: (v) => v <= 4.5 ? 'var(--q-success)' : 'var(--q-danger)',
+    arranquioMeta: (v) => v <= 2.5 ? 'var(--q-success)' : 'var(--q-danger)',
+    pisoteioSimplesMeta: (v) => v <= 50.0 ? 'var(--q-success)' : 'var(--q-danger)',
+    pisoteioDuploMeta: (v) => v <= 2.0 ? 'var(--q-success)' : 'var(--q-danger)'
   }
-  
-  // Futuramente, você adiciona aqui as regras das outras atividades
-  // Perdas: { meta: (val) => ... }
 };
