@@ -1,81 +1,97 @@
-import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import './Style.css';
 
-// Componentes
-import COAHeader from '../../components/COACenter/COAHeader';
-import COASidebar from '../../components/COACenter/COASidebar';
-import COADateSelector from '../../components/COACenter/COADateSelector';
-import COAAreaCard from '../../components/COACenter/COAAreaCard'; 
-import COAcctCard from '../../components/COACenter/COAcctCard'; 
+import HeaderCOACenter from '../../components/COACenter/HeaderCOACenter';
+import SidebarCOACenter from '../../components/COACenter/SidebarCOACenter';
+import DateSelectorCOA from '../../components/COACenter/DateSelectorCOA';
+import CardResumo from '../../components/COACenter/CardResumo';
+import CardOcioso from '../../components/COACenter/CardOcioso';
+import { supabase } from '../../lib/supabaseClient';
 
-// Regras e Engine de Negócio
-import { buildHomeCardsData } from './coa_rules';
+const toIsoDate = (date = new Date()) => {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
-// Dados
-import coaMockData from '../../data/mockData_coa.json';
+const brToIsoDate = (brDate) => {
+  if (!brDate || typeof brDate !== 'string' || !brDate.includes('/')) return '';
+  const [dd, mm, yyyy] = brDate.split('/');
+  return `${yyyy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
+};
 
 const COACenterHome = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-  const navigate = useNavigate();
+  const [selectedDate, setSelectedDate] = useState(toIsoDate(new Date()));
+  const [availableDates, setAvailableDates] = useState([]);
 
-  const availableDates = useMemo(() => {
-    const dates = [...new Set(coaMockData.map(i => i.DATA ? i.DATA.substring(0, 10) : null).filter(Boolean))];
-    return dates.sort((a, b) => b.split('/').reverse().join('-').localeCompare(a.split('/').reverse().join('-')));
+  const todayIso = useMemo(() => toIsoDate(new Date()), []);
+
+  useEffect(() => {
+    let mounted = true;
+
+    const loadAvailableDates = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('vw_c_datas')
+          .select('data,qnt_equip');
+
+        if (error) throw error;
+
+        const normalizedDates = [...new Set(
+          (data || [])
+            .map((row) => brToIsoDate(row.data))
+            .filter(Boolean)
+        )].sort((a, b) => a.localeCompare(b));
+
+        if (!mounted) return;
+
+        setAvailableDates(normalizedDates);
+
+        if (normalizedDates.length) {
+          setSelectedDate((prev) => {
+            if (normalizedDates.includes(prev)) return prev;
+            return normalizedDates[normalizedDates.length - 1];
+          });
+        }
+      } catch (err) {
+        console.error('[COA] Erro ao carregar vw_c_datas:', err);
+      }
+    };
+
+    loadAvailableDates();
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  const [dateIndex, setDateIndex] = useState(0);
-  const selectedDate = availableDates[dateIndex] || "";
-
-  // ===========================================================================
-  // MOTOR DE CÁLCULO EXTERNALIZADO (Lógica 1:1 com Python)
-  // ===========================================================================
-  const processedCards = useMemo(() => {
-    if (!selectedDate) return [];
-    const filtered = coaMockData.filter(i => i.DATA && i.DATA.startsWith(selectedDate));
-    return buildHomeCardsData(filtered);
-  }, [selectedDate]);
-
   return (
-    <div className="min-h-screen bg-[#06090F] text-slate-300 font-sans pb-10">
-      <COAHeader onMenuOpen={() => setSidebarOpen(true)} />
-      <COASidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} onNavigate={() => {}} />
+    <div className="coa-theme">
+      <HeaderCOACenter onMenuOpen={() => setSidebarOpen(true)} />
 
-      <main className="p-4 flex flex-col items-center">
-        <COADateSelector 
-          date={selectedDate}
-          onPrev={() => setDateIndex(i => Math.min(i + 1, availableDates.length - 1))}
-          onNext={() => setDateIndex(i => Math.max(i - 1, 0))}
-          disablePrev={dateIndex === availableDates.length - 1}
-          disableNext={dateIndex === 0}
-        />
+      <SidebarCOACenter
+        isOpen={isSidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-        <div className="w-full max-w-lg flex flex-col items-center gap-6 mt-2">
-          {processedCards.map((card, idx) => {
-            // Roteamento de Detalhes
-            const detalheLink = `/coacenter/detalhe?area=${card.areaName}&date=${selectedDate}`;
-            
-            // Renderização Condicional baseada na regra da CCT
-            if (card.isSpecialCCT) {
-              return (
-                <COAcctCard 
-                  key={`cct-${idx}`}
-                  areaName={card.areaName}
-                  stats={card.stats}
-                  to={detalheLink}
-                />
-              );
-            }
-
-            return (
-              <COAAreaCard 
-                key={`area-${idx}`}
-                areaName={card.areaName}
-                stats={card.stats}
-                to={detalheLink}
+      <main className="coa-container py-5 md:py-6">
+        <section className="coa-section coa-fade-in flex flex-col gap-5">
+          <div className="w-full flex justify-center">
+            <div className="w-full max-w-sm md:max-w-md">
+              <DateSelectorCOA
+                value={selectedDate}
+                onChange={setSelectedDate}
+                maxDate={todayIso}
+                availableDates={availableDates}
               />
-            );
-          })}
-        </div>
+            </div>
+          </div>
+
+          <CardResumo selectedDate={selectedDate} />
+          <CardOcioso selectedDate={selectedDate} />
+        </section>
       </main>
     </div>
   );

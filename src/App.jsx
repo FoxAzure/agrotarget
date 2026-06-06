@@ -16,11 +16,12 @@ import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
 
 // Importando Páginas do COA Center
 import COACenterHome from './pages/COACenter/COACenterHome';
-import Operacoes from './pages/COACenter/Operacoes';
-import Detalhe from './pages/COACenter/Detalhe';
-import MotorOcioso from './pages/COACenter/MotorOcioso';
-import COADataAudit from './pages/COACenter/COADataAudit';
-import Comboio from './pages/COACenter/Comboio';
+import OciosoDetail from './pages/COACenter/details/OciosoDetail';
+//import Operacoes from './pages/COACenter/Operacoes';
+//import Detalhe from './pages/COACenter/Detalhe';
+//import MotorOcioso from './pages/COACenter/MotorOcioso';
+//import COADataAudit from './pages/COACenter/COADataAudit';
+//import Comboio from './pages/COACenter/Comboio';
 
 // ================================= HELPERS (COMPONENTES) ================================= //
 
@@ -112,11 +113,8 @@ function App() {
         <Route path="/qualyflow/cuc" element={<CucDetail />} />
 
         <Route path="/coacenter" element={<COACenterHome />} />
-        <Route path="/coacenter/operacoes" element={<Operacoes />} />
-        <Route path="/coacenter/detalhe" element={<Detalhe />} />
-        <Route path='/coacenter/motorocioso' element={<MotorOcioso />} />
-        <Route path='/coacenter/audit' element={<COADataAudit />} />
-        <Route path='/coacenter/comboio' element={<Comboio />} />
+        <Route path="/coacenter/ocioso" element={<OciosoDetail />} />
+        
 
         {/* ROTA PADRÃO (CATCH-ALL) */}
         <Route path="*" element={<PaginaNaoEncontrada />} />
@@ -124,5 +122,12 @@ function App() {
     </>
   );
 }
+
+
+        //<Route path="/coacenter/operacoes" element={<Operacoes />} />
+        //<Route path="/coacenter/detalhe" element={<Detalhe />} />
+        //<Route path='/coacenter/motorocioso' element={<MotorOcioso />} />
+        //<Route path='/coacenter/audit' element={<COADataAudit />} />
+        //<Route path='/coacenter/comboio' element={<Comboio />} />
 
 export default App;
