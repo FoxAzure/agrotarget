@@ -1,12 +1,161 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 
+/* ==========================================================================
+   CONFIG VISUAL
+   ========================================================================== */
+
+const COLOR_SUCCESS = 'var(--coa-success)';
+const COLOR_WARNING = '#facc15';
+const COLOR_DANGER = '#ef4444';
+const COLOR_DANGER_STRONG = '#ff4d4f';
+const COLOR_DANGER_TEXT = '#ff6b6b';
+const COLOR_GRAY_LIGHT = '#d1d5db';
+const COLOR_PANEL_BG = 'rgba(255,255,255,0.02)';
+const COLOR_DIVIDER = 'var(--coa-divider)';
+const COLOR_TEXT = 'var(--coa-text)';
+const COLOR_TEXT_SOFT = 'var(--coa-text-soft)';
+const COLOR_TEXT_MUTED = 'var(--coa-text-muted)';
+
+const GROUP_THEME_CONFIG = {
+  produtivo: {
+    cardStyle: {
+      borderColor: 'rgba(61,220,151,0.24)',
+      background: 'rgba(61,220,151,0.05)',
+    },
+    detailStyle: {
+      borderColor: 'rgba(61,220,151,0.16)',
+      background: 'rgba(61,220,151,0.03)',
+    },
+    groupTextColor: 'var(--coa-success)',
+    totalColor: 'var(--coa-success)',
+    opTextColor: 'var(--coa-success)',
+    headerLabelColor: 'rgba(61,220,151,0.78)',
+    valueLabel: 'Total',
+  },
+
+  manutencao: {
+    cardStyle: {
+      borderColor: 'rgba(168,85,247,0.30)',
+      background: 'rgba(168,85,247,0.07)',
+    },
+    detailStyle: {
+      borderColor: 'rgba(168,85,247,0.18)',
+      background: 'rgba(168,85,247,0.05)',
+    },
+    groupTextColor: '#d8b4fe',
+    totalColor: '#c084fc',
+    opTextColor: '#e9d5ff',
+    headerLabelColor: 'rgba(216,180,254,0.85)',
+    valueLabel: 'Ocioso',
+  },
+
+  sem_apontamento: {
+    cardStyle: {
+      borderColor: 'rgba(239,68,68,0.36)',
+      background: 'rgba(239,68,68,0.10)',
+    },
+    detailStyle: {
+      borderColor: 'rgba(239,68,68,0.22)',
+      background: 'rgba(239,68,68,0.08)',
+    },
+    groupTextColor: COLOR_DANGER_STRONG,
+    totalColor: COLOR_DANGER_STRONG,
+    opTextColor: '#ff8b8b',
+    headerLabelColor: 'rgba(255,107,107,0.92)',
+    valueLabel: 'Ocioso',
+  },
+
+  indeterminado: {
+    cardStyle: {
+      borderColor: 'rgba(209,213,219,0.30)',
+      background: 'rgba(209,213,219,0.07)',
+    },
+    detailStyle: {
+      borderColor: 'rgba(209,213,219,0.20)',
+      background: 'rgba(209,213,219,0.05)',
+    },
+    groupTextColor: COLOR_DANGER_STRONG,
+    totalColor: COLOR_DANGER_STRONG,
+    opTextColor: COLOR_DANGER_TEXT,
+    headerLabelColor: 'rgba(255,107,107,0.92)',
+    valueLabel: 'Ocioso',
+  },
+
+  default: {
+    cardStyle: {
+      borderColor: 'rgba(239,68,68,0.26)',
+      background: 'rgba(239,68,68,0.06)',
+    },
+    detailStyle: {
+      borderColor: 'rgba(239,68,68,0.16)',
+      background: 'rgba(239,68,68,0.05)',
+    },
+    groupTextColor: COLOR_DANGER_STRONG,
+    totalColor: COLOR_DANGER_STRONG,
+    opTextColor: '#ff9a9a',
+    headerLabelColor: 'rgba(255,107,107,0.88)',
+    valueLabel: 'Ocioso',
+  },
+};
+
+const ANALYSIS_TEXT_THEME = {
+  good: {
+    color: '#7ae3b5',
+  },
+  bad: {
+    color: '#ff7d7d',
+  },
+  warning: {
+    color: '#f6d66d',
+  },
+};
+
+/* ==========================================================================
+   REGRAS DE EXIBIÇÃO DOS OPERADORES
+   - fácil de incluir novas regras depois
+   ========================================================================== */
+
+const normalizeOperatorRuleKey = (value) =>
+  String(value || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .toUpperCase();
+
+const OPERATOR_DISPLAY_RULES = [
+  {
+    test: (rawValue) => normalizeOperatorRuleKey(rawValue) === '9999 - - -',
+    label: 'NÃO DISPONÍVEL',
+    highlight: true,
+  },
+  {
+    test: (rawValue) => normalizeOperatorRuleKey(rawValue) === '9999 -',
+    label: 'NÃO DISPONÍVEL',
+    highlight: true,
+  },
+  {
+    test: (rawValue) =>
+      normalizeOperatorRuleKey(rawValue) === '99999 - EQUIPE MONITORAMENTO',
+    label: 'EQUIPE MONITORAMENTO',
+    highlight: true,
+  },
+];
+
+/* ==========================================================================
+   QUERIES / COLUNAS
+   ========================================================================== */
+
 const OPERACAO_VIEW_COLUMNS = [
   'data',
   'semana',
   'mes',
   'ano',
   'cod_equip',
+  'cod_op',
+  'desc_area',
+  'desc_grupo',
   'desc_grupo_op',
   'desc_operacao',
   'hrs_operacionais_seg',
@@ -17,6 +166,7 @@ const OPERACAO_VIEW_COLUMNS = [
 const EQUIPE_VIEW_COLUMNS = [
   'data',
   'cod_equip',
+  'cod_op',
   'desc_equip',
   'desc_area',
   'desc_grupo',
@@ -25,6 +175,10 @@ const EQUIPE_VIEW_COLUMNS = [
   'hrs_motor_ligado_seg',
   'hrs_ocioso_seg',
 ].join(',');
+
+/* ==========================================================================
+   HELPERS
+   ========================================================================== */
 
 const isoToBr = (isoDate) => {
   if (!isoDate || typeof isoDate !== 'string') return '';
@@ -40,21 +194,17 @@ const toNumber = (value) => {
   return Number.isFinite(n) ? n : 0;
 };
 
-const formatHours = (value) => `${Number(value || 0).toFixed(1)}h`;
 const formatPercent = (value) => `${Number(value || 0).toFixed(1)}%`;
 
-const formatHoursClock = (valueInHours) => {
-  const totalSeconds = Math.round(Number(valueInHours || 0) * 3600);
-  const safe = Math.max(0, totalSeconds);
-
-  const hh = Math.floor(safe / 3600);
-  const mm = Math.floor((safe % 3600) / 60);
-
+const formatHHMM = (valueInHours) => {
+  const totalMinutes = Math.max(0, Math.round(Number(valueInHours || 0) * 60));
+  const hh = Math.floor(totalMinutes / 60);
+  const mm = totalMinutes % 60;
   return `${String(hh).padStart(2, '0')}:${String(mm).padStart(2, '0')}`;
 };
 
 const getMetaColor = (value, maxOk) => {
-  return Number(value || 0) <= maxOk ? 'var(--coa-success)' : 'var(--coa-danger)';
+  return Number(value || 0) <= maxOk ? COLOR_SUCCESS : COLOR_DANGER_STRONG;
 };
 
 const normalizeKey = (value) =>
@@ -72,28 +222,116 @@ const isIndeterminadoGroup = (groupName) => normalizeKey(groupName) === 'INDETER
 const isSemApont = (row) => {
   const grupo = normalizeKey(row.desc_grupo_op);
   const operacao = normalizeKey(row.desc_operacao);
-
   return grupo === 'SEM APONTAMENTO' || operacao === 'SEM APONTAMENTO';
 };
 
 const isIndeterminado = (row) => {
   const grupo = normalizeKey(row.desc_grupo_op);
   const operacao = normalizeKey(row.desc_operacao);
-
   return grupo === 'INDETERMINADO' || operacao === 'INDETERMINADO';
 };
+
+const normalizeEquipeDbRow = (row = {}) => ({
+  ...row,
+  cod_op: String(row.cod_op || '').trim(),
+  hrs_operacionais_seg: toNumber(row.hrs_operacionais_seg),
+  hrs_disp_seg: toNumber(row.hrs_disp_seg),
+  hrs_motor_ligado_seg: toNumber(row.hrs_motor_ligado_seg),
+  hrs_ocioso_seg: toNumber(row.hrs_ocioso_seg),
+});
+
+const normalizeOperacaoDbRow = (row = {}) => ({
+  ...row,
+  cod_op: String(row.cod_op || '').trim(),
+  hrs_operacionais_seg: toNumber(row.hrs_operacionais_seg),
+  hrs_motor_ligado_seg: toNumber(row.hrs_motor_ligado_seg),
+  hrs_ocioso_seg: toNumber(row.hrs_ocioso_seg),
+});
+
+const getOperatorDisplayMeta = (rawOperatorValue) => {
+  const raw = String(rawOperatorValue || '').trim();
+
+  for (const rule of OPERATOR_DISPLAY_RULES) {
+    if (rule.test(raw)) {
+      return {
+        raw,
+        label: rule.label,
+        highlight: !!rule.highlight,
+      };
+    }
+  }
+
+  const parts = raw.split(' - ');
+  const namePart =
+    parts.length >= 2
+      ? parts.slice(1).join(' - ').trim()
+      : raw;
+
+  if (!namePart) {
+    return {
+      raw,
+      label: 'NÃO DISPONÍVEL',
+      highlight: true,
+    };
+  }
+
+  const words = namePart.split(/\s+/).filter(Boolean);
+
+  if (words.length === 0) {
+    return {
+      raw,
+      label: 'NÃO DISPONÍVEL',
+      highlight: true,
+    };
+  }
+
+  if (words.length === 1) {
+    return {
+      raw,
+      label: words[0],
+      highlight: false,
+    };
+  }
+
+  if (words.length === 2) {
+    return {
+      raw,
+      label: `${words[0]} ${words[1]}`,
+      highlight: false,
+    };
+  }
+
+  const secondWord = words[1] || '';
+  if (secondWord.length < 4 && words[2]) {
+    return {
+      raw,
+      label: `${words[0]} ${words[1]} ${words[2]}`,
+      highlight: false,
+    };
+  }
+
+  return {
+    raw,
+    label: `${words[0]} ${words[1]}`,
+    highlight: false,
+  };
+};
+
+/* ==========================================================================
+   COMPONENTES AUXILIARES
+   ========================================================================== */
 
 const SummaryItem = ({ label, value, color }) => (
   <div
     className="flex flex-col justify-end border-b pb-2 min-w-[120px]"
-    style={{ borderColor: 'var(--coa-divider)' }}
+    style={{ borderColor: COLOR_DIVIDER }}
   >
     <span className="text-[8px] font-black text-[var(--coa-text-muted)] uppercase tracking-widest mb-1">
       {label}
     </span>
     <span
       className="text-[15px] font-black tracking-tight leading-none"
-      style={{ color: color || 'var(--coa-text)' }}
+      style={{ color: color || COLOR_TEXT }}
     >
       {value}
     </span>
@@ -113,7 +351,7 @@ const AnimatedProgressBar = ({ value, color }) => {
       className="w-full h-2 rounded-full overflow-hidden border"
       style={{
         background: 'rgba(255,255,255,0.03)',
-        borderColor: 'var(--coa-divider)',
+        borderColor: COLOR_DIVIDER,
       }}
     >
       <div
@@ -128,94 +366,122 @@ const AnimatedProgressBar = ({ value, color }) => {
   );
 };
 
+const OperatorTable = ({
+  rows = [],
+  selectedOperators = [],
+  onToggleOperator,
+  onClear,
+}) => {
+  const selectedSet = new Set(selectedOperators);
+
+  return (
+    <div className="coa-panel p-0 overflow-hidden">
+      <div
+        className="grid grid-cols-[1fr_68px_68px_58px] gap-2 px-4 py-3 border-b"
+        style={{ borderColor: COLOR_DIVIDER }}
+      >
+        <span className="coa-text-micro">Operador</span>
+        <span className="coa-text-micro text-right">Total</span>
+        <span className="coa-text-micro text-right">Ocioso</span>
+        <span className="coa-text-micro text-right">%</span>
+      </div>
+
+      <div className="max-h-[220px] overflow-y-auto">
+        {rows.length === 0 ? (
+          <div className="px-4 py-6 text-center text-sm font-bold text-[var(--coa-text-muted)]">
+            Nenhum operador encontrado para este equipamento.
+          </div>
+        ) : (
+          rows.map((row) => {
+            const active = selectedSet.has(row.raw_cod_op);
+
+            return (
+              <button
+                key={row.raw_cod_op}
+                type="button"
+                onClick={() => onToggleOperator(row.raw_cod_op)}
+                className="w-full text-left grid grid-cols-[1fr_68px_68px_58px] gap-2 px-4 py-3 border-b transition-all"
+                style={{
+                  borderColor: COLOR_DIVIDER,
+                  background: active ? 'rgba(61,220,151,0.10)' : 'transparent',
+                }}
+              >
+                <span
+                  className="text-[12px] font-black truncate pr-2"
+                  style={{
+                    color: row.highlight
+                      ? COLOR_DANGER_STRONG
+                      : active
+                      ? COLOR_TEXT
+                      : COLOR_TEXT_SOFT,
+                  }}
+                  title={row.label}
+                >
+                  {row.label}
+                </span>
+
+                <span className="text-[11px] font-black text-right whitespace-nowrap text-[var(--coa-text-soft)]">
+                  {formatHHMM(row.hrs_operacionais)}
+                </span>
+
+                <span className="text-[11px] font-black text-right whitespace-nowrap text-[var(--coa-text-soft)]">
+                  {formatHHMM(row.hrs_ocioso)}
+                </span>
+
+                <span
+                  className="text-[11px] font-black text-right whitespace-nowrap"
+                  style={{ color: getMetaColor(row.perc_ocioso, 5) }}
+                >
+                  {formatPercent(row.perc_ocioso)}
+                </span>
+              </button>
+            );
+          })
+        )}
+      </div>
+
+      {rows.length > 0 && (
+        <div
+          className="flex items-center justify-between gap-3 px-4 py-2 border-t"
+          style={{ borderColor: COLOR_DIVIDER, background: 'rgba(255,255,255,0.015)' }}
+        >
+          <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--coa-text-muted)]">
+            Clique para filtrar
+          </span>
+
+          <button
+            type="button"
+            onClick={onClear}
+            className="text-[11px] font-black transition-colors"
+            style={{ color: COLOR_SUCCESS }}
+          >
+            Limpar seleção
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const AnalysisListItem = ({ text, type = 'good' }) => {
+  const theme = ANALYSIS_TEXT_THEME[type] || ANALYSIS_TEXT_THEME.good;
+
+  return (
+    <div
+      className="text-sm font-bold leading-relaxed"
+      style={{ color: theme.color }}
+    >
+      • {text}
+    </div>
+  );
+};
+
 const getGroupTheme = (groupName) => {
-  if (isProdutivoGroup(groupName)) {
-    return {
-      cardStyle: {
-        borderColor: 'rgba(61,220,151,0.24)',
-        background: 'rgba(61,220,151,0.05)',
-      },
-      detailStyle: {
-        borderColor: 'rgba(61,220,151,0.16)',
-        background: 'rgba(61,220,151,0.03)',
-      },
-      groupTextColor: 'var(--coa-success)',
-      totalColor: 'var(--coa-success)',
-      opTextColor: 'var(--coa-success)',
-      headerLabelColor: 'rgba(61,220,151,0.78)',
-      valueLabel: 'Total',
-    };
-  }
-
-  if (isMaintenanceGroup(groupName)) {
-    return {
-      cardStyle: {
-        borderColor: 'rgba(168,85,247,0.30)',
-        background: 'rgba(168,85,247,0.07)',
-      },
-      detailStyle: {
-        borderColor: 'rgba(168,85,247,0.18)',
-        background: 'rgba(168,85,247,0.05)',
-      },
-      groupTextColor: '#d8b4fe',
-      totalColor: '#c084fc',
-      opTextColor: '#e9d5ff',
-      headerLabelColor: 'rgba(216,180,254,0.85)',
-      valueLabel: 'Ocioso',
-    };
-  }
-
-  if (isSemApontGroup(groupName)) {
-    return {
-      cardStyle: {
-        borderColor: 'rgba(250,204,21,0.32)',
-        background: 'rgba(250,204,21,0.10)',
-      },
-      detailStyle: {
-        borderColor: 'rgba(250,204,21,0.22)',
-        background: 'rgba(255,244,184,0.14)',
-      },
-      groupTextColor: '#facc15',
-      totalColor: '#f59e8b',
-      opTextColor: '#fca5a5',
-      headerLabelColor: 'rgba(250,204,21,0.90)',
-      valueLabel: 'Ocioso',
-    };
-  }
-
-  if (isIndeterminadoGroup(groupName)) {
-    return {
-      cardStyle: {
-        borderColor: 'rgba(250,204,21,0.26)',
-        background: 'rgba(250,204,21,0.08)',
-      },
-      detailStyle: {
-        borderColor: 'rgba(250,204,21,0.16)',
-        background: 'rgba(255,248,210,0.10)',
-      },
-      groupTextColor: '#fde68a',
-      totalColor: '#fcd34d',
-      opTextColor: 'var(--coa-text)',
-      headerLabelColor: 'rgba(253,230,138,0.90)',
-      valueLabel: 'Ocioso',
-    };
-  }
-
-  return {
-    cardStyle: {
-      borderColor: 'rgba(248,113,113,0.18)',
-      background: 'rgba(248,113,113,0.035)',
-    },
-    detailStyle: {
-      borderColor: 'var(--coa-divider)',
-      background: 'rgba(255,255,255,0.02)',
-    },
-    groupTextColor: 'var(--coa-text)',
-    totalColor: '#fca5a5',
-    opTextColor: '#fca5a5',
-    headerLabelColor: 'var(--coa-text-muted)',
-    valueLabel: 'Ocioso',
-  };
+  if (isProdutivoGroup(groupName)) return GROUP_THEME_CONFIG.produtivo;
+  if (isMaintenanceGroup(groupName)) return GROUP_THEME_CONFIG.manutencao;
+  if (isSemApontGroup(groupName)) return GROUP_THEME_CONFIG.sem_apontamento;
+  if (isIndeterminadoGroup(groupName)) return GROUP_THEME_CONFIG.indeterminado;
+  return GROUP_THEME_CONFIG.default;
 };
 
 const GroupAccordion = ({ group, expanded, onToggle }) => {
@@ -247,7 +513,7 @@ const GroupAccordion = ({ group, expanded, onToggle }) => {
             className="text-[11px] font-black text-right whitespace-nowrap"
             style={{ color: theme.totalColor }}
           >
-            {formatHours(groupTotal)}
+            {formatHHMM(groupTotal)}
           </span>
 
           <span className="text-[12px] font-black text-right text-[var(--coa-text-muted)]">
@@ -260,7 +526,7 @@ const GroupAccordion = ({ group, expanded, onToggle }) => {
         <div className="border-t px-4 py-3" style={theme.detailStyle}>
           <div
             className="grid grid-cols-[minmax(0,1fr)_96px] gap-3 pb-2 border-b"
-            style={{ borderColor: 'var(--coa-divider)' }}
+            style={{ borderColor: COLOR_DIVIDER }}
           >
             <span className="coa-text-micro" style={{ color: theme.headerLabelColor }}>
               Operação
@@ -294,7 +560,7 @@ const GroupAccordion = ({ group, expanded, onToggle }) => {
                     className="text-[12px] font-black text-right whitespace-nowrap"
                     style={{ color: theme.totalColor }}
                   >
-                    {formatHours(opValue)}
+                    {formatHHMM(opValue)}
                   </span>
                 </div>
               );
@@ -305,6 +571,10 @@ const GroupAccordion = ({ group, expanded, onToggle }) => {
     </div>
   );
 };
+
+/* ==========================================================================
+   AGREGAÇÕES
+   ========================================================================== */
 
 const aggregateEquipeRows = (rows = []) => {
   const total = rows.reduce(
@@ -330,6 +600,43 @@ const aggregateEquipeRows = (rows = []) => {
         ? (total.hrs_ocioso_seg / total.hrs_operacionais_seg) * 100
         : 0,
   };
+};
+
+const buildOperatorRows = (rows = []) => {
+  const map = new Map();
+
+  rows.forEach((row) => {
+    const rawKey = String(row.cod_op || '').trim() || 'SEM OPERADOR';
+    const displayMeta = getOperatorDisplayMeta(rawKey);
+
+    if (!map.has(rawKey)) {
+      map.set(rawKey, {
+        raw_cod_op: rawKey,
+        label: displayMeta.label,
+        highlight: displayMeta.highlight,
+        hrs_operacionais_seg: 0,
+        hrs_ocioso_seg: 0,
+      });
+    }
+
+    const item = map.get(rawKey);
+    item.hrs_operacionais_seg += toNumber(row.hrs_operacionais_seg);
+    item.hrs_ocioso_seg += toNumber(row.hrs_ocioso_seg);
+  });
+
+  return [...map.values()]
+    .map((row) => ({
+      raw_cod_op: row.raw_cod_op,
+      label: row.label,
+      highlight: row.highlight,
+      hrs_operacionais: row.hrs_operacionais_seg / 3600,
+      hrs_ocioso: row.hrs_ocioso_seg / 3600,
+      perc_ocioso:
+        row.hrs_operacionais_seg > 0
+          ? (row.hrs_ocioso_seg / row.hrs_operacionais_seg) * 100
+          : 0,
+    }))
+    .sort((a, b) => b.hrs_ocioso - a.hrs_ocioso);
 };
 
 const buildOperationGroups = (rows = []) => {
@@ -405,11 +712,16 @@ const buildOperationGroups = (rows = []) => {
     });
 };
 
+/* ==========================================================================
+   COMPONENTE PRINCIPAL
+   ========================================================================== */
+
 const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
   const [equipeRows, setEquipeRows] = useState([]);
   const [operacaoRows, setOperacaoRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [expandedGroups, setExpandedGroups] = useState([]);
+  const [selectedOperators, setSelectedOperators] = useState([]);
 
   useEffect(() => {
     let mounted = true;
@@ -420,6 +732,7 @@ const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
       try {
         setLoading(true);
         setExpandedGroups([]);
+        setSelectedOperators([]);
 
         const codigoEquip = String(item.cod_equip || '').trim();
         const selectedBrDate = isoToBr(selectedDate);
@@ -441,8 +754,9 @@ const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
         if (operacaoRes.error) throw operacaoRes.error;
 
         if (!mounted) return;
-        setEquipeRows(equipeRes.data || []);
-        setOperacaoRows(operacaoRes.data || []);
+
+        setEquipeRows((equipeRes.data || []).map(normalizeEquipeDbRow));
+        setOperacaoRows((operacaoRes.data || []).map(normalizeOperacaoDbRow));
       } catch (err) {
         console.error('[COA][Modal] Erro ao carregar detalhe do equipamento:', err);
         if (!mounted) return;
@@ -460,41 +774,66 @@ const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
     };
   }, [item, selectedDate]);
 
-  const equipeSummary = useMemo(() => aggregateEquipeRows(equipeRows), [equipeRows]);
-  const groups = useMemo(() => buildOperationGroups(operacaoRows), [operacaoRows]);
+  const operatorRows = useMemo(() => buildOperatorRows(equipeRows), [equipeRows]);
+
+  useEffect(() => {
+    const validOps = new Set(operatorRows.map((row) => row.raw_cod_op));
+    setSelectedOperators((prev) => prev.filter((op) => validOps.has(op)));
+  }, [operatorRows]);
+
+  const useOperatorFilter = useMemo(() => {
+    return selectedOperators.length > 0 && selectedOperators.length < operatorRows.length;
+  }, [selectedOperators, operatorRows]);
+
+  const filteredEquipeRows = useMemo(() => {
+    if (!useOperatorFilter) return equipeRows;
+    return equipeRows.filter((row) =>
+      selectedOperators.includes(String(row.cod_op || '').trim() || 'SEM OPERADOR')
+    );
+  }, [equipeRows, selectedOperators, useOperatorFilter]);
+
+  const filteredOperacaoRows = useMemo(() => {
+    if (!useOperatorFilter) return operacaoRows;
+    return operacaoRows.filter((row) =>
+      selectedOperators.includes(String(row.cod_op || '').trim() || 'SEM OPERADOR')
+    );
+  }, [operacaoRows, selectedOperators, useOperatorFilter]);
+
+  const equipeSummary = useMemo(() => aggregateEquipeRows(filteredEquipeRows), [filteredEquipeRows]);
+  const groups = useMemo(() => buildOperationGroups(filteredOperacaoRows), [filteredOperacaoRows]);
+
+  const operatorFilterLabel = useMemo(() => {
+    if (!operatorRows.length) return 'Todos Operadores';
+
+    if (!selectedOperators.length || selectedOperators.length === operatorRows.length) {
+      return 'Todos Operadores';
+    }
+
+    if (selectedOperators.length === 1) {
+      const found = operatorRows.find((row) => row.raw_cod_op === selectedOperators[0]);
+      return found?.label || 'Operador Selecionado';
+    }
+
+    return 'Mais de um selecionado';
+  }, [selectedOperators, operatorRows]);
 
   const summary = useMemo(() => {
-    const hrsOperacionais =
-      toNumber(item?.hrs_operacionais) > 0
-        ? toNumber(item.hrs_operacionais)
-        : equipeSummary.hrs_operacionais;
-
-    const hrsMotorLigado =
-      toNumber(item?.hrs_motor_ligado) > 0
-        ? toNumber(item.hrs_motor_ligado)
-        : equipeSummary.hrs_motor_ligado;
-
-    const hrsOcioso =
-      toNumber(item?.hrs_ocioso) > 0
-        ? toNumber(item.hrs_ocioso)
-        : equipeSummary.hrs_ocioso;
-
-    const percOcioso =
-      toNumber(item?.perc_ocioso) > 0
-        ? toNumber(item.perc_ocioso)
-        : equipeSummary.perc_ocioso;
-
     let hrsProdutivoSeg = 0;
     let hrsSapontSeg = 0;
     let hrsIndeterSeg = 0;
 
-    operacaoRows.forEach((row) => {
+    filteredOperacaoRows.forEach((row) => {
       const hrs = toNumber(row.hrs_operacionais_seg);
 
       if (isProdutivoGroup(row.desc_grupo_op)) hrsProdutivoSeg += hrs;
       if (isSemApont(row)) hrsSapontSeg += hrs;
       if (isIndeterminado(row)) hrsIndeterSeg += hrs;
     });
+
+    const hrsOperacionais = equipeSummary.hrs_operacionais;
+    const hrsMotorLigado = equipeSummary.hrs_motor_ligado;
+    const hrsOcioso = equipeSummary.hrs_ocioso;
+    const percOcioso = equipeSummary.perc_ocioso;
 
     const hrsProdutivo = hrsProdutivoSeg / 3600;
     const hrsSapont = hrsSapontSeg / 3600;
@@ -511,7 +850,7 @@ const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
       perc_s_apont: hrsOperacionais > 0 ? (hrsSapont / hrsOperacionais) * 100 : 0,
       perc_indeter: hrsOperacionais > 0 ? (hrsIndeter / hrsOperacionais) * 100 : 0,
     };
-  }, [item, equipeSummary, operacaoRows]);
+  }, [equipeSummary, filteredOperacaoRows]);
 
   const operationWithMaxOcioso = useMemo(() => {
     return (
@@ -528,6 +867,39 @@ const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
     );
   }, [groups]);
 
+  const analysisItems = useMemo(() => {
+    const items = [];
+
+    if (summary.perc_s_apont < 2) {
+      items.push({ type: 'good', text: 'Sem Apontamento Ok.' });
+    } else if (summary.hrs_s_apont > 0) {
+      items.push({
+        type: 'bad',
+        text: `Total de ${formatHHMM(summary.hrs_s_apont)} sem apontamento.`,
+      });
+    }
+
+    if (summary.perc_indeter < 10) {
+      items.push({ type: 'good', text: 'Indeterminado Ok.' });
+    } else if (summary.hrs_indeter > 0) {
+      items.push({
+        type: 'warning',
+        text: `Total de ${formatHHMM(summary.hrs_indeter)} indeterminadas, aguardando novos dados para recálculo do equipamento.`,
+      });
+    }
+
+    if (summary.perc_ocioso <= 5) {
+      items.push({ type: 'good', text: 'Motor Ocioso Ok.' });
+    } else if (operationWithMaxOcioso?.hrs_ocioso > 0) {
+      items.push({
+        type: 'bad',
+        text: `Operação ${operationWithMaxOcioso.desc_operacao} foi a maior com ${formatHHMM(operationWithMaxOcioso.hrs_ocioso)} de motor ocioso.`,
+      });
+    }
+
+    return items;
+  }, [summary, operationWithMaxOcioso]);
+
   const handleToggleGroup = (groupName) => {
     setExpandedGroups((prev) => {
       const exists = prev.includes(groupName);
@@ -536,32 +908,26 @@ const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
     });
   };
 
+  const handleToggleOperator = (operatorRawCode) => {
+    setExpandedGroups([]);
+    setSelectedOperators((prev) => {
+      const exists = prev.includes(operatorRawCode);
+      if (exists) return prev.filter((item) => item !== operatorRawCode);
+      return [...prev, operatorRawCode];
+    });
+  };
+
+  const handleClearOperators = () => {
+    setExpandedGroups([]);
+    setSelectedOperators([]);
+  };
+
   if (!item) return null;
 
-  const equipeMeta = equipeRows[0] || {};
+  const equipeMeta = filteredEquipeRows[0] || equipeRows[0] || {};
   const headerArea = item?.desc_area || equipeMeta?.desc_area || 'SEM ÁREA';
   const headerFrente = item?.desc_grupo || equipeMeta?.desc_grupo || 'SEM FRENTE';
   const headerDate = selectedDate ? isoToBr(selectedDate) : '--/--/----';
-
-  const insightMessages = [];
-
-  if (summary.perc_ocioso > 5 && operationWithMaxOcioso?.hrs_ocioso > 0) {
-    insightMessages.push(
-      `Operação ${operationWithMaxOcioso.desc_operacao} foi a maior com ${formatHoursClock(operationWithMaxOcioso.hrs_ocioso)} de motor ocioso.`
-    );
-  }
-
-  if (summary.perc_s_apont > 2 && summary.hrs_s_apont > 0) {
-    insightMessages.push(
-      `Equipamento com ${formatHoursClock(summary.hrs_s_apont)} sem apontamento.`
-    );
-  }
-
-  if (summary.perc_indeter > 10 && summary.hrs_indeter > 0) {
-    insightMessages.push(
-      `Equipamento com ${formatHoursClock(summary.hrs_indeter)} indeterminadas.`
-    );
-  }
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
@@ -569,7 +935,7 @@ const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
         <button
           onClick={onClose}
           className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.04)] border text-[var(--coa-text-soft)] hover:text-[var(--coa-text)] transition-all z-20"
-          style={{ borderColor: 'var(--coa-divider)' }}
+          style={{ borderColor: COLOR_DIVIDER }}
         >
           ✕
         </button>
@@ -606,31 +972,53 @@ const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
               </div>
             ) : (
               <>
+                <div className="flex flex-col gap-3">
+                  <span className="coa-text-micro">Operadores</span>
+
+                  <OperatorTable
+                    rows={operatorRows}
+                    selectedOperators={selectedOperators}
+                    onToggleOperator={handleToggleOperator}
+                    onClear={handleClearOperators}
+                  />
+
+                  <div
+                    className="rounded-[14px] border px-4 py-3 text-sm font-black"
+                    style={{
+                      borderColor: COLOR_DIVIDER,
+                      background: COLOR_PANEL_BG,
+                      color: selectedOperators.length ? COLOR_TEXT : COLOR_TEXT_SOFT,
+                    }}
+                  >
+                    {operatorFilterLabel}
+                  </div>
+                </div>
+
                 <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
-                  <SummaryItem label="Total" value={formatHours(summary.hrs_operacionais)} />
+                  <SummaryItem label="Total" value={formatHHMM(summary.hrs_operacionais)} />
                   <SummaryItem
                     label="Produtivo"
-                    value={formatHours(summary.hrs_produtivo)}
-                    color="var(--coa-success)"
+                    value={formatHHMM(summary.hrs_produtivo)}
+                    color={COLOR_SUCCESS}
                   />
                   <SummaryItem
                     label="Motor Ligado"
-                    value={formatHours(summary.hrs_motor_ligado)}
+                    value={formatHHMM(summary.hrs_motor_ligado)}
                   />
                   <SummaryItem
                     label="Ocioso"
-                    value={formatHours(summary.hrs_ocioso)}
+                    value={formatHHMM(summary.hrs_ocioso)}
                     color={getMetaColor(summary.perc_ocioso, 5)}
                   />
                   <SummaryItem
                     label="Sem Apont."
-                    value={formatHours(summary.hrs_s_apont)}
+                    value={formatHHMM(summary.hrs_s_apont)}
                     color={getMetaColor(summary.perc_s_apont, 2)}
                   />
                   <SummaryItem
                     label="Indeterm."
-                    value={formatHours(summary.hrs_indeter)}
-                    color={getMetaColor(summary.perc_indeter, 10)}
+                    value={formatHHMM(summary.hrs_indeter)}
+                    color={summary.perc_indeter < 10 ? COLOR_SUCCESS : COLOR_WARNING}
                   />
                 </div>
 
@@ -678,14 +1066,14 @@ const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
                       </span>
                       <span
                         className="text-[12px] font-black"
-                        style={{ color: getMetaColor(summary.perc_indeter, 10) }}
+                        style={{ color: summary.perc_indeter < 10 ? COLOR_SUCCESS : COLOR_WARNING }}
                       >
                         {formatPercent(summary.perc_indeter)}
                       </span>
                     </div>
                     <AnimatedProgressBar
                       value={summary.perc_indeter}
-                      color={getMetaColor(summary.perc_indeter, 10)}
+                      color={summary.perc_indeter < 10 ? COLOR_SUCCESS : COLOR_WARNING}
                     />
                   </div>
                 </div>
@@ -711,18 +1099,22 @@ const OciosoDetailDiarioModal = ({ item, selectedDate, onClose }) => {
                   )}
                 </div>
 
-                <div className="coa-panel p-4 flex flex-col gap-3">
-                  <span className="coa-text-micro">Análise do Equipamento</span>
+                <div className="flex flex-col gap-2 pt-1">
+                  <span className="text-[11px] font-black uppercase tracking-[0.14em] text-[var(--coa-text-muted)]">
+                    Análise do Equipamento
+                  </span>
 
-                  {insightMessages.length === 0 ? (
+                  {analysisItems.length === 0 ? (
                     <div className="text-sm font-bold text-[var(--coa-text-soft)]">
-                      Equipamento dentro dos parâmetros esperados para os indicadores monitorados.
+                      Equipamento sem dados suficientes para análise.
                     </div>
                   ) : (
-                    insightMessages.map((message, idx) => (
-                      <div key={idx} className="text-sm font-bold text-[var(--coa-text)]">
-                        • {message}
-                      </div>
+                    analysisItems.map((itemAnalysis, idx) => (
+                      <AnalysisListItem
+                        key={`${itemAnalysis.type}-${idx}`}
+                        text={itemAnalysis.text}
+                        type={itemAnalysis.type}
+                      />
                     ))
                   )}
                 </div>

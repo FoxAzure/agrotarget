@@ -80,7 +80,7 @@ const OciosoDetail = () => {
     <button
       type="button"
       onClick={() => setActiveTab(id)}
-      className={`py-3 px-5 text-[11px] font-black uppercase tracking-widest transition-all border-b-[3px] flex-1 sm:flex-none text-center ${
+      className={`w-full min-w-0 py-3 px-2 md:px-5 text-[10px] md:text-[11px] font-black uppercase tracking-[0.08em] md:tracking-widest transition-all border-b-[3px] text-center whitespace-nowrap ${
         activeTab === id
           ? 'text-[var(--coa-accent)] border-[var(--coa-accent)] bg-[rgba(255,255,255,0.02)]'
           : 'text-[var(--coa-text-soft)] border-transparent hover:text-[var(--coa-text)]'
@@ -106,7 +106,7 @@ const OciosoDetail = () => {
         </div>
 
         <div
-          className="flex flex-wrap w-full border-b"
+          className="grid grid-cols-4 w-full border-b"
           style={{ borderColor: 'var(--coa-divider)' }}
         >
           <TabButton id="diario" label="Diário" />
@@ -133,7 +133,6 @@ const OciosoDetail = () => {
             availableDates={availableDates}
           />
         )}
-
 
         {activeTab === 'semanal' && (
           <OciosoDetailSemanal
