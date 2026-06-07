@@ -136,6 +136,11 @@ const OPERATOR_DISPLAY_RULES = [
     highlight: true,
   },
   {
+    test: (rawValue) => normalizeOperatorRuleKey(rawValue) === '-',
+    label: 'NÃO DISPONÍVEL',
+    highlight: true,
+  },
+  {
     test: (rawValue) =>
       normalizeOperatorRuleKey(rawValue) === '99999 - EQUIPE MONITORAMENTO',
     label: 'EQUIPE MONITORAMENTO',
