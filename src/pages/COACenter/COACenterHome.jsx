@@ -1,12 +1,15 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import './Style.css';
 
+import { supabase } from '../../lib/supabaseClient';
+
 import HeaderCOACenter from '../../components/COACenter/HeaderCOACenter';
 import SidebarCOACenter from '../../components/COACenter/SidebarCOACenter';
 import DateSelectorCOA from '../../components/COACenter/DateSelectorCOA';
 import CardResumo from '../../components/COACenter/CardResumo';
 import CardOcioso from '../../components/COACenter/CardOcioso';
-import { supabase } from '../../lib/supabaseClient';
+
+
 
 const toIsoDate = (date = new Date()) => {
   const year = date.getFullYear();

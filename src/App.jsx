@@ -16,6 +16,7 @@ import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
 
 // Importando Páginas do COA Center
 import COACenterHome from './pages/COACenter/COACenterHome';
+import ResumoDetail from './pages/COACenter/details/ResumoDetail';
 import OciosoDetail from './pages/COACenter/details/OciosoDetail';
 //import Operacoes from './pages/COACenter/Operacoes';
 //import Detalhe from './pages/COACenter/Detalhe';
@@ -113,6 +114,7 @@ function App() {
         <Route path="/qualyflow/cuc" element={<CucDetail />} />
 
         <Route path="/coacenter" element={<COACenterHome />} />
+        <Route path="/coacenter/resumo" element={<ResumoDetail />} />
         <Route path="/coacenter/ocioso" element={<OciosoDetail />} />
         
 
