@@ -19,6 +19,7 @@ import COACenterHome from './pages/COACenter/COACenterHome';
 import ResumoDetail from './pages/COACenter/details/ResumoDetail';
 import OciosoDetail from './pages/COACenter/details/OciosoDetail';
 import DispoDetail from './pages/COACenter/details/DispoDetail';
+import COAOperacoes from './pages/COACenter/COAOperacoes';
 //import Operacoes from './pages/COACenter/Operacoes';
 //import Detalhe from './pages/COACenter/Detalhe';
 //import MotorOcioso from './pages/COACenter/MotorOcioso';
@@ -118,6 +119,7 @@ function App() {
         <Route path="/coacenter/resumo" element={<ResumoDetail />} />
         <Route path="/coacenter/ocioso" element={<OciosoDetail />} />
         <Route path="/coacenter/disponibilidade" element={<DispoDetail />} />
+        <Route path="/coacenter/operacoes" element={<COAOperacoes />} />
 
         {/* ROTA PADRÃO (CATCH-ALL) */}
         <Route path="*" element={<PaginaNaoEncontrada />} />
