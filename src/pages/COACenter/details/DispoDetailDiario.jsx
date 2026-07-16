@@ -481,6 +481,9 @@ const TrendTooltip = ({ active, payload }) => {
 
 const TrendDot = (props) => {
   const { cx, cy, payload } = props;
+
+  if (cx === undefined || cy === undefined || !payload) return null;
+
   const color = getDispoColor(payload.perc_disp);
 
   return (
@@ -492,6 +495,28 @@ const TrendDot = (props) => {
       stroke="var(--coa-bg-soft)"
       strokeWidth={2}
     />
+  );
+};
+
+const TrendLabel = (props) => {
+  const { x, y, value } = props;
+
+  if (x === undefined || y === undefined || value === undefined) return null;
+
+  const color = getDispoColor(value);
+
+  return (
+    <text
+      x={x}
+      y={y}
+      dy={-12}
+      fill={color}
+      fontSize={12}
+      fontWeight="900"
+      textAnchor="middle"
+    >
+      {formatPercent(value)}
+    </text>
   );
 };
 
@@ -784,12 +809,22 @@ const ScreenAnalysisPanel = ({
         <div className="flex flex-col gap-4">
           <span>{analysis.trendText}</span>
 
-          <div className="h-[260px] min-h-[260px] w-full min-w-0 overflow-hidden">
-            <ResponsiveContainer width="100%" height={260} minWidth={0}>
-                <LineChart
+          <div className="h-[280px] min-h-[280px] w-full min-w-0 overflow-visible">
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              minWidth={0}
+              minHeight={240}
+            >
+              <LineChart
                 data={analysis.trendChart}
-                margin={{ top: 26, right: 16, left: -18, bottom: 0 }}
-                >
+                margin={{
+                  top: 34,
+                  right: 24,
+                  left: 16,
+                  bottom: 8,
+                }}
+              >
                 <CartesianGrid
                   strokeDasharray="3 3"
                   stroke="var(--coa-border)"
@@ -803,6 +838,8 @@ const ScreenAnalysisPanel = ({
                   tickLine={false}
                   axisLine={false}
                   dy={10}
+                  interval={0}
+                  minTickGap={0}
                 />
 
                 <YAxis hide domain={[0, 100]} />
@@ -822,7 +859,13 @@ const ScreenAnalysisPanel = ({
                   stroke="var(--coa-text-soft)"
                   strokeWidth={2}
                   dot={<TrendDot />}
-                  activeDot={{ r: 7, stroke: 'var(--coa-text)', strokeWidth: 2 }}
+                  activeDot={{
+                    r: 7,
+                    stroke: 'var(--coa-text)',
+                    strokeWidth: 2,
+                  }}
+                  label={<TrendLabel />}
+                  isAnimationActive={false}
                 />
               </LineChart>
             </ResponsiveContainer>

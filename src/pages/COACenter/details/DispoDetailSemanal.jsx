@@ -21,9 +21,13 @@ const DISPO_META_AMARELA = 80;
 const INDETER_META_ALERTA = 10;
 const PAGE_SIZE = 1000;
 
+const DEFAULT_CATEGORIES = ['AGRÍCOLA', 'APOIO'];
+const CATEGORY_ORDER = ['AGRÍCOLA', 'APOIO', 'INDÚSTRIAL', 'OFICINA', 'EMPACOTAMENTO'];
+
 const AREA_COLUMNS = [
   'ano',
   'semana_iso',
+  'categoria',
   'desc_area',
   'qnt_equip',
   'hrs_operacionais_seg',
@@ -36,6 +40,7 @@ const AREA_COLUMNS = [
 const DIA_COLUMNS = [
   'ano',
   'semana_iso',
+  'categoria',
   'data',
   'qnt_equip',
   'hrs_operacionais_seg',
@@ -47,6 +52,7 @@ const DIA_COLUMNS = [
 const EQUIP_AREA_COLUMNS = [
   'ano',
   'semana_iso',
+  'categoria',
   'desc_area',
   'desc_grupo',
   'cod_equip',
@@ -94,11 +100,13 @@ const toIsoDate = (date = new Date()) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
+
   return `${year}-${month}-${day}`;
 };
 
 const brDateToSortValue = (brDate) => {
   if (!brDate || typeof brDate !== 'string' || !brDate.includes('/')) return 0;
+
   const [dd, mm, yyyy] = brDate.split('/');
   return Number(`${yyyy}${mm}${dd}`);
 };
@@ -215,6 +223,7 @@ const normalizeAreaRow = (row = {}) => {
 
   return {
     ...row,
+    categoria: row.categoria || 'NÃO MAPEADA',
     desc_area: row.desc_area || 'NÃO MAPEADA',
     qnt_equip: toNumber(row.qnt_equip),
     hrs_operacionais: hrsOperacionais,
@@ -233,6 +242,7 @@ const normalizeDiaRow = (row = {}) => {
 
   return {
     ...row,
+    categoria: row.categoria || 'NÃO MAPEADA',
     data: row.data || '',
     dia_semana: getDayName(row.data),
     dia_curto: getDayShortName(row.data),
@@ -252,6 +262,7 @@ const normalizeEquipRow = (row = {}) => {
 
   return {
     ...row,
+    categoria: row.categoria || 'NÃO MAPEADA',
     desc_area: row.desc_area || 'NÃO MAPEADA',
     desc_grupo: row.desc_grupo || 'SEM FRENTE',
     cod_equip: row.cod_equip || 'SEM CÓDIGO',
@@ -263,6 +274,119 @@ const normalizeEquipRow = (row = {}) => {
     perc_disp: toNumber(row.perc_disp),
     perc_indeter: toNumber(row.perc_indeter),
   };
+};
+
+/* ==========================================================================
+   AGRUPADORES
+   ========================================================================== */
+
+const aggregateAreaRows = (rows = []) => {
+  const map = new Map();
+
+  rows.forEach((row) => {
+    const key = row.desc_area || 'NÃO MAPEADA';
+
+    if (!map.has(key)) {
+      map.set(key, {
+        desc_area: key,
+        rows: [],
+      });
+    }
+
+    map.get(key).rows.push(row);
+  });
+
+  return [...map.values()]
+    .map((item) => {
+      const total = item.rows.reduce(
+        (acc, row) => {
+          acc.qnt_equip += toNumber(row.qnt_equip);
+          acc.hrs_operacionais += toNumber(row.hrs_operacionais);
+          acc.hrs_manutencao += toNumber(row.hrs_manutencao);
+          acc.hrs_indeter += toNumber(row.hrs_indeter);
+          return acc;
+        },
+        {
+          qnt_equip: 0,
+          hrs_operacionais: 0,
+          hrs_manutencao: 0,
+          hrs_indeter: 0,
+        }
+      );
+
+      const percDisp =
+        total.hrs_operacionais > 0
+          ? Math.max(0, (1 - total.hrs_manutencao / total.hrs_operacionais)) * 100
+          : 0;
+
+      const percIndeter =
+        total.hrs_operacionais > 0
+          ? (total.hrs_indeter / total.hrs_operacionais) * 100
+          : 0;
+
+      return {
+        desc_area: item.desc_area,
+        ...total,
+        hrs_disponivel: Math.max(0, total.hrs_operacionais - total.hrs_manutencao),
+        perc_disp: percDisp,
+        perc_indeter: percIndeter,
+      };
+    })
+    .sort((a, b) => a.perc_disp - b.perc_disp);
+};
+
+const aggregateDayRowsByDate = (rows = []) => {
+  const map = new Map();
+
+  rows.forEach((row) => {
+    const key = row.data || '';
+
+    if (!key) return;
+
+    if (!map.has(key)) {
+      map.set(key, {
+        data: key,
+        rows: [],
+      });
+    }
+
+    map.get(key).rows.push(row);
+  });
+
+  return [...map.values()]
+    .map((item) => {
+      const total = item.rows.reduce(
+        (acc, row) => {
+          acc.qnt_equip += toNumber(row.qnt_equip);
+          acc.hrs_operacionais += toNumber(row.hrs_operacionais);
+          acc.hrs_manutencao += toNumber(row.hrs_manutencao);
+          acc.hrs_indeter += toNumber(row.hrs_indeter);
+          return acc;
+        },
+        {
+          qnt_equip: 0,
+          hrs_operacionais: 0,
+          hrs_manutencao: 0,
+          hrs_indeter: 0,
+        }
+      );
+
+      const hasData = total.hrs_operacionais > 0;
+
+      const percDisp = hasData
+        ? Math.max(0, (1 - total.hrs_manutencao / total.hrs_operacionais)) * 100
+        : null;
+
+      return {
+        data: item.data,
+        dia_semana: getDayName(item.data),
+        dia_curto: getDayShortName(item.data),
+        ...total,
+        hrs_disponivel: Math.max(0, total.hrs_operacionais - total.hrs_manutencao),
+        perc_disp: percDisp,
+      };
+    })
+    .sort((a, b) => brDateToSortValue(a.data) - brDateToSortValue(b.data));
 };
 
 /* ==========================================================================
@@ -307,7 +431,10 @@ const MetricCard = ({ label, value, color = 'var(--coa-text)', hint }) => (
       {label}
     </span>
 
-    <span className="block text-[1.05rem] font-black tracking-tight leading-none" style={{ color }}>
+    <span
+      className="block text-[1.05rem] font-black tracking-tight leading-none"
+      style={{ color }}
+    >
       {value}
     </span>
 
@@ -319,19 +446,87 @@ const MetricCard = ({ label, value, color = 'var(--coa-text)', hint }) => (
   </div>
 );
 
+const CategoryFilter = ({
+  categoryOptions = [],
+  selectedCategories = [],
+  onToggle,
+  isOpen,
+  onToggleOpen,
+}) => (
+  <div className="coa-panel p-3 md:p-4 flex flex-col gap-3">
+    <button
+      type="button"
+      onClick={onToggleOpen}
+      className="w-full flex items-center justify-between gap-3 text-left"
+    >
+      <div className="flex flex-col gap-1">
+        <span className="coa-text-micro">Filtro</span>
+
+        <span className="text-sm font-black text-[var(--coa-text)]">
+          Categorias
+        </span>
+      </div>
+
+      <span className="coa-badge">
+        {isOpen ? 'Ocultar' : `${selectedCategories.length} ativas`}
+      </span>
+    </button>
+
+    {isOpen && (
+      <div className="flex flex-col gap-2">
+        {categoryOptions.map((category) => {
+          const checked = selectedCategories.includes(category);
+
+          return (
+            <label
+              key={category}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-[14px] border text-sm font-bold cursor-pointer transition-colors"
+              style={{
+                borderColor: checked
+                  ? 'rgba(61,220,151,0.28)'
+                  : 'var(--coa-border)',
+                background: checked
+                  ? 'rgba(61,220,151,0.10)'
+                  : 'rgba(255,255,255,0.02)',
+                color: checked
+                  ? 'var(--coa-text)'
+                  : 'var(--coa-text-soft)',
+              }}
+            >
+              <input
+                type="checkbox"
+                className="hidden"
+                checked={checked}
+                onChange={() => onToggle(category)}
+              />
+
+              <span>{category}</span>
+            </label>
+          );
+        })}
+      </div>
+    )}
+  </div>
+);
+
 const CustomTooltip = ({ active, payload, label }) => {
   if (!active || !payload || !payload.length) return null;
 
   const row = payload[0].payload;
-  
-  // Ignora o tooltip se não houver dados no dia
+
   if (row.perc_disp == null) return null;
 
   return (
-    <div className="coa-panel p-3 border shadow-lg" style={{ borderColor: 'var(--coa-divider)' }}>
+    <div
+      className="coa-panel p-3 border shadow-lg"
+      style={{ borderColor: 'var(--coa-divider)' }}
+    >
       <p className="coa-text-micro mb-2">{row.data || label}</p>
 
-      <p className="text-sm font-black" style={{ color: getDispoColor(row.perc_disp) }}>
+      <p
+        className="text-sm font-black"
+        style={{ color: getDispoColor(row.perc_disp) }}
+      >
         Disponibilidade: {formatPercent(row.perc_disp)}
       </p>
 
@@ -344,10 +539,10 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const DispoDot = (props) => {
   const { cx, cy, payload } = props;
-  
-  // Se o valor for null, não desenha a bolinha (não cai pra zero)
+
+  if (cx === undefined || cy === undefined || !payload) return null;
   if (payload.perc_disp == null) return null;
-  
+
   const color = getDispoColor(payload.perc_disp);
 
   return (
@@ -363,7 +558,6 @@ const DispoDot = (props) => {
 };
 
 const DispoLabel = ({ x, y, value }) => {
-  // Ignora a label se não houver valor no dia
   if (x == null || y == null || value == null) return null;
 
   const color = getDispoColor(value);
@@ -384,7 +578,7 @@ const DispoLabel = ({ x, y, value }) => {
 };
 
 /* ==========================================================================
-   TABELA AREAS MOBILE FRIENDLY
+   TABELA AREAS
    ========================================================================== */
 
 const AreaTable = ({ rows = [], onOpenArea }) => (
@@ -403,7 +597,7 @@ const AreaTable = ({ rows = [], onOpenArea }) => (
     <div>
       {rows.length === 0 ? (
         <div className="px-4 py-8 text-center text-sm font-bold text-[var(--coa-text-muted)]">
-          Nenhuma área encontrada para a semana selecionada.
+          Nenhuma área encontrada para os filtros selecionados.
         </div>
       ) : (
         rows.map((row) => (
@@ -490,7 +684,10 @@ const WeeklyDonut = ({ summary, weekLabel }) => {
                   Disp. Mec.
                 </span>
 
-                <span className="text-[1.45rem] md:text-[1.65rem] font-black tracking-tight" style={{ color }}>
+                <span
+                  className="text-[1.45rem] md:text-[1.65rem] font-black tracking-tight"
+                  style={{ color }}
+                >
                   {formatPercent(safeValue)}
                 </span>
 
@@ -523,7 +720,11 @@ const WeeklyDonut = ({ summary, weekLabel }) => {
           <MetricCard
             label="Indeterminado"
             value={formatHHMM(summary.hrs_indeter)}
-            color={summary.perc_indeter > INDETER_META_ALERTA ? 'var(--coa-danger)' : '#f6d66d'}
+            color={
+              summary.perc_indeter > INDETER_META_ALERTA
+                ? 'var(--coa-danger)'
+                : '#f6d66d'
+            }
             hint={`${formatPercent(summary.perc_indeter)} do período`}
           />
         </div>
@@ -597,11 +798,21 @@ const WeeklyTrend = ({ rows = [] }) => (
   <div className="coa-panel p-4 flex flex-col gap-4 min-w-0">
     <SectionTitle title="Resultado Diário" />
 
-    <div className="h-[260px] min-h-[260px] w-full min-w-0 overflow-hidden">
-      <ResponsiveContainer width="100%" height={260} minWidth={0}>
+    <div className="h-[280px] min-h-[280px] w-full min-w-0 overflow-visible">
+      <ResponsiveContainer
+        width="100%"
+        height="100%"
+        minWidth={0}
+        minHeight={240}
+      >
         <LineChart
           data={rows}
-          margin={{ top: 34, right: 16, left: -18, bottom: 0 }}
+          margin={{
+            top: 34,
+            right: 24,
+            left: 16,
+            bottom: 8,
+          }}
         >
           <CartesianGrid
             strokeDasharray="3 3"
@@ -617,6 +828,8 @@ const WeeklyTrend = ({ rows = [] }) => (
             tickLine={false}
             axisLine={false}
             dy={10}
+            interval={0}
+            minTickGap={0}
           />
 
           <YAxis hide domain={[0, 100]} />
@@ -635,9 +848,14 @@ const WeeklyTrend = ({ rows = [] }) => (
             dataKey="perc_disp"
             stroke="var(--coa-text-soft)"
             strokeWidth={2}
-            connectNulls={true} // Aqui está a mágica pra linha não quebrar entre dias vazios!
+            connectNulls
             dot={<DispoDot />}
-            activeDot={{ r: 7, stroke: 'var(--coa-text)', strokeWidth: 2 }}
+            activeDot={{
+              r: 7,
+              stroke: 'var(--coa-text)',
+              strokeWidth: 2,
+            }}
+            isAnimationActive={false}
           >
             <LabelList
               dataKey="perc_disp"
@@ -651,13 +869,24 @@ const WeeklyTrend = ({ rows = [] }) => (
 );
 
 /* ==========================================================================
-   MODAL AREA MOBILE FRIENDLY
+   MODAL AREA
    ========================================================================== */
 
-const AreaEquipModal = ({ area, weekInfo, weekLabel, onClose }) => {
+const AreaEquipModal = ({
+  area,
+  weekInfo,
+  weekLabel,
+  selectedCategories = [],
+  onClose,
+}) => {
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const selectedCategoriesKey = useMemo(
+    () => selectedCategories.join('|'),
+    [selectedCategories]
+  );
 
   useEffect(() => {
     let mounted = true;
@@ -669,15 +898,21 @@ const AreaEquipModal = ({ area, weekInfo, weekLabel, onClose }) => {
         setLoading(true);
         setError('');
 
-        const data = await fetchAllPages(() =>
-          supabase
+        const data = await fetchAllPages(() => {
+          let query = supabase
             .from('vw_c_dispo_semanal_equip_area')
             .select(EQUIP_AREA_COLUMNS)
             .eq('ano', weekInfo.ano)
             .eq('semana_iso', weekInfo.semana_iso)
             .eq('desc_area', area.desc_area)
-            .order('perc_disp', { ascending: true })
-        );
+            .order('perc_disp', { ascending: true });
+
+          if (selectedCategories.length > 0) {
+            query = query.in('categoria', selectedCategories);
+          }
+
+          return query;
+        });
 
         if (!mounted) return;
 
@@ -695,7 +930,7 @@ const AreaEquipModal = ({ area, weekInfo, weekLabel, onClose }) => {
     return () => {
       mounted = false;
     };
-  }, [area, weekInfo]);
+  }, [area, weekInfo, selectedCategoriesKey]);
 
   if (!area) return null;
 
@@ -750,7 +985,10 @@ const AreaEquipModal = ({ area, weekInfo, weekLabel, onClose }) => {
                   <span />
                   <span />
                 </div>
-                <span className="coa-loader-text">Carregando equipamentos da área...</span>
+
+                <span className="coa-loader-text">
+                  Carregando equipamentos da área...
+                </span>
               </div>
             ) : error ? (
               <div className="coa-empty text-[var(--coa-danger)]">{error}</div>
@@ -771,12 +1009,12 @@ const AreaEquipModal = ({ area, weekInfo, weekLabel, onClose }) => {
                 <div>
                   {rows.length === 0 ? (
                     <div className="px-4 py-8 text-center text-sm font-bold text-[var(--coa-text-muted)]">
-                      Nenhum equipamento encontrado para esta área na semana.
+                      Nenhum equipamento encontrado para esta área nos filtros selecionados.
                     </div>
                   ) : (
                     rows.map((row) => (
                       <div
-                        key={`${row.cod_equip}-${row.desc_grupo}`}
+                        key={`${row.cod_equip}-${row.desc_grupo}-${row.categoria}`}
                         className="grid grid-cols-[72px_minmax(0,1fr)_70px] md:grid-cols-[84px_minmax(0,1fr)_minmax(0,1fr)_96px_82px_72px] gap-2 px-3 md:px-4 py-3 border-b"
                         style={{
                           borderColor: 'var(--coa-divider)',
@@ -808,7 +1046,10 @@ const AreaEquipModal = ({ area, weekInfo, weekLabel, onClose }) => {
                         <span
                           className="text-[12px] font-black text-right whitespace-nowrap hidden md:block"
                           style={{
-                            color: row.perc_indeter > INDETER_META_ALERTA ? 'var(--coa-danger)' : '#f6d66d',
+                            color:
+                              row.perc_indeter > INDETER_META_ALERTA
+                                ? 'var(--coa-danger)'
+                                : '#f6d66d',
                           }}
                         >
                           {formatHHMM(row.hrs_indeter)}
@@ -850,6 +1091,9 @@ const DispoDetailSemanal = ({
   const [areaRows, setAreaRows] = useState([]);
   const [dayRows, setDayRows] = useState([]);
   const [selectedArea, setSelectedArea] = useState(null);
+
+  const [selectedCategories, setSelectedCategories] = useState(DEFAULT_CATEGORIES);
+  const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -920,8 +1164,49 @@ const DispoDetailSemanal = ({
     };
   }, [weekInfo.ano, weekInfo.semana_iso]);
 
+  const categoryOptions = useMemo(() => {
+    const values = [
+      ...new Set(
+        [...areaRows, ...dayRows]
+          .map((row) => row.categoria)
+          .filter(Boolean)
+      ),
+    ];
+
+    return values.sort((a, b) => {
+      const ai = CATEGORY_ORDER.indexOf(a);
+      const bi = CATEGORY_ORDER.indexOf(b);
+
+      if (ai === -1 && bi === -1) return a.localeCompare(b, 'pt-BR');
+      if (ai === -1) return 1;
+      if (bi === -1) return -1;
+
+      return ai - bi;
+    });
+  }, [areaRows, dayRows]);
+
+  const filteredAreaBaseRows = useMemo(() => {
+    if (selectedCategories.length === 0) return [];
+
+    return areaRows.filter((row) => selectedCategories.includes(row.categoria));
+  }, [areaRows, selectedCategories]);
+
+  const filteredDayBaseRows = useMemo(() => {
+    if (selectedCategories.length === 0) return [];
+
+    return dayRows.filter((row) => selectedCategories.includes(row.categoria));
+  }, [dayRows, selectedCategories]);
+
+  const areaRowsFiltered = useMemo(() => {
+    return aggregateAreaRows(filteredAreaBaseRows);
+  }, [filteredAreaBaseRows]);
+
+  const dayRowsFiltered = useMemo(() => {
+    return aggregateDayRowsByDate(filteredDayBaseRows);
+  }, [filteredDayBaseRows]);
+
   const weeklySummary = useMemo(() => {
-    const total = areaRows.reduce(
+    const total = areaRowsFiltered.reduce(
       (acc, row) => {
         acc.hrs_operacionais += toNumber(row.hrs_operacionais);
         acc.hrs_manutencao += toNumber(row.hrs_manutencao);
@@ -953,12 +1238,12 @@ const DispoDetailSemanal = ({
       perc_disp: percDisp,
       perc_indeter: percIndeter,
     };
-  }, [areaRows]);
+  }, [areaRowsFiltered]);
 
   const dayRowsComplete = useMemo(() => {
     const rowsMap = new Map();
 
-    dayRows.forEach((row) => {
+    dayRowsFiltered.forEach((row) => {
       rowsMap.set(row.data, row);
     });
 
@@ -984,14 +1269,24 @@ const DispoDetailSemanal = ({
         hrs_manutencao: null,
         hrs_disponivel: null,
         hrs_indeter: null,
-        perc_disp: null, // A magica está aqui, null em vez de zero pra nao ferrar o grafico
+        perc_disp: null,
       };
     });
-  }, [dayRows, weekDates]);
+  }, [dayRowsFiltered, weekDates]);
 
   const trendRows = useMemo(() => {
     return dayRowsComplete;
   }, [dayRowsComplete]);
+
+  const handleCategoryToggle = (category) => {
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category]
+    );
+
+    setSelectedArea(null);
+  };
 
   if (loading || error) {
     return (
@@ -1016,7 +1311,10 @@ const DispoDetailSemanal = ({
                   <span />
                   <span />
                 </div>
-                <span className="coa-loader-text">Calculando visão semanal...</span>
+
+                <span className="coa-loader-text">
+                  Calculando visão semanal...
+                </span>
               </div>
             ) : (
               <div className="coa-empty text-[var(--coa-danger)]">{error}</div>
@@ -1040,6 +1338,14 @@ const DispoDetailSemanal = ({
         </div>
       </div>
 
+      <CategoryFilter
+        categoryOptions={categoryOptions}
+        selectedCategories={selectedCategories}
+        onToggle={handleCategoryToggle}
+        isOpen={isCategoryOpen}
+        onToggleOpen={() => setIsCategoryOpen((prev) => !prev)}
+      />
+
       <WeeklyDonut summary={weeklySummary} weekLabel={weekLabel} />
 
       <WeeklyTrend rows={trendRows} />
@@ -1050,14 +1356,13 @@ const DispoDetailSemanal = ({
           subtitle="Clique em uma área para visualizar os equipamentos da semana"
         />
 
-        <AreaTable rows={areaRows} onOpenArea={setSelectedArea} />
+        <AreaTable rows={areaRowsFiltered} onOpenArea={setSelectedArea} />
       </div>
 
       <div className="flex flex-col gap-3">
         <SectionTitle title="Resumo Diário da Semana" />
 
-        {/* Aqui mudei de dayRowsComplete para dayRows para não mostrar dias vazios na tabela! */}
-        <DayTable rows={dayRows} />
+        <DayTable rows={dayRowsFiltered} />
       </div>
 
       {selectedArea && (
@@ -1065,6 +1370,7 @@ const DispoDetailSemanal = ({
           area={selectedArea}
           weekInfo={weekInfo}
           weekLabel={weekLabel}
+          selectedCategories={selectedCategories}
           onClose={() => setSelectedArea(null)}
         />
       )}

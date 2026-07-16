@@ -20,32 +20,36 @@ const DISP_COLUMNS = [
   'hrs_total_seg',
   'hrs_manutencao_seg',
   'hrs_total',
-  'hrs_manutencao'
+  'hrs_manutencao',
 ].join(',');
 
 const getLast7Days = (isoDate) => {
   const datesBr = [];
   const chartLabels = [];
-  
-  const base = new Date(`${isoDate}T12:00:00Z`); 
+
+  const base = new Date(`${isoDate}T12:00:00Z`);
 
   for (let i = 6; i >= 0; i--) {
     const d = new Date(base);
     d.setDate(d.getDate() - i);
-    
+
     const dd = String(d.getDate()).padStart(2, '0');
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const yyyy = d.getFullYear();
-    
+
     datesBr.push(`${dd}/${mm}/${yyyy}`);
-    chartLabels.push({ full: `${dd}/${mm}/${yyyy}`, short: `${dd}/${mm}` });
+    chartLabels.push({
+      full: `${dd}/${mm}/${yyyy}`,
+      short: `${dd}/${mm}`,
+    });
   }
-  
+
   return { datesBr, chartLabels };
 };
 
 const getDispMecColor = (value) => {
   const safe = Number(value || 0);
+
   if (safe >= 90) return 'var(--coa-success)';
   if (safe >= 80) return 'var(--coa-warning)';
   return 'var(--coa-danger)';
@@ -53,7 +57,6 @@ const getDispMecColor = (value) => {
 
 const formatHours = (value) => `${Number(value || 0).toFixed(1)}h`;
 
-// Retornado ao padrão visual exato do seu CardOcioso
 const MetricCard = ({ label, value, color = 'var(--coa-text)' }) => {
   return (
     <div
@@ -63,7 +66,11 @@ const MetricCard = ({ label, value, color = 'var(--coa-text)' }) => {
       <span className="block text-[10px] font-black uppercase tracking-[0.14em] text-[var(--coa-text-muted)] mb-1">
         {label}
       </span>
-      <span className="block text-[1rem] font-black tracking-tight" style={{ color }}>
+
+      <span
+        className="block text-[1rem] font-black tracking-tight"
+        style={{ color }}
+      >
         {value}
       </span>
     </div>
@@ -72,15 +79,28 @@ const MetricCard = ({ label, value, color = 'var(--coa-text)' }) => {
 
 const CustomDot = (props) => {
   const { cx, cy, payload } = props;
+
+  if (cx === undefined || cy === undefined || !payload) return null;
+
   const color = getDispMecColor(payload.disp_mec);
-  
+
   return (
-    <circle cx={cx} cy={cy} r={5} fill={color} stroke="var(--coa-bg-soft)" strokeWidth={2} />
+    <circle
+      cx={cx}
+      cy={cy}
+      r={5}
+      fill={color}
+      stroke="var(--coa-bg-soft)"
+      strokeWidth={2}
+    />
   );
 };
 
 const CustomLabel = (props) => {
   const { x, y, value } = props;
+
+  if (x === undefined || y === undefined || value === undefined) return null;
+
   const color = getDispMecColor(value);
 
   return (
@@ -93,7 +113,7 @@ const CustomLabel = (props) => {
       fontWeight="900"
       textAnchor="middle"
     >
-      {`${Number(value).toFixed(1)}%`}
+      {`${Number(value || 0).toFixed(1)}%`}
     </text>
   );
 };
@@ -101,42 +121,80 @@ const CustomLabel = (props) => {
 const CustomTooltip = ({ active, payload }) => {
   if (active && payload && payload.length) {
     const data = payload[0].payload;
+
     return (
-      <div className="coa-panel p-3 border shadow-lg" style={{ borderColor: 'var(--coa-border)' }}>
+      <div
+        className="coa-panel p-3 border shadow-lg"
+        style={{ borderColor: 'var(--coa-border)' }}
+      >
         <p className="coa-text-micro mb-2">{data.fullDate}</p>
-        <p className="text-sm font-black" style={{ color: getDispMecColor(data.disp_mec) }}>
-          Disp. Mecânica: {data.disp_mec.toFixed(1)}%
+
+        <p
+          className="text-sm font-black"
+          style={{ color: getDispMecColor(data.disp_mec) }}
+        >
+          Disp. Mecânica: {Number(data.disp_mec || 0).toFixed(1)}%
         </p>
       </div>
     );
   }
+
   return null;
 };
 
-const CategoryFilter = ({ categoryOptions = [], selectedCategories = [], onToggle, isOpen, onToggleOpen }) => (
+const CategoryFilter = ({
+  categoryOptions = [],
+  selectedCategories = [],
+  onToggle,
+  isOpen,
+  onToggleOpen,
+}) => (
   <div className="coa-panel p-3 md:p-4 flex flex-col gap-3">
-    <button type="button" onClick={onToggleOpen} className="w-full flex items-center justify-between gap-3 text-left">
+    <button
+      type="button"
+      onClick={onToggleOpen}
+      className="w-full flex items-center justify-between gap-3 text-left"
+    >
       <div className="flex flex-col gap-1">
         <span className="coa-text-micro">Filtro</span>
-        <span className="text-sm font-black text-[var(--coa-text)]">Categorias</span>
+        <span className="text-sm font-black text-[var(--coa-text)]">
+          Categorias
+        </span>
       </div>
-      <span className="coa-badge">{isOpen ? 'Ocultar' : `${selectedCategories.length} ativas`}</span>
+
+      <span className="coa-badge">
+        {isOpen ? 'Ocultar' : `${selectedCategories.length} ativas`}
+      </span>
     </button>
+
     {isOpen && (
       <div className="flex flex-col gap-2">
         {categoryOptions.map((category) => {
           const checked = selectedCategories.includes(category);
+
           return (
             <label
               key={category}
               className="inline-flex items-center gap-2 px-3 py-2 rounded-[14px] border text-sm font-bold cursor-pointer transition-colors"
               style={{
-                borderColor: checked ? 'rgba(61,220,151,0.28)' : 'var(--coa-border)',
-                background: checked ? 'rgba(61,220,151,0.10)' : 'rgba(255,255,255,0.02)',
-                color: checked ? 'var(--coa-text)' : 'var(--coa-text-soft)',
+                borderColor: checked
+                  ? 'rgba(61,220,151,0.28)'
+                  : 'var(--coa-border)',
+                background: checked
+                  ? 'rgba(61,220,151,0.10)'
+                  : 'rgba(255,255,255,0.02)',
+                color: checked
+                  ? 'var(--coa-text)'
+                  : 'var(--coa-text-soft)',
               }}
             >
-              <input type="checkbox" className="hidden" checked={checked} onChange={() => onToggle(category)} />
+              <input
+                type="checkbox"
+                className="hidden"
+                checked={checked}
+                onChange={() => onToggle(category)}
+              />
+
               <span>{category}</span>
             </label>
           );
@@ -148,16 +206,34 @@ const CategoryFilter = ({ categoryOptions = [], selectedCategories = [], onToggl
 
 const CardDisponibilidade = ({ selectedDate }) => {
   const navigate = useNavigate();
+
   const [rawData, setRawData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [selectedCategories, setSelectedCategories] = useState(DEFAULT_CATEGORIES);
   const [isCategoryOpen, setIsCategoryOpen] = useState(false);
 
-  const { datesBr, chartLabels } = useMemo(() => getLast7Days(selectedDate), [selectedDate]);
+  const safeSelectedDate = useMemo(() => {
+    if (selectedDate) return selectedDate;
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = String(today.getMonth() + 1).padStart(2, '0');
+    const dd = String(today.getDate()).padStart(2, '0');
+
+    return `${yyyy}-${mm}-${dd}`;
+  }, [selectedDate]);
+
+  const { datesBr, chartLabels } = useMemo(
+    () => getLast7Days(safeSelectedDate),
+    [safeSelectedDate]
+  );
+
+  const datesKey = useMemo(() => datesBr.join('|'), [datesBr]);
 
   useEffect(() => {
     let mounted = true;
+
     const load = async () => {
       try {
         setLoading(true);
@@ -170,66 +246,84 @@ const CardDisponibilidade = ({ selectedDate }) => {
 
         if (error) throw error;
         if (!mounted) return;
+
         setRawData(data || []);
       } catch (err) {
         console.error('[COA] Erro ao carregar Disp. Mecânica:', err);
+
         if (!mounted) return;
+
         setError(err?.message || 'Falha ao carregar o gráfico de disponibilidade.');
       } finally {
         if (mounted) setLoading(false);
       }
     };
+
     load();
-    return () => { mounted = false; };
-  }, [datesBr]);
+
+    return () => {
+      mounted = false;
+    };
+  }, [datesKey]);
 
   const categoryOptions = useMemo(() => {
-    const values = [...new Set(rawData.map((row) => row.categoria).filter(Boolean))];
+    const values = [
+      ...new Set(rawData.map((row) => row.categoria).filter(Boolean)),
+    ];
+
     return values.sort((a, b) => {
       const ai = CATEGORY_ORDER.indexOf(a);
       const bi = CATEGORY_ORDER.indexOf(b);
+
       if (ai === -1 && bi === -1) return a.localeCompare(b, 'pt-BR');
       if (ai === -1) return 1;
       if (bi === -1) return -1;
+
       return ai - bi;
     });
   }, [rawData]);
 
   const summary = useMemo(() => {
-    const filteredRows = rawData.filter((row) => selectedCategories.includes(row.categoria));
-    
+    const filteredRows = rawData.filter((row) =>
+      selectedCategories.includes(row.categoria)
+    );
+
     let hrsTotal = 0;
     let hrsManut = 0;
     let hrsTotalSeg = 0;
     let hrsManutSeg = 0;
 
-    filteredRows.forEach(row => {
+    filteredRows.forEach((row) => {
       hrsTotal += Number(row.hrs_total || 0);
       hrsManut += Number(row.hrs_manutencao || 0);
       hrsTotalSeg += Number(row.hrs_total_seg || 0);
       hrsManutSeg += Number(row.hrs_manutencao_seg || 0);
     });
 
-    const dispMec = hrsTotalSeg > 0 ? (1 - (hrsManutSeg / hrsTotalSeg)) * 100 : 0;
+    const dispMec =
+      hrsTotalSeg > 0 ? (1 - hrsManutSeg / hrsTotalSeg) * 100 : 0;
 
     return { hrsTotal, hrsManut, dispMec };
   }, [rawData, selectedCategories]);
 
   const chartData = useMemo(() => {
-    const filteredRows = rawData.filter((row) => selectedCategories.includes(row.categoria));
+    const filteredRows = rawData.filter((row) =>
+      selectedCategories.includes(row.categoria)
+    );
 
     return chartLabels.map(({ full, short }) => {
-      const dayRows = filteredRows.filter(row => row.data === full);
-      
+      const dayRows = filteredRows.filter((row) => row.data === full);
+
       let totalSeg = 0;
       let manutSeg = 0;
 
-      dayRows.forEach(row => {
+      dayRows.forEach((row) => {
         totalSeg += Number(row.hrs_total_seg || 0);
         manutSeg += Number(row.hrs_manutencao_seg || 0);
       });
 
-      const disp_mec = totalSeg > 0 ? (1 - (manutSeg / totalSeg)) * 100 : 0;
+      const disp_mec =
+        totalSeg > 0 ? (1 - manutSeg / totalSeg) * 100 : 0;
 
       return {
         label: short,
@@ -240,12 +334,17 @@ const CardDisponibilidade = ({ selectedDate }) => {
   }, [rawData, selectedCategories, chartLabels]);
 
   const handleCategoryToggle = (category) => {
-    setSelectedCategories((prev) => 
-      prev.includes(category) ? prev.filter((item) => item !== category) : [...prev, category]
+    setSelectedCategories((prev) =>
+      prev.includes(category)
+        ? prev.filter((item) => item !== category)
+        : [...prev, category]
     );
   };
 
-  const navState = { selectedDate, selectedCategories };
+  const navState = {
+    selectedDate: safeSelectedDate,
+    selectedCategories,
+  };
 
   if (loading || error) {
     return (
@@ -255,8 +354,15 @@ const CardDisponibilidade = ({ selectedDate }) => {
             <div className="py-10">
               {loading ? (
                 <div className="flex flex-col items-center justify-center gap-3">
-                  <div className="coa-loader-dots"><span /><span /><span /></div>
-                  <span className="coa-loader-text">Analisando histórico mecânico...</span>
+                  <div className="coa-loader-dots">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+
+                  <span className="coa-loader-text">
+                    Analisando histórico mecânico...
+                  </span>
                 </div>
               ) : (
                 <div className="coa-empty">{error}</div>
@@ -272,19 +378,28 @@ const CardDisponibilidade = ({ selectedDate }) => {
     <section className="coa-section">
       <div className="coa-card coa-card--resumo-home">
         <div className="coa-card__header">
-          <h2 className="coa-text-title !mb-0">Disponibilidade Mecânica 7 Dias</h2>
+          <h2 className="coa-text-title !mb-0">
+            Disponibilidade Mecânica 7 Dias
+          </h2>
         </div>
 
-        <div className="coa-card__body flex flex-col gap-4">
-          
-          {/* Componente MetricCard restaurado e alinhado em 3 colunas */}
+        <div className="coa-card__body flex flex-col gap-4 min-w-0">
           <div className="grid grid-cols-3 gap-3">
-            <MetricCard label="Total Hrs" value={formatHours(summary.hrsTotal)} />
-            <MetricCard label="Manutenção" value={formatHours(summary.hrsManut)} color="var(--coa-danger)" />
-            <MetricCard 
-              label="Disp." 
-              value={`${summary.dispMec.toFixed(1)}%`} 
-              color={getDispMecColor(summary.dispMec)} 
+            <MetricCard
+              label="Total Hrs"
+              value={formatHours(summary.hrsTotal)}
+            />
+
+            <MetricCard
+              label="Manutenção"
+              value={formatHours(summary.hrsManut)}
+              color="var(--coa-danger)"
+            />
+
+            <MetricCard
+              label="Disp."
+              value={`${summary.dispMec.toFixed(1)}%`}
+              color={getDispMecColor(summary.dispMec)}
             />
           </div>
 
@@ -296,32 +411,66 @@ const CardDisponibilidade = ({ selectedDate }) => {
             onToggleOpen={() => setIsCategoryOpen((prev) => !prev)}
           />
 
-          <div className="coa-panel p-4 h-[280px] w-full flex flex-col mt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={chartData} margin={{ top: 25, right: 15, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="var(--coa-border)" vertical={false} />
-                
-                <XAxis 
-                  dataKey="label" 
-                  stroke="var(--coa-text-muted)" 
-                  fontSize={12} 
-                  tickLine={false} 
-                  axisLine={false} 
-                  dy={10}
+          <div className="coa-panel p-4 h-[280px] min-h-[280px] w-full min-w-0 overflow-visible flex flex-col mt-2">
+            <ResponsiveContainer
+              width="100%"
+              height="100%"
+              minWidth={0}
+              minHeight={240}
+            >
+              <LineChart
+                data={chartData}
+                margin={{
+                  top: 32,
+                  right: 24,
+                  left: 16,
+                  bottom: 8,
+                }}
+              >
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  stroke="var(--coa-border)"
+                  vertical={false}
                 />
-                
-                <YAxis hide={true} domain={[0, 100]} />
-                
-                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'var(--coa-border)', strokeWidth: 1, strokeDasharray: '5 5' }} />
-                
-                <Line 
-                  type="monotone" 
-                  dataKey="disp_mec" 
-                  stroke="var(--coa-text-soft)" 
+
+                <XAxis
+                  dataKey="label"
+                  stroke="var(--coa-text-muted)"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  dy={10}
+                  interval={0}
+                  minTickGap={0}
+                />
+
+                <YAxis
+                  hide
+                  domain={[0, 100]}
+                />
+
+                <Tooltip
+                  content={<CustomTooltip />}
+                  cursor={{
+                    stroke: 'var(--coa-border)',
+                    strokeWidth: 1,
+                    strokeDasharray: '5 5',
+                  }}
+                />
+
+                <Line
+                  type="monotone"
+                  dataKey="disp_mec"
+                  stroke="var(--coa-text-soft)"
                   strokeWidth={2}
                   dot={<CustomDot />}
-                  activeDot={{ r: 7, stroke: 'var(--coa-text)', strokeWidth: 2 }}
+                  activeDot={{
+                    r: 7,
+                    stroke: 'var(--coa-text)',
+                    strokeWidth: 2,
+                  }}
                   label={<CustomLabel />}
+                  isAnimationActive={false}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -331,7 +480,9 @@ const CardDisponibilidade = ({ selectedDate }) => {
             <button
               className="coa-btn coa-btn--ghost min-w-[130px]"
               type="button"
-              onClick={() => navigate('/coacenter/disponibilidade', { state: navState })}
+              onClick={() =>
+                navigate('/coacenter/disponibilidade', { state: navState })
+              }
             >
               Detalhado
             </button>
