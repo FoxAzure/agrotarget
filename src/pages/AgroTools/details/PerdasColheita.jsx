@@ -194,7 +194,6 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
   return (
     <div className="at-theme">
       <HeaderAgroTools onMenuOpen={() => setSidebarOpen(true)}>
-        <span className="font-bold text-slate-500 uppercase text-xs tracking-widest hidden md:inline-block">Perdas MEC</span>
       </HeaderAgroTools>
       <SidebarAgroTools isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
 
