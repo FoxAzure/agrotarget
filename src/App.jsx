@@ -7,6 +7,7 @@ import ScrollToTop from './components/Config/ScrollToTop';
 // Importando as logos
 import qualyflowLogo from './gallery/logo/qualyflow.png';
 import coacenterLogo from './gallery/logo/coacenter.png';
+import agroToolsLogo from './gallery/logo/agrotools.png'; // ➔ Logo do AgroTools adicionada!
 
 // Importando a página principal do QualyFlow
 import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
@@ -25,6 +26,14 @@ import COAOperacoes from './pages/COACenter/COAOperacoes';
 //import MotorOcioso from './pages/COACenter/MotorOcioso';
 //import COADataAudit from './pages/COACenter/COADataAudit';
 //import Comboio from './pages/COACenter/Comboio';
+
+// Importação das Páginas do AgroTools
+import AgroToolsHome from './pages/AgroTools/AgroToolsHome';
+import CucGotejoTools from './pages/AgroTools/details/CucGotejo';
+import AdubacaoTools from './pages/AgroTools/details/Adubacao';
+import PerdasColheitaTools from './pages/AgroTools/details/PerdasColheita';
+import VinhacaTools from './pages/AgroTools/details/Vinhaca';
+
 
 // ================================= HELPERS (COMPONENTES) ================================= //
 
@@ -65,9 +74,11 @@ function Hub() {
       </header>
 
       <main className="flex-grow p-6 flex justify-center items-start pt-10">
-        <div className="w-full max-w-2xl grid grid-cols-2 gap-4">
+        {/* ➔ Grid atualizado para lidar bem com os 3 cards (max-w-3xl e md:grid-cols-3) */}
+        <div className="w-full max-w-3xl grid grid-cols-2 md:grid-cols-3 gap-4">
           <ModuleCard title="QualyFlow" logoSrc={qualyflowLogo} to="/qualyflow" />
           <ModuleCard title="COA Center" logoSrc={coacenterLogo} to="/coacenter" />
+          <ModuleCard title="AgroTools" logoSrc={agroToolsLogo} to="/agrotools" />
         </div>
       </main>
 
@@ -82,21 +93,6 @@ function Hub() {
           </div>
         </div>
       </footer>
-    </div>
-  );
-}
-
-// Página Rascunho da aplicação COA Center
-function COACenterPage() {
-  const navigate = useNavigate();
-  return (
-    <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-6">
-      <img src={coacenterLogo} alt="COA Center" className="w-24 mb-6 drop-shadow-md" />
-      <h1 className="text-3xl font-black text-agro-green uppercase tracking-widest mb-2">COA Center</h1>
-      <p className="text-slate-500 mb-8 text-center max-w-md">Área isolada para as regras de negócio de Operações. Ferramenta de alta performance.</p>
-      <button onClick={() => navigate('/')} className="px-6 py-3 bg-white border-2 border-agro-orange text-agro-orange font-bold uppercase text-xs rounded-lg hover:bg-agro-orange hover:text-white transition-colors active:scale-95">
-        ← Voltar ao Hub
-      </button>
     </div>
   );
 }
@@ -120,6 +116,12 @@ function App() {
         <Route path="/coacenter/ocioso" element={<OciosoDetail />} />
         <Route path="/coacenter/disponibilidade" element={<DispoDetail />} />
         <Route path="/coacenter/operacoes" element={<COAOperacoes />} />
+        
+        <Route path="/agrotools" element={<AgroToolsHome />} />
+        <Route path="/agrotools/cuc" element={<CucGotejoTools />} />
+        <Route path="/agrotools/adubacao" element={<AdubacaoTools />} />
+        <Route path="/agrotools/perdas" element={<PerdasColheitaTools />} />
+        <Route path="/agrotools/vinhaca" element={<VinhacaTools />} />
 
         {/* ROTA PADRÃO (CATCH-ALL) */}
         <Route path="*" element={<PaginaNaoEncontrada />} />
@@ -127,12 +129,5 @@ function App() {
     </>
   );
 }
-
-
-        //<Route path="/coacenter/operacoes" element={<Operacoes />} />
-        //<Route path="/coacenter/detalhe" element={<Detalhe />} />
-        //<Route path='/coacenter/motorocioso' element={<MotorOcioso />} />
-        //<Route path='/coacenter/audit' element={<COADataAudit />} />
-        //<Route path='/coacenter/comboio' element={<Comboio />} />
 
 export default App;

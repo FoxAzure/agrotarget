@@ -1,0 +1,1541 @@
+/* src/pages/AgroTools/Style.css */
+
+:root {
+  /* Cores AgroTools - Tema Claro, Limpo e Focado */
+  --at-bg: #f8fafc;
+  --at-surface: #ffffff;
+  --at-text: #334155;
+  --at-text-muted: #64748b;
+  --at-border: #e2e8f0;
+  --at-border-hover: #cbd5e1;
+  --at-primary: #22c55e;
+  --at-primary-light: #dcfce7;
+  --at-primary-dark: #16a34a;
+  
+  --at-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --at-shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -4px rgba(0, 0, 0, 0.025);
+}
+
+.at-theme {
+  background-color: var(--at-bg);
+  min-height: 100vh;
+  color: var(--at-text);
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.at-container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* ================= HEADER ================= */
+.at-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--at-border);
+  height: 64px;
+  display: flex;
+  align-items: center;
+  
+}
+
+.at-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+
+.at-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+}
+
+.at-brand-title {
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--at-text);
+  text-transform: uppercase;
+}
+
+.at-brand-highlight {
+  color: var(--at-primary);
+}
+
+.at-btn-back {
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: 1px solid var(--at-border);
+  background: var(--at-surface);
+  color: var(--at-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.at-btn-back:hover {
+  border-color: var(--at-text-muted);
+  color: var(--at-text);
+}
+
+.at-btn-back:active {
+  transform: scale(0.97);
+}
+
+/* ================= LISTA DE CALCULADORAS ================= */
+.at-page-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--at-text);
+  margin-bottom: 0.5rem;
+  letter-spacing: -0.02em;
+}
+
+.at-page-subtitle {
+  font-size: 0.875rem;
+  color: var(--at-text-muted);
+  margin-bottom: 2rem;
+}
+
+.at-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.at-card {
+  background: var(--at-surface);
+  border: 1px solid var(--at-border);
+  border-radius: 16px;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--at-shadow-sm);
+}
+
+.at-card:hover {
+  border-color: var(--at-primary);
+  box-shadow: var(--at-shadow-hover);
+  transform: translateY(-2px);
+}
+
+.at-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.at-card-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--at-text);
+}
+
+.at-card-desc {
+  font-size: 0.8125rem;
+  color: var(--at-text-muted);
+}
+
+.at-card-action {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.at-badge {
+  background: var(--at-primary-light);
+  color: var(--at-primary-dark);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.at-arrow {
+  color: var(--at-border-hover);
+  font-size: 1.25rem;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.at-card:hover .at-arrow {
+  color: var(--at-primary);
+  transform: translateX(4px);
+}
+
+
+/* ================= HEADER AJUSTES ================= */
+.at-brand-logo {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* Verde (#16a34a) e Laranja (F59E0B) conforme Hub */
+.at-brand-title { color: #16a34a; }
+.at-brand-highlight { color: #f59e0b; }
+
+.at-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+/* Botões do Header estilo COA, mas no tema claro */
+.at-btn {
+  appearance: none;
+  border: 0;
+  outline: none;
+  cursor: pointer;
+  transition: all 180ms ease;
+  font-family: inherit;
+  min-height: 38px;
+  padding: 0 0.95rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.at-btn:active { transform: scale(0.97); }
+
+.at-btn-ghost {
+  background: transparent;
+  border: 1px solid var(--at-border);
+  color: var(--at-text-muted);
+}
+
+.at-btn-ghost:hover {
+  background: rgba(0,0,0,0.03);
+  color: var(--at-text);
+  border-color: var(--at-border-hover);
+}
+
+.at-btn-primary {
+  background: #16a34a; /* Agro Green */
+  color: white;
+  border: 1px solid #15803d;
+  box-shadow: 0 4px 10px -2px rgba(22, 163, 74, 0.3);
+}
+
+.at-btn-primary:hover {
+  background: #15803d;
+}
+
+/* ================= SIDEBAR ================= */
+.at-sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  background: rgba(15, 23, 42, 0.4);
+  backdrop-filter: blur(4px);
+}
+
+.at-sidebar {
+  position: fixed;
+  top: 0;
+  right: 0;
+  z-index: 60;
+  width: min(86vw, 340px);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--at-surface);
+  border-left: 1px solid var(--at-border);
+  box-shadow: -10px 0 25px rgba(0,0,0,0.05);
+}
+
+.fade-in-right {
+  animation: fade-in-right 220ms ease-out;
+}
+
+@keyframes fade-in-right {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.at-sidebar-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem;
+  border-bottom: 1px solid var(--at-border);
+}
+
+.at-sidebar-brand {
+  display: flex;
+  flex-direction: column;
+}
+
+.at-sidebar-sub {
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--at-text-muted);
+}
+
+.at-sidebar-title {
+  font-size: 1rem;
+  font-weight: 900;
+  color: #16a34a; /* Agro Green */
+}
+
+.at-sidebar-close {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--at-border);
+  background: transparent;
+  color: var(--at-text-muted);
+  font-weight: bold;
+  cursor: pointer;
+}
+.at-sidebar-close:hover {
+  background: #fee2e2;
+  color: #ef4444;
+  border-color: #fca5a5;
+}
+
+.at-sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+.at-menu-group-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--at-border);
+  background: #f8fafc;
+  color: var(--at-text-muted);
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.at-menu-group-btn.is-open,
+.at-menu-group-btn:hover {
+  border-color: #16a34a;
+  color: #16a34a;
+  background: #f0fdf4;
+}
+
+.at-menu-chevron { transition: transform 0.2s; }
+.at-menu-group-btn.is-open .at-menu-chevron { transform: rotate(180deg); }
+
+.at-menu-group-items {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.35rem 0;
+}
+
+.at-menu-item {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  color: var(--at-text-muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: all 0.2s;
+}
+
+.at-menu-item:hover {
+  background: #f1f5f9;
+  color: var(--at-text);
+}
+
+.at-menu-home-btn {
+  background: var(--at-bg);
+  border: 1px dashed var(--at-border-hover);
+  margin-bottom: 0.5rem;
+  color: var(--at-text);
+}
+
+.at-sidebar-footer {
+  padding: 1rem 1.25rem;
+  border-top: 1px solid var(--at-border);
+}
+
+.at-text-micro {
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  color: var(--at-text-muted);
+}
+.at-text-subtitle {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--at-text);
+}
+
+
+/* ================= BOTÕES GRADIENTES (HOME) ================= */
+.at-grid-simples {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.at-card-gradient {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 1.25rem 1.75rem;
+  border-radius: 16px;
+  /* Degradê Agro Green para Emerald */
+  background: linear-gradient(135deg, #16a34a 0%, #10b981 100%);
+  color: white;
+  font-size: 1.1rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  overflow: hidden;
+  border: none;
+  box-shadow: 0 4px 15px -3px rgba(22, 163, 74, 0.4);
+  transition: all 0.3s ease;
+}
+
+/* O toque laranja (Tools) sutil misturado no fundo via pseudo-elemento */
+.at-card-gradient::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, transparent 40%, rgba(245, 158, 11, 0.25) 100%);
+  pointer-events: none;
+}
+
+.at-card-gradient:hover {
+  transform: translateY(-3px) scale(1.01);
+  box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.5);
+  background: linear-gradient(135deg, #15803d 0%, #059669 100%);
+}
+
+.at-card-name {
+  z-index: 1;
+}
+
+.at-card-gradient .at-arrow {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1.5rem;
+  transition: transform 0.3s ease, color 0.3s ease;
+  z-index: 1;
+}
+
+.at-card-gradient:hover .at-arrow {
+  color: white;
+  transform: translateX(6px);
+}
+
+/* Se a tela for um pouco maior, podemos fazer 2 colunas */
+@media (min-width: 640px) {
+  .at-grid-simples {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
+/* ================= GRID MODERNO (BENTO STYLE) ================= */
+.at-modern-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+/* Responsividade: 2 colunas em telas médias, 4 colunas em telas grandes */
+@media (min-width: 640px) {
+  .at-modern-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .at-modern-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.at-modern-card {
+  background-color: var(--at-surface, #ffffff);
+  border: 1px solid var(--at-border, #e2e8f0);
+  border-radius: 24px;
+  padding: 2.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+  outline: none;
+}
+
+/* Efeito de Hover sofisticado */
+.at-modern-card:hover {
+  transform: translateY(-8px);
+  border-color: #16a34a; /* Agro Green */
+  /* Sombra mesclando um tom escuro com o laranja (Agro Orange) */
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(245, 158, 11, 0.15);
+}
+
+.at-modern-card:active {
+  transform: translateY(-2px);
+}
+
+/* Envoltório do Ícone */
+.at-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background-color: #f1f5f9; /* Slate 100 - cinza super claro */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+/* Interação do Ícone no Hover do Card */
+.at-modern-card:hover .at-icon-wrapper {
+  background-color: #dcfce7; /* Verde clarinho */
+  transform: scale(1.1);
+}
+
+.at-icon {
+  font-size: 2rem;
+  line-height: 1;
+  /* Garante que emojis fiquem nítidos */
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.at-modern-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--at-text, #334155);
+  text-align: center;
+  letter-spacing: -0.02em;
+  transition: color 0.3s ease;
+}
+
+.at-modern-card:hover .at-modern-title {
+  color: #16a34a; /* Agro Green */
+}
+
+/* ================= TÍTULOS (HOME) ================= */
+.at-page-title {
+  font-size: 1.4rem;
+  font-weight: 900;
+  color: var(--at-text, #334155);
+  letter-spacing: -0.03em;
+  margin-bottom: 0.25rem;
+}
+
+.at-page-subtitle {
+  font-size: 0.85rem;
+  color: var(--at-text-muted, #64748b);
+  font-weight: 500;
+}
+
+/* ================= SLIM LIST ================= */
+.at-slim-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem; /* Espaço estreito entre os itens */
+}
+
+.at-slim-card {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #ffffff;
+  /* Borda geral levemente mais marcada */
+  border: 1px solid #cbd5e1; 
+  /* O charme sutil: uma borda verde clara mais grossa na esquerda */
+  border-left: 4px solid #9ce4af; 
+  border-radius: 10px;
+  padding: 0.85rem 1.25rem;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  outline: none;
+  /* Sombra um pouquinho mais presente para dar volume */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05); 
+}
+
+.at-slim-card:hover {
+  background-color: #f0fdf4; /* Fundo ganha um tom verde quase imperceptível */
+  border-color: #16a34a; /* Acende a borda toda pro verde principal */
+  border-left-color: #16a34a; /* Borda esquerda fica com o verde intenso */
+  /* Sombra com um brilho esverdeado super elegante */
+  box-shadow: 0 6px 14px -3px rgba(22, 163, 74, 0.15); 
+  transform: translateX(4px); /* Aquele deslize provocativo pra direita */
+}
+
+.at-slim-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* O ícone minimalista */
+.at-slim-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background-color: #f1f5f9;
+  color: #64748b;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.at-slim-card:hover .at-slim-icon {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+/* Alinhamento do texto */
+.at-slim-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.at-slim-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--at-text, #334155);
+}
+
+.at-slim-desc {
+  font-size: 0.75rem;
+  color: var(--at-text-muted, #64748b);
+  margin-top: -0.1rem;
+}
+
+.at-slim-card:hover .at-slim-title {
+  color: #16a34a;
+}
+
+/* Seta minimalista na direita */
+.at-slim-right {
+  display: flex;
+  align-items: center;
+}
+
+.at-slim-arrow {
+  color: #cbd5e1;
+  transition: all 0.2s;
+}
+
+.at-slim-card:hover .at-slim-arrow {
+  color: #f59e0b; /* Agro Orange dando um detalhe super charmoso no hover */
+  transform: translateX(4px);
+}
+
+
+
+
+/* ================= CALCULADORAS - LAYOUT GERAL ================= */
+
+/* Grid de Configurações (Tempo e Vazão) */
+.at-calc-config {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.at-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.at-input-group label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--at-text-muted, #64748b);
+  letter-spacing: 0.05em;
+}
+
+.at-input {
+  width: 100%;
+  height: 48px; /* Altura confortável para toque no mobile */
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 0 1rem;
+  font-size: 1rem;
+  font-family: inherit;
+  color: var(--at-text, #334155);
+  transition: all 0.2s;
+  outline: none;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.at-input:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+/* ================= KPIs (RESULTADOS) ================= */
+.at-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.75rem;
+}
+
+.at-kpi-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+}
+
+.at-kpi-label {
+  font-size: 0.65rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #64748b;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.at-kpi-value {
+  font-size: 1.4rem;
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  transition: color 0.3s;
+}
+
+/* ================= ROW DE INSERÇÃO ================= */
+.at-form-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.at-form-row .at-input {
+  height: 54px; /* O input principal é mais gordinho pra ser fácil de digitar */
+}
+
+.at-form-row .at-btn {
+  height: 54px;
+}
+
+/* ================= LISTA DE AMOSTRAS ================= */
+.at-list-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.25rem;
+}
+
+.at-btn-text {
+  background: none;
+  border: none;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  cursor: pointer;
+  outline: none;
+}
+.at-btn-text:active { transform: scale(0.95); }
+
+.at-sample-row {
+  padding: 0.65rem 1rem !important; /* Mais fino que os cards da home */
+  border-left: 1px solid #cbd5e1 !important; /* Remove o verde da lateral */
+}
+.at-sample-row:hover {
+  transform: none; /* Não desliza no hover */
+  background-color: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.at-sample-index {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #94a3b8;
+  width: 24px;
+}
+
+.at-sample-ml {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--at-text);
+}
+
+.at-sample-lh {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.at-btn-remove {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 0.25rem;
+  border-radius: 4px;
+}
+.at-btn-remove:hover {
+  color: #ef4444;
+  background-color: #fee2e2;
+}
+
+.at-empty-state {
+  text-align: center;
+  padding: 2rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #94a3b8;
+  border: 1px dashed #cbd5e1;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+/* ================= GRID DE AMOSTRAS (QUADRADINHOS) ================= */
+.at-sample-grid {
+  display: grid;
+  /* 3 colunas no celular, expandindo automaticamente em telas maiores, sempre centralizado */
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.65rem;
+  justify-content: center;
+}
+
+@media (min-width: 640px) {
+  .at-sample-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.at-sample-box {
+  position: relative;
+  background-color: #ffffff;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 14px;
+  padding: 0.75rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.at-sample-box:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+}
+
+/* Valor em mL principal */
+.at-box-ml {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: var(--at-text);
+  line-height: 1.1;
+  margin-top: 0.1rem;
+}
+
+/* Conversão em L/h logo abaixo com a cor dinâmica */
+.at-box-lh {
+  font-size: 0.7rem;
+  font-weight: 800;
+  margin-top: 0.2rem;
+  letter-spacing: -0.02em;
+}
+
+/* Botão X de remoção no canto superior direito */
+.at-box-remove {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.95rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: background 0.1s, color 0.1s;
+}
+
+.at-box-remove:hover {
+  background-color: #fee2e2;
+  color: #ef4444;
+}
+
+
+
+/* ================= HEADER AJUSTES RESPONSIVOS ================= */
+.at-header-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 0.5rem; /* Evita que os elementos colem uns nos outros */
+}
+
+.at-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  flex-shrink: 0; /* Impede que a logo esmague */
+}
+
+.at-brand-title {
+  font-size: 1.1rem; /* Tamanho Otimizado para não estourar no celular */
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #16a34a;
+  margin: 0;
+}
+
+.at-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem; /* Espaço enxuto entre Início e Menu */
+  flex-shrink: 0;
+}
+
+/* Reduz sutilmente o padding dos botões no mobile para caber perfeitamente */
+.at-btn {
+  min-height: 34px;
+  padding: 0 0.65rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.05em;
+}
+
+
+/* =========================================
+   HEADER AGROTOOLS (Padrão IDÊNTICO ao COA Center)
+========================================= */
+:root {
+  --at-header-height: 64px;
+}
+
+.at-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  width: 100%;
+  height: var(--at-header-height);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--at-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.at-header__inner {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.at-header__brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  cursor: pointer;
+}
+
+.at-header__logo {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.1));
+}
+
+.at-header__title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
+  color: var(--at-text);
+  line-height: 1;
+}
+
+.at-header__title-highlight {
+  color: #f59e0b; /* Laranja Agro Orange */
+}
+
+.at-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-shrink: 0;
+}
+
+/* Botões do Header seguindo a exata proporção estrutural do COA */
+.at-btn {
+  appearance: none;
+  border: 0;
+  outline: none;
+  cursor: pointer;
+  user-select: none;
+  transition: all 180ms ease;
+  font-family: inherit;
+}
+
+.at-btn:active {
+  transform: scale(0.97);
+}
+
+.at-btn--ghost {
+  min-height: 38px;
+  padding: 0 0.95rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid var(--at-border);
+  color: var(--at-text-muted);
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+}
+
+.at-btn--ghost:hover {
+  background: rgba(0, 0, 0, 0.05);
+  border-color: #cbd5e1;
+  color: var(--at-text);
+}
+
+.at-btn--primary {
+  min-height: 38px;
+  padding: 0 0.95rem;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #16a34a 0%, #15803d 100%);
+  color: #ffffff;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.25);
+}
+
+.at-btn--primary:hover {
+  filter: brightness(1.05);
+}
+
+
+/* ================= ADUBAÇÃO - ABAS E PAINEL ================= */
+.at-tabs {
+  display: flex;
+  background-color: #e2e8f0;
+  border-radius: 12px;
+  padding: 4px;
+}
+
+.at-tab-btn {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.6rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.at-tab-btn.active {
+  background-color: #ffffff;
+  color: #16a34a;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.at-panel {
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.at-panel-header {
+  background-color: #f8fafc;
+  padding: 0.6rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: #64748b;
+  border-bottom: 1px solid #cbd5e1;
+}
+
+/* ================= ADUBAÇÃO - CARDS DE PREVIEW (PARA PRINTS) ================= */
+.at-adub-grid {
+  display: grid;
+  gap: 0.75rem;
+}
+.at-adub-grid.cols-2 { grid-template-columns: 1fr 1fr; }
+.at-adub-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+
+.at-adub-card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1rem 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+  transition: border-bottom-color 0.3s;
+}
+
+.at-adub-label {
+  font-size: 0.75rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: var(--at-text);
+  margin-bottom: 0.1rem;
+}
+
+.at-adub-rec {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #94a3b8;
+  margin-bottom: 0.75rem;
+}
+
+.at-adub-input {
+  width: 80%;
+  height: 42px;
+  text-align: center;
+  font-size: 1.1rem;
+  font-weight: 900;
+  color: var(--at-text);
+  background-color: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  margin-bottom: 0.75rem;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.at-adub-input:focus {
+  background-color: #ffffff;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+.at-adub-var {
+  font-size: 1.25rem;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  transition: color 0.3s;
+}
+
+/* ================= ADUBAÇÃO - LIVE GERAL (MÉDIA ANTES DE SALVAR) ================= */
+.at-adub-live-geral {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1.25rem;
+  border-radius: 12px;
+  border: 1.5px solid;
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.5);
+  animation: fadeIn 0.3s ease;
+}
+
+.at-live-geral-label {
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.at-live-geral-val {
+  font-size: 1.4rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================= ADUBAÇÃO - HISTÓRICO DE VARIAÇÃO V2 ================= */
+.at-hist-card-v2 {
+  border: 1.5px solid;
+  border-radius: 14px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 0.75rem;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  transition: transform 0.2s;
+}
+
+.at-hist-card-v2:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.06);
+}
+
+/* Linha 1: Topo */
+.at-hist-row-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+  padding-bottom: 0.65rem;
+}
+
+.at-hist-tag-lines {
+  background-color: #ffffff;
+  border: 1px solid rgba(0,0,0,0.1);
+  color: #64748b;
+  font-size: 0.65rem;
+  font-weight: 900;
+  padding: 2px 6px;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.at-hist-time {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.at-hist-geral-badge {
+  font-size: 1.1rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+/* Linha 2: Meio (Colunas) */
+.at-hist-row-mid {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.25rem 0;
+}
+
+.at-hist-col-v2 {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+}
+
+.at-hist-label-v2 {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  margin-bottom: 0.15rem;
+}
+
+.at-hist-val-v2 {
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+/* Linha 3: Rodapé (Botões) */
+.at-hist-row-bot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.25rem;
+}
+
+.at-btn-remove-v2 {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.at-btn-remove-v2:hover {
+  background-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.at-btn-copy-v2 {
+  background-color: #ffffff;
+  border: 1px solid #16a34a;
+  color: #16a34a;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 6px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.at-btn-copy-v2:hover {
+  background-color: #f0fdf4;
+  border-color: #15803d;
+  color: #15803d;
+}
+
+
+
+/* ================= PERDAS NA COLHEITA ================= */
+.at-card-section {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.25rem;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+  transition: border-color 0.3s ease;
+  margin-top: 20px;
+}
+
+/* Botões do Turno (Cores Pasteis Modernas) */
+.at-turno-btn {
+  flex: 1;
+  height: 48px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+  color: #64748b;
+  font-size: 0.85rem;
+  font-weight: 900;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.at-turno-btn.turno-1 {
+  background-color: #fef9c3; /* Yellow Pastel */
+  border-color: #fde047;
+  color: #a16207;
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.6);
+}
+
+.at-turno-btn.turno-2 {
+  background-color: #e0f2fe; /* Blue Pastel */
+  border-color: #7dd3fc;
+  color: #0369a1;
+  box-shadow: inset 0 2px 4px rgba(255,255,255,0.6);
+}
+
+/* ================= NAVEGAÇÃO INFERIOR FIXA (PWA) ================= */
+.at-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid var(--at-border);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 45;
+  box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.03);
+  /* Proteção para o SafeArea do iOS */
+  padding-bottom: env(safe-area-inset-bottom); 
+}
+
+/* Para garantir que o conteúdo não fique escondido atrás da barra fixa */
+.at-theme {
+  min-height: 100vh;
+  /* Espaço para o header + nav */
+  padding-bottom: 80px; 
+}
+
+.at-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 70px;
+  height: 100%;
+  background: transparent;
+  border: none;
+  color: #94a3b8; /* Slate 400 */
+  cursor: pointer;
+  transition: color 0.2s, transform 0.1s;
+}
+
+.at-nav-btn:active {
+  transform: scale(0.92);
+}
+
+.at-nav-btn.active {
+  color: #16a34a; /* Agro Green */
+}
+
+/* Animação suave para os grupos do histórico */
+.rotate-180 {
+  transform: rotate(180deg);
+}
+
+
+/* ================= BOTÃO DE LIMPAR INPUT (X) ================= */
+.at-btn-clear {
+  width: 48px;
+  height: 48px;
+  border: 1px solid #fca5a5;
+  background-color: #fef2f2;
+  color: #ef4444;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.at-btn-clear:hover {
+  background-color: #fee2e2;
+  border-color: #ef4444;
+}
+
+.at-btn-clear:active {
+  transform: scale(0.95);
+}
+
+/* ================= NAVEGAÇÃO INFERIOR FIXA E BLINDADA (PWA) ================= */
+.at-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  height: 64px;
+  background-color: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  border-top: 1px solid #e2e8f0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  z-index: 9999; /* Blindagem contra sobreposições de teclado/browser */
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.05);
+  padding-bottom: env(safe-area-inset-bottom); 
+}
+
+/* Garante que o usuário consiga rolar até o fim sem que a barra esconda o botão */
+.at-theme {
+  min-height: 100vh;
+  padding-bottom: 80px; 
+}
+
+
+
+/* ================= VINHAÇA - LIVE GERAL ================= */
+.at-vin-live-geral {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-radius: 14px;
+  border: 1.5px solid;
+  box-shadow: inset 0 2px 5px rgba(255,255,255,0.6);
+  animation: fadeIn 0.3s ease;
+}
+
+
+/* ================= SIDEBAR - MENU SIMPLIFICADO ================= */
+.at-menu-item-simple {
+  width: 100%;
+  text-align: left;
+  padding: 1rem 1.25rem;
+  background-color: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  color: #475569;
+  font-size: 0.95rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+}
+
+.at-menu-item-simple:hover {
+  background-color: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #0f172a;
+  transform: translateX(4px); /* Efeito tátil suave pro lado */
+}
+
+.at-menu-item-simple:active {
+  transform: translateX(2px) scale(0.98);
+}
+
+/* Estado Ativo (Página atual) */
+.at-menu-item-simple.active {
+  background-color: #f0fdf4;
+  border-color: #16a34a;
+  color: #15803d;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.15);
+}

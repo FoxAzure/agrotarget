@@ -1,0 +1,1442 @@
+[
+  {
+    "CODIGO": 101,
+    "CAMPO": "AREIA",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 102,
+    "CAMPO": "MURICI",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 105,
+    "CAMPO": "HUNGRIA",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 106,
+    "CAMPO": "POLONIA",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 108,
+    "CAMPO": "BELGICA A",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 109,
+    "CAMPO": "HOLANDA",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 111,
+    "CAMPO": "COLOMBIA",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 112,
+    "CAMPO": "ARGENTINA A",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 113,
+    "CAMPO": "JAMAICA A",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 114,
+    "CAMPO": "EQUADOR A",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 115,
+    "CAMPO": "CUBA",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 116,
+    "CAMPO": "URUGUAI",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 117,
+    "CAMPO": "CHILE A",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 118,
+    "CAMPO": "VENEZUELA A",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 120,
+    "CAMPO": "PORTUGAL",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 121,
+    "CAMPO": "ALEMANHA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 122,
+    "CAMPO": "SUICA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 123,
+    "CAMPO": "ESPANHA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 124,
+    "CAMPO": "PERU A",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 125,
+    "CAMPO": "BOLIVIA",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 126,
+    "CAMPO": "PALMEIRA",
+    "DEPA": "DEPA 03",
+    "SETOR": "PANCARAUY"
+  },
+  {
+    "CODIGO": 127,
+    "CAMPO": "EST. EXPERIMENTAL A (CHILE)",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 128,
+    "CAMPO": "ITALIA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 130,
+    "CAMPO": "PICOS",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 131,
+    "CAMPO": "MEXICO A",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 134,
+    "CAMPO": "WASHINGTON C",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 136,
+    "CAMPO": "PENEDO B",
+    "DEPA": "DEPA 03",
+    "SETOR": "PANCARAUY"
+  },
+  {
+    "CODIGO": 138,
+    "CAMPO": "TRUJILLO A",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 152,
+    "CAMPO": "PAULO AFONSO",
+    "DEPA": "DEPA 03",
+    "SETOR": "PANCARAUY"
+  },
+  {
+    "CODIGO": 154,
+    "CAMPO": "BUIQUE",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 156,
+    "CAMPO": "CORRENTES",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 159,
+    "CAMPO": "EST. EXPERIMENTAL B (CHILE)",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 165,
+    "CAMPO": "BARREIRAS",
+    "DEPA": "DEPA 03",
+    "SETOR": "PANCARAUY"
+  },
+  {
+    "CODIGO": 166,
+    "CAMPO": "PAULO AFONSO B",
+    "DEPA": "DEPA 03",
+    "SETOR": "PANCARAUY"
+  },
+  {
+    "CODIGO": 167,
+    "CAMPO": "VALENCA",
+    "DEPA": "DEPA 03",
+    "SETOR": "PANCARAUY"
+  },
+  {
+    "CODIGO": 176,
+    "CAMPO": "AGUAS BELAS",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 178,
+    "CAMPO": "PILAR",
+    "DEPA": "DEPA 03",
+    "SETOR": "PANCARAUY"
+  },
+  {
+    "CODIGO": 181,
+    "CAMPO": "MEXICO C",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 184,
+    "CAMPO": "SATUBA",
+    "DEPA": "DEPA 03",
+    "SETOR": "PANCARAUY"
+  },
+  {
+    "CODIGO": 194,
+    "CAMPO": "NITEROI",
+    "DEPA": "DEPA 03",
+    "SETOR": "PANCARAUY"
+  },
+  {
+    "CODIGO": 197,
+    "CAMPO": "JAVA",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 198,
+    "CAMPO": "DOMINICANA A",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 199,
+    "CAMPO": "BOM CONSELHO",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 200,
+    "CAMPO": "LONDRINA",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 201,
+    "CAMPO": "MANAUS",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 202,
+    "CAMPO": "SANTAREM A",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 203,
+    "CAMPO": "MARABA A",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 204,
+    "CAMPO": "LONDRINA A",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 205,
+    "CAMPO": "MACEIO",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 206,
+    "CAMPO": "NATAL",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 207,
+    "CAMPO": "FORTALEZA",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 208,
+    "CAMPO": "BELEM",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 209,
+    "CAMPO": "VILA VELHA",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 210,
+    "CAMPO": "VILA VELHA(ANEXO)",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 211,
+    "CAMPO": "QUEBRANGULO",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 213,
+    "CAMPO": "SAO LUIZ A",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 214,
+    "CAMPO": "SANTANA",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 215,
+    "CAMPO": "JOAO PESSOA",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 216,
+    "CAMPO": "SALVADOR",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 217,
+    "CAMPO": "PORTO ALEGRE",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 218,
+    "CAMPO": "R.DE JANEIRO",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 219,
+    "CAMPO": "ARACAJU",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 220,
+    "CAMPO": "CABROBO",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 221,
+    "CAMPO": "RECIFE",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 223,
+    "CAMPO": "JUAZEIRO",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 224,
+    "CAMPO": "PALMARES I",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 225,
+    "CAMPO": "PALMARES II",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 226,
+    "CAMPO": "PETROLINA",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 227,
+    "CAMPO": "GARANHUNS A",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 228,
+    "CAMPO": "ALAGOINHAS",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 229,
+    "CAMPO": "CARUARU A",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 230,
+    "CAMPO": "BRASILIA A",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 231,
+    "CAMPO": "ITABUNA A",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 234,
+    "CAMPO": "AEROPORTO II",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 238,
+    "CAMPO": "AEROPORTO I",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 239,
+    "CAMPO": "SALGUEIRO A",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 241,
+    "CAMPO": "PELOTAS A",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 242,
+    "CAMPO": "AEROPORTO III",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 245,
+    "CAMPO": "NAZARE B",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 246,
+    "CAMPO": "DETROIT",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 252,
+    "CAMPO": "PHOENIX",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 253,
+    "CAMPO": "DALLAS",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 255,
+    "CAMPO": "MACEIO ANEXO",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 256,
+    "CAMPO": "LAS VEGAS",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 257,
+    "CAMPO": "LOS ANGELES",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 266,
+    "CAMPO": "MARABA ANEXO",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 268,
+    "CAMPO": "PETROLANDIA",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 271,
+    "CAMPO": "NOVA YORK",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 272,
+    "CAMPO": "PENSILVANIA",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 273,
+    "CAMPO": "CALIFORNIA",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 274,
+    "CAMPO": "MISSOURI",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 275,
+    "CAMPO": "ARIZONA",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 276,
+    "CAMPO": "ALABAMA",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 277,
+    "CAMPO": "COLORADO",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 278,
+    "CAMPO": "FLORIDA",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 279,
+    "CAMPO": "INDIANA",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 281,
+    "CAMPO": "MISSISSIPI",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 282,
+    "CAMPO": "MONTANA",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 283,
+    "CAMPO": "NEVADA",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 284,
+    "CAMPO": "OREGON",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 285,
+    "CAMPO": "TEXAS",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 287,
+    "CAMPO": "TERRA NOVA",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 288,
+    "CAMPO": "MONTREAL",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 289,
+    "CAMPO": "BRITANICA",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 290,
+    "CAMPO": "COLUMBIA",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 291,
+    "CAMPO": "QUEBEC",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 292,
+    "CAMPO": "VICTORIA",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 293,
+    "CAMPO": "SANTA FE",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 294,
+    "CAMPO": "GRAVATA",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 295,
+    "CAMPO": "ARCOVERDE",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 297,
+    "CAMPO": "MIAMI",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 298,
+    "CAMPO": "DAKOTA",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 299,
+    "CAMPO": "CHICAGO",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 300,
+    "CAMPO": "INAJA",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 303,
+    "CAMPO": "SAO LUIZ ANEXO",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 317,
+    "CAMPO": "SANTA BARBARA",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 318,
+    "CAMPO": "SAVANNAH",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 319,
+    "CAMPO": "MENPHIS",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 320,
+    "CAMPO": "ATLANTA",
+    "DEPA": "DEPA 02",
+    "SETOR": "CANADA"
+  },
+  {
+    "CODIGO": 327,
+    "CAMPO": "FILADELFIA ANEXO",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 331,
+    "CAMPO": "SANHARO",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  },
+  {
+    "CODIGO": 333,
+    "CAMPO": "BONFIM",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 338,
+    "CAMPO": "INDIANAPOLIS",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 339,
+    "CAMPO": "HAWAI",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 340,
+    "CAMPO": "ARARIPINA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 341,
+    "CAMPO": "IPOJUCA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 342,
+    "CAMPO": "OURICURI",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 344,
+    "CAMPO": "TRIUNFO",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 345,
+    "CAMPO": "DENVER",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 347,
+    "CAMPO": "PIVOT CENT 18",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 354,
+    "CAMPO": "OLINDA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 355,
+    "CAMPO": "JABOATAO",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 356,
+    "CAMPO": "CAMARAGIBE",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 357,
+    "CAMPO": "ITAMARACA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 358,
+    "CAMPO": "PAULISTA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 359,
+    "CAMPO": "IGARASSU",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 360,
+    "CAMPO": "SURUBIM",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 361,
+    "CAMPO": "CARPINA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 362,
+    "CAMPO": "FLORES",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 363,
+    "CAMPO": "TAMANDARE",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 364,
+    "CAMPO": "LIMOEIRO",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 365,
+    "CAMPO": "GOIANA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 366,
+    "CAMPO": "CAETES",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 367,
+    "CAMPO": "ALIANÇA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 368,
+    "CAMPO": "OURO PRETO",
+    "DEPA": "DEPA 01",
+    "SETOR": "TIRADENTES"
+  },
+  {
+    "CODIGO": 372,
+    "CAMPO": "SERRA TALHADA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 377,
+    "CAMPO": "SAO JOSE DO EGITO",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 380,
+    "CAMPO": "CAMPO EXPERIMENTAL",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 381,
+    "CAMPO": "AEROPORTO  IV",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 383,
+    "CAMPO": "FEIRA DE SANTANA",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 384,
+    "CAMPO": "PORTO SEGURO",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 385,
+    "CAMPO": "ITAPARICA",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 386,
+    "CAMPO": "ILHEUS",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 387,
+    "CAMPO": "JAGUARARI",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 388,
+    "CAMPO": "CANUDOS",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 389,
+    "CAMPO": "JEREMOABO",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 390,
+    "CAMPO": "UAUÁ",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 391,
+    "CAMPO": "SOBRADINHO",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 392,
+    "CAMPO": "ABARÉ",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 393,
+    "CAMPO": "CURAÇA",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 394,
+    "CAMPO": "CASA NOVA",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 396,
+    "CAMPO": "SERTANIA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 397,
+    "CAMPO": "FLORESTA",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 398,
+    "CAMPO": "LIMOEIRO A",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 399,
+    "CAMPO": "GRANADA A",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 400,
+    "CAMPO": "MINNESOTA",
+    "DEPA": "DEPA 02",
+    "SETOR": "EUA"
+  },
+  {
+    "CODIGO": 402,
+    "CAMPO": "IRECE",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 404,
+    "CAMPO": "PIVOT CENT 26",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 405,
+    "CAMPO": "PIVOT CENT 27",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 406,
+    "CAMPO": "PIVOT CENT 28",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 407,
+    "CAMPO": "SENTO SÉ",
+    "DEPA": "DEPA 03",
+    "SETOR": "SALITRE"
+  },
+  {
+    "CODIGO": 501,
+    "CAMPO": "SAO PEDRO",
+    "DEPA": "DEPA 01",
+    "SETOR": "CAXANGA"
+  },
+  {
+    "CODIGO": 502,
+    "CAMPO": "SAO PAULO",
+    "DEPA": "DEPA 01",
+    "SETOR": "CAXANGA"
+  },
+  {
+    "CODIGO": 503,
+    "CAMPO": "SAO JOAO",
+    "DEPA": "DEPA 01",
+    "SETOR": "CAXANGA"
+  },
+  {
+    "CODIGO": 504,
+    "CAMPO": "SANTO ANTONIO",
+    "DEPA": "DEPA 01",
+    "SETOR": "CAXANGA"
+  },
+  {
+    "CODIGO": 505,
+    "CAMPO": "SAO SEBASTIAO",
+    "DEPA": "DEPA 01",
+    "SETOR": "CAXANGA"
+  },
+  {
+    "CODIGO": 506,
+    "CAMPO": "SAO JORGE",
+    "DEPA": "DEPA 01",
+    "SETOR": "CAXANGA"
+  },
+  {
+    "CODIGO": 507,
+    "CAMPO": "SAO CARLOS",
+    "DEPA": "DEPA 01",
+    "SETOR": "CAXANGA"
+  },
+  {
+    "CODIGO": 508,
+    "CAMPO": "SANTA ROSA",
+    "DEPA": "DEPA 01",
+    "SETOR": "CAXANGA"
+  },
+  {
+    "CODIGO": 509,
+    "CAMPO": "SANTA MARTA",
+    "DEPA": "DEPA 01",
+    "SETOR": "CAXANGA"
+  },
+  {
+    "CODIGO": 510,
+    "CAMPO": "SANTA LUCIA",
+    "DEPA": "DEPA 01",
+    "SETOR": "CAXANGA"
+  },
+  {
+    "CODIGO": 540,
+    "CAMPO": "BAHIA",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 541,
+    "CAMPO": "TOCANTINS",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 542,
+    "CAMPO": "GOIAS",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 543,
+    "CAMPO": "MINAS GERAIS",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 544,
+    "CAMPO": "MINAS GERAIS A",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 546,
+    "CAMPO": "MATO GROSSO",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 549,
+    "CAMPO": "ALAGOAS",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 550,
+    "CAMPO": "PERNAMBUCO",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 551,
+    "CAMPO": "PARAIBA",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 552,
+    "CAMPO": "SERGIPE",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 553,
+    "CAMPO": "MARANHAO",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 554,
+    "CAMPO": "PIAUI",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 555,
+    "CAMPO": "CEARA",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 556,
+    "CAMPO": "RIO GRANDE DO NORTE",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 558,
+    "CAMPO": "PARA",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 559,
+    "CAMPO": "AMAZONAS",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 560,
+    "CAMPO": "AMAPA",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 561,
+    "CAMPO": "RONDONIA",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 562,
+    "CAMPO": "ACRE",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 565,
+    "CAMPO": "PIVOT CENT 15",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 567,
+    "CAMPO": "PIVOT CENT 14",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 568,
+    "CAMPO": "PIVOT CENT 16",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 569,
+    "CAMPO": "PIVOT CENT 17",
+    "DEPA": "DEPA 02",
+    "SETOR": "MANICOBA"
+  },
+  {
+    "CODIGO": 601,
+    "CAMPO": "BAHAMAS A",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 602,
+    "CAMPO": "BERMUDAS",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 603,
+    "CAMPO": "GUATEMALA A",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 605,
+    "CAMPO": "COSTA RICA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 606,
+    "CAMPO": "GUATEMALA B",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 607,
+    "CAMPO": "TRINIDADE",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 608,
+    "CAMPO": "BARBADOS",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 609,
+    "CAMPO": "PORTO RICO",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 611,
+    "CAMPO": "HONDURAS",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 618,
+    "CAMPO": "NICARAGUA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 619,
+    "CAMPO": "GRANADA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 622,
+    "CAMPO": "BELIZE",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 624,
+    "CAMPO": "HAITI",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 627,
+    "CAMPO": "DINAMARCA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 628,
+    "CAMPO": "NORUEGA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 629,
+    "CAMPO": "SUECIA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 630,
+    "CAMPO": "FINLANDIA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 631,
+    "CAMPO": "YUGUSLAVIA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 633,
+    "CAMPO": "GRECIA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 634,
+    "CAMPO": "FRANCA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 636,
+    "CAMPO": "RUSSIA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 637,
+    "CAMPO": "BULGARIA A",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 638,
+    "CAMPO": "UCRANIA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 639,
+    "CAMPO": "TURQUIA",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 641,
+    "CAMPO": "BULGARIA B",
+    "DEPA": "DEPA 03",
+    "SETOR": "LAGINHA"
+  },
+  {
+    "CODIGO": 642,
+    "CAMPO": "INDIANAPOLIS B",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 644,
+    "CAMPO": "ARAPIRACA",
+    "DEPA": "DEPA 03",
+    "SETOR": "PANCARAUY"
+  },
+  {
+    "CODIGO": 645,
+    "CAMPO": "TUCSON",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 646,
+    "CAMPO": "ORLANDO",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 647,
+    "CAMPO": "DAYTONA",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 648,
+    "CAMPO": "BOSTON",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 649,
+    "CAMPO": "HOUSTON",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 650,
+    "CAMPO": "VIRGINIA",
+    "DEPA": "DEPA 02",
+    "SETOR": "SAO MIGUEL"
+  },
+  {
+    "CODIGO": 651,
+    "CAMPO": "CONDADO",
+    "DEPA": "DEPA 02",
+    "SETOR": "PERNAMBUCO"
+  },
+  {
+    "CODIGO": 652,
+    "CAMPO": "FRONTEIRAS",
+    "DEPA": "DEPA 01",
+    "SETOR": "IPIRANGA"
+  },
+  {
+    "CODIGO": 653,
+    "CAMPO": "TACARATU",
+    "DEPA": "DEPA 01",
+    "SETOR": "GUARARAPES"
+  }
+]
