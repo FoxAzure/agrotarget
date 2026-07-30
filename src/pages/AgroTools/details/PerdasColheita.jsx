@@ -29,11 +29,16 @@ const PerdasColheitaTools = () => {
     cat: { solto: '', lasca: '', estilhaco: '', repicado: '', inteira: '', fixo: '', toco7: '', ponta: '' },
     totalManual: '',
     pisoTipo: 'Simples', pisoMetros: '',
-    tocosFixos: '', tocosArrancados: '', tocosAbalados: ''
+    tocosFixos: '', tocosArrancados: '', tocosAbalados: '',
+    justificativa: '' // Novo campo adicionado
   };
+
   const [form, setForm] = useState(() => {
     const saved = localStorage.getItem('at_perdas_form');
-    return saved ? JSON.parse(saved) : defaultForm;
+    const parsed = saved ? JSON.parse(saved) : defaultForm;
+    // Força a data do dia atual ao carregar o app, evitando datas presas de dias anteriores
+    parsed.data = new Date().toISOString().split('T')[0];
+    return parsed;
   });
 
   // ================= HISTÓRICO E FILTROS =================
@@ -71,7 +76,8 @@ const PerdasColheitaTools = () => {
 
     const areaPiso = form.pisoTipo === 'Simples' ? 6.66 : 9.08;
     const metrosPiso = parseFloat(form.pisoMetros.replace(',', '.')) || 0;
-    const pisoteioPercent = metrosPiso > 0 ? (metrosPiso / areaPiso) : 0;
+    // CORRIGIDO: Adicionado o * 100 para o cálculo correto da porcentagem
+    const pisoteioPercent = metrosPiso > 0 ? (metrosPiso / areaPiso) * 100 : 0;
 
     const fixos = parseFloat(form.tocosFixos.replace(',', '.')) || 0;
     const arrancados = parseFloat(form.tocosArrancados.replace(',', '.')) || 0;
@@ -113,6 +119,11 @@ const PerdasColheitaTools = () => {
     if (!form.colhedora) return alert('Informe a Colhedora!');
     if (!form.tch) return alert('Informe o TCH Estimado!');
 
+    // Validação da Justificativa
+    if (calcTotals.perdasPercent > config.metaPerda && (!form.justificativa || form.justificativa.trim() === '')) {
+      return alert('Perda acima da meta! A justificativa é obrigatória.');
+    }
+
     const novoPonto = {
       id: Date.now(),
       horaStr: new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }),
@@ -123,9 +134,16 @@ const PerdasColheitaTools = () => {
 
     setHistorico([novoPonto, ...historico]);
     
+    // Zera os inputs de perda, mas mantém cabeçalho para facilitar o próximo lançamento
     setForm(prev => ({
       ...defaultForm,
-      data: prev.data, turno: prev.turno, colhedora: prev.colhedora, campo: prev.campo, lote: prev.lote, tch: prev.tch
+      data: prev.data, 
+      turno: prev.turno, 
+      colhedora: prev.colhedora, 
+      campo: prev.campo, 
+      lote: prev.lote, 
+      tch: prev.tch,
+      justificativa: '' 
     }));
     alert('Ponto salvo com sucesso!');
   };
@@ -159,6 +177,12 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
     if (item.tocosAbalados > 0) {
       txt += `▫️ Abalo...................${results.abaloPercent.toFixed(2)}%\n`;
     }
+    
+    // Adiciona justificativa no resumo se existir
+    if (item.justificativa) {
+      txt += `\n⚠️ *Justificativa:*\n${item.justificativa}\n`;
+    }
+    
     return txt;
   };
 
@@ -201,7 +225,6 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
         {camposData.map(c => <option key={c.CODIGO} value={c.CAMPO} />)}
       </datalist>
 
-      {/* pb-24 garante que o conteúdo não fique escondido debaixo da barra fixa inferior */}
       <main className="at-container py-6 pb-24 max-w-lg mx-auto fade-in min-h-screen">
         
         {/* ================= ABA: NOVO PONTO ================= */}
@@ -256,8 +279,9 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
               </div>
             </div>
 
+            {/* CARD DE RESULTADOS: PERDAS */}
             <div className="at-card-section mb-4 border-l-4" style={{ borderColor: hexColor(calcTotals.perdasPercent, config.metaPerda) }}>
-              <div className="flex justify-between items-end mb-3 border-b pb-2">
+              <div className="flex justify-between items-center mb-3 border-b pb-2">
                 <label className="font-black text-sm uppercase text-slate-600">Perdas (kg)</label>
                 <span className="font-black text-xl" style={{ color: hexColor(calcTotals.perdasPercent, config.metaPerda) }}>
                   {calcTotals.perdasPercent.toFixed(2)}%
@@ -291,11 +315,27 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
               )}
             </div>
 
+            {/* JUSTIFICATIVA OBRIGATÓRIA (Aparece apenas se perder > meta) */}
+            {calcTotals.perdasPercent > config.metaPerda && (
+              <div className="at-card-section mb-4 border-l-4 border-red-500 bg-red-50/40 fade-in">
+                <label className="font-black text-sm uppercase text-red-600 mb-2 block">
+                  Justificativa Obrigatória
+                </label>
+                <textarea 
+                  className="at-input w-full h-20 resize-none text-sm" 
+                  placeholder="A perda excedeu a meta. Qual o motivo?"
+                  value={form.justificativa}
+                  onChange={e => updateForm('justificativa', e.target.value)}
+                />
+              </div>
+            )}
+
+            {/* CARD DE RESULTADOS: PISOTEIO */}
             {config.showPisoteio && (
               <div className="at-card-section mb-4 border-l-4" style={{ borderColor: hexColor(calcTotals.pisoteioPercent, form.pisoTipo === 'Simples' ? config.metaPisoSimples : config.metaPisoDuplo) }}>
-                 <div className="flex justify-between items-center mb-3">
+                 <div className="flex justify-between items-center mb-3 border-b pb-2">
                   <label className="font-black text-sm uppercase text-slate-600">Pisoteio</label>
-                  <span className="font-black text-lg" style={{ color: hexColor(calcTotals.pisoteioPercent, form.pisoTipo === 'Simples' ? config.metaPisoSimples : config.metaPisoDuplo) }}>
+                  <span className="font-black text-xl" style={{ color: hexColor(calcTotals.pisoteioPercent, form.pisoTipo === 'Simples' ? config.metaPisoSimples : config.metaPisoDuplo) }}>
                     {calcTotals.pisoteioPercent.toFixed(2)}%
                   </span>
                 </div>
@@ -309,10 +349,30 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
               </div>
             )}
 
+            {/* CARD DE RESULTADOS: ARRANQUIO E ABALO PADRONIZADO */}
             {(config.showArranquio || config.showAbalo) && (
               <div className="at-card-section mb-4 border-l-4" style={{ borderColor: hexColor(calcTotals.arranquioPercent, config.metaArranquio) }}>
-                <label className="font-black text-sm uppercase text-slate-600 mb-2 block">Tocos (Arranquio / Abalo)</label>
-                <div className="grid grid-cols-3 gap-2 mb-2">
+                
+                <div className="flex flex-col mb-3 border-b pb-2 gap-1">
+                  {config.showArranquio && (
+                    <div className="flex justify-between items-center">
+                      <label className="font-black text-sm uppercase text-slate-600">Arranquio</label>
+                      <span className="font-black text-xl" style={{ color: hexColor(calcTotals.arranquioPercent, config.metaArranquio) }}>
+                        {calcTotals.arranquioPercent.toFixed(2)}%
+                      </span>
+                    </div>
+                  )}
+                  {config.showAbalo && (
+                    <div className="flex justify-between items-center mt-1">
+                      <label className="font-black text-sm uppercase text-slate-600">Abalo</label>
+                      <span className="font-black text-xl text-slate-500">
+                        {calcTotals.abaloPercent.toFixed(2)}%
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
                   <div className="flex flex-col"><span className="text-[10px] font-bold text-slate-400">Fixos (Total)</span>
                     <input type="number" className="at-input h-10 text-center" value={form.tocosFixos} onChange={e => updateForm('tocosFixos', e.target.value)} />
                   </div>
@@ -326,10 +386,6 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
                       <input type="number" className="at-input h-10 text-center" value={form.tocosAbalados} onChange={e => updateForm('tocosAbalados', e.target.value)} />
                     </div>
                   )}
-                </div>
-                <div className="flex justify-around mt-2 pt-2 border-t text-xs font-bold">
-                  {config.showArranquio && <span style={{ color: hexColor(calcTotals.arranquioPercent, config.metaArranquio) }}>Arranquio: {calcTotals.arranquioPercent.toFixed(1)}%</span>}
-                  {config.showAbalo && <span className="text-slate-500">Abalo: {calcTotals.abaloPercent.toFixed(1)}%</span>}
                 </div>
               </div>
             )}
@@ -362,7 +418,7 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
 
             {Object.keys(groupedHistory).length === 0 ? <div className="at-empty-state">Nenhum ponto encontrado.</div> : (
               Object.entries(groupedHistory).map(([groupName, items]) => {
-                const isOpen = expandedGroups[groupName]; // Fechado por padrão (falsy)
+                const isOpen = expandedGroups[groupName]; 
                 return (
                   <div key={groupName} className="mb-3 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
                     <div 
@@ -379,18 +435,24 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
                     {isOpen && (
                       <div className="p-2 flex flex-col gap-2">
                         {items.map(item => (
-                          <div key={item.id} className="flex justify-between items-center p-3 border border-slate-100 rounded-lg hover:bg-slate-50 cursor-pointer shadow-sm transition-transform active:scale-[0.98]" onClick={() => setModalItem(item)}>
-                            <div className="flex flex-col gap-1">
-                              <span className="text-[10px] font-bold text-slate-400 uppercase bg-slate-100 px-2 py-0.5 rounded w-fit">
-                                {item.horaStr} • {item.turno}º Turno
-                              </span>
-                              <span className="text-sm font-black text-slate-700">
-                                {groupMode === 'colhedora' ? (item.campo || 'Sem Campo') : item.colhedora}
-                              </span>
+                          <div key={item.id} className="flex flex-col p-3 border border-slate-100 rounded-lg hover:bg-slate-50 cursor-pointer shadow-sm transition-transform active:scale-[0.98]" onClick={() => setModalItem(item)}>
+                            <div className="flex justify-between items-start mb-1">
+                              <div className="flex flex-col gap-1 overflow-hidden pr-2">
+                                <span className="text-[10px] font-bold text-slate-400 uppercase bg-slate-100 px-2 py-0.5 rounded w-fit">
+                                  {item.horaStr} • {item.turno}º Turno
+                                </span>
+                                <span className="text-sm font-black text-slate-700 truncate">
+                                  {groupMode === 'colhedora' ? (item.campo || 'Sem Campo') : item.colhedora}
+                                </span>
+                              </div>
+                              <div className="font-black text-lg bg-white px-2 py-1 rounded-lg border shadow-sm flex-shrink-0" style={{ borderColor: hexColor(item.results.perdasPercent, config.metaPerda), color: hexColor(item.results.perdasPercent, config.metaPerda) }}>
+                                {item.results.perdasPercent.toFixed(2)}%
+                              </div>
                             </div>
-                            <div className="font-black text-lg bg-white px-3 py-1 rounded-lg border shadow-sm" style={{ borderColor: hexColor(item.results.perdasPercent, config.metaPerda), color: hexColor(item.results.perdasPercent, config.metaPerda) }}>
-                              {item.results.perdasPercent.toFixed(2)}%
-                            </div>
+                            {/* Altura fixa para justificar, garantindo que os cards mantenham o mesmo tamanho */}
+                            <span className="text-[10px] text-slate-400 italic truncate block h-3 leading-3 mt-1">
+                              {item.justificativa ? `Just: ${item.justificativa}` : ''}
+                            </span>
                           </div>
                         ))}
                       </div>
@@ -452,7 +514,6 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
       {/* ================= MODAL DE RESUMO ================= */}
       {modalItem && (
         <div className="fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-          {/* O Modal agora está blindado com max-h-[85vh] e padding/margins seguros */}
           <div className="bg-white w-full max-w-[85vw] md:max-w-sm rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[85vh] m-auto">
             <div className="bg-slate-100 p-4 border-b flex justify-between items-center">
               <h3 className="font-black text-slate-700 uppercase text-sm">Resumo do Ponto</h3>
