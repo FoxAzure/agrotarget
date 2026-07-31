@@ -33,6 +33,7 @@ import CucGotejoTools from './pages/AgroTools/details/CucGotejo';
 import AdubacaoTools from './pages/AgroTools/details/Adubacao';
 import PerdasColheitaTools from './pages/AgroTools/details/PerdasColheita';
 import VinhacaTools from './pages/AgroTools/details/Vinhaca';
+import CucPivotTools from './pages/AgroTools/details/CucPivot';
 
 
 // ================================= HELPERS (COMPONENTES) ================================= //
@@ -122,6 +123,7 @@ function App() {
         <Route path="/agrotools/adubacao" element={<AdubacaoTools />} />
         <Route path="/agrotools/perdas" element={<PerdasColheitaTools />} />
         <Route path="/agrotools/vinhaca" element={<VinhacaTools />} />
+        <Route path="/agrotools/cucpivot" element={<CucPivotTools />} />
 
         {/* ROTA PADRÃO (CATCH-ALL) */}
         <Route path="*" element={<PaginaNaoEncontrada />} />

@@ -1,4 +1,9 @@
-import React, { useState } from 'react';
+// ================= DOCUMENTATION ------------------------------------------
+// Script: AgroToolsHome
+// Purpose: Hub central das ferramentas agrícolas. Com suporte visual a modo offline (PWA).
+// ==========================================================================
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './Style.css';
 
@@ -8,6 +13,21 @@ import SidebarAgroTools from '../../components/AgroTools/SidebarAgroTools';
 const AgroToolsHome = () => {
   const navigate = useNavigate();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  // Detector de status da rede (Online/Offline)
+  useEffect(() => {
+    const handleOffline = () => setIsOffline(true);
+    const handleOnline = () => setIsOffline(false);
+
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
 
   // Lista atualizada com ícones SVG minimalistas (estilo linha fina) embutidos
   const toolsList = [
@@ -45,6 +65,17 @@ const AgroToolsHome = () => {
       )
     },
     { 
+      id: 'cucpivot', 
+      titulo: 'CUC Pivot', 
+      descricao: 'Uniformidade de Irrigação de Pivô Central',
+      rota: '/agrotools/cucpivot',
+      icon: (
+        <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25a.75.75 0 01.75.75v13.5a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM5.25 10.5a6.75 6.75 0 1013.5 0" />
+        </svg>
+      )
+    },
+    { 
       id: 'vinhaca', 
       titulo: 'Vinhaça', 
       descricao: 'Cálculos e Métrica da Vinhaça Localizada',
@@ -58,7 +89,7 @@ const AgroToolsHome = () => {
   ];
 
   return (
-    <div className="at-theme">
+    <div className="at-theme relative">
       <HeaderAgroTools onMenuOpen={() => setSidebarOpen(true)} />
 
       <SidebarAgroTools 
@@ -71,7 +102,15 @@ const AgroToolsHome = () => {
           
           {/* O texto voltou, mas com uma tipografia elegante */}
           <div className="mb-8">
-            <h2 className="at-page-title">Calculadoras e Ferramentas</h2>
+            <h2 className="at-page-title flex items-center gap-2">
+              Calculadoras e Ferramentas
+              {/* Badge indicando o modo offline */}
+              {isOffline && (
+                <span className="bg-orange-100 text-orange-600 border border-orange-200 text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-sm ml-2">
+                  Offline
+                </span>
+              )}
+            </h2>
             <p className="at-page-subtitle">
               Módulos de apoio operacional - Qualidade Agrícola
             </p>
@@ -86,7 +125,6 @@ const AgroToolsHome = () => {
                 onClick={() => navigate(tool.rota)}
               >
                 <div className="at-slim-left">
-                  
                   <div className="at-slim-text">
                     <span className="at-slim-title">{tool.titulo}</span>
                     <span className="at-slim-desc">{tool.descricao}</span>
