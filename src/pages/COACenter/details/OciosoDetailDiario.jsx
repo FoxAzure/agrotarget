@@ -1,8 +1,15 @@
+// ================= DOCUMENTATION ------------------------------------------
+// Script: OciosoDetailDiario
+// Purpose: Visão detalhada do Ocioso Diário com hierarquia de Frota e barra de % Indeterminado.
+// Relationships: vw_c_ociosogeral, vw_c_ociosoequipe, tb_c_geral (consulta otimizada)
+// ==========================================================================
+
 import React, { useEffect, useMemo, useState } from 'react';
 import DateSelectorCOA from '../../../components/COACenter/DateSelectorCOA';
 import { supabase } from '../../../lib/supabaseClient';
 import OciosoDetailDiarioModal from './OciosoDetailDiarioModal';
 
+// Colunas restauradas para o formato original da view (sem quebrar o banco)
 const OCIOSO_COLUMNS = [
   'data',
   'semana',
@@ -112,6 +119,11 @@ const aggregateSummaryRows = (rows = []) => {
       sum.hrs_ocioso += toNumber(row.hrs_ocioso);
       sum.hrs_total_seg += toNumber(row.hrs_total_seg);
       sum.hrs_ocioso_seg += toNumber(row.hrs_ocioso_seg);
+      
+      // Agregando os valores anexados em memória
+      sum.indeter_seg += toNumber(row.indeter_seg);
+      sum.hrs_operacionais_seg += toNumber(row.hrs_operacionais_seg);
+      
       return sum;
     },
     {
@@ -122,15 +134,24 @@ const aggregateSummaryRows = (rows = []) => {
       hrs_ocioso: 0,
       hrs_total_seg: 0,
       hrs_ocioso_seg: 0,
+      indeter_seg: 0,
+      hrs_operacionais_seg: 0,
     }
   );
 
   const perc_ocioso =
     acc.hrs_total_seg > 0 ? (acc.hrs_ocioso_seg / acc.hrs_total_seg) * 100 : 0;
 
+  // Calculo real: indeter_seg / hrs_operacionais_seg
+  const perc_indeterminado =
+    acc.hrs_operacionais_seg > 0 ? (acc.indeter_seg / acc.hrs_operacionais_seg) * 100 : 0;
+  const hrs_indeterminado = acc.indeter_seg / 3600;
+
   return {
     ...acc,
     perc_ocioso,
+    perc_indeterminado,
+    hrs_indeterminado
   };
 };
 
@@ -165,6 +186,8 @@ const aggregateEquipeRows = (rows = []) => {
   };
 };
 
+// ================= HELPERS: COMPONENTES UI =================
+
 const MetricCard = ({ label, value, color = 'var(--coa-text)' }) => {
   return (
     <div
@@ -177,6 +200,42 @@ const MetricCard = ({ label, value, color = 'var(--coa-text)' }) => {
       <span className="block text-[1rem] font-black tracking-tight" style={{ color }}>
         {value}
       </span>
+    </div>
+  );
+};
+
+// Barra de Indeterminado (Com regra de 10% e Font 1rem)
+const ProgressBarIndeterminado = ({ perc, hrs }) => {
+  const safePerc = Number(perc) || 0;
+  // Regra clara: Abaixo ou igual a 10% é Verde, Acima é Vermelho
+  const isDanger = safePerc > 10;
+  const barColor = isDanger ? 'var(--coa-danger)' : 'var(--coa-success)';
+
+  return (
+    <div 
+      className="rounded-[14px] border px-4 py-4 bg-[rgba(255,255,255,0.02)] flex flex-col gap-3 shadow-sm transition-all"
+      style={{ borderColor: 'var(--coa-divider)' }}
+    >
+      <div className="flex justify-between items-center">
+        <span className="text-[10px] font-black uppercase tracking-[0.14em] text-[var(--coa-text-muted)]">
+          Indeterminado
+        </span>
+        {/* Fonte com o mesmo tamanho (1rem) e peso dos cards superiores */}
+        <div className="flex items-center gap-2 text-[1rem] font-black tracking-tight">
+          <span style={{ color: 'var(--coa-text)' }}>{formatHours(hrs)}</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--coa-text-muted)] opacity-50"></span>
+          <span className="transition-colors" style={{ color: barColor }}>
+            {formatPercent(safePerc)}
+          </span>
+        </div>
+      </div>
+      
+      <div className="w-full h-2 rounded-full overflow-hidden flex bg-[rgba(255,255,255,0.05)] shadow-inner">
+        <div 
+          className="h-full transition-all duration-700 ease-out"
+          style={{ width: `${Math.min(safePerc, 100)}%`, backgroundColor: barColor }}
+        />
+      </div>
     </div>
   );
 };
@@ -517,6 +576,8 @@ const buildHierarchy = (rows = []) => {
     .sort((a, b) => b.hrs_ocioso - a.hrs_ocioso);
 };
 
+// ================= EXECUTOR =================
+
 const OciosoDetailDiario = ({
   selectedDate,
   setSelectedDate,
@@ -549,7 +610,8 @@ const OciosoDetailDiario = ({
 
         const selectedBrDate = isoToBr(selectedDate);
 
-        const [geralRes, equipeRes] = await Promise.all([
+        // CONSULTA INTELIGENTE: Baixando só 3 coluninhas de tb_c_geral para cruzar em memória. 
+        const [geralRes, equipeRes, tbGeralRes] = await Promise.all([
           supabase
             .from('vw_c_ociosogeral')
             .select(OCIOSO_COLUMNS)
@@ -558,13 +620,37 @@ const OciosoDetailDiario = ({
             .from('vw_c_ociosoequipe')
             .select(OCIOSO_EQUIPE_COLUMNS)
             .eq('data', selectedBrDate),
+          supabase
+            .from('tb_c_geral')
+            .select('desc_area, indeter_seg, hrs_operacionais_seg')
+            .eq('data', selectedBrDate)
         ]);
 
         if (geralRes.error) throw geralRes.error;
         if (equipeRes.error) throw equipeRes.error;
+        if (tbGeralRes.error) throw tbGeralRes.error;
+
+        // Agrupando o resultado otimizado por área para fundir com a view principal
+        const indeterMap = {};
+        (tbGeralRes.data || []).forEach(row => {
+            const area = row.desc_area || 'NÃO MAPEADO';
+            if (!indeterMap[area]) {
+                indeterMap[area] = { indeter_seg: 0, hrs_operacionais_seg: 0 };
+            }
+            indeterMap[area].indeter_seg += Number(row.indeter_seg) || 0;
+            indeterMap[area].hrs_operacionais_seg += Number(row.hrs_operacionais_seg) || 0;
+        });
 
         const normalizedGeral = (geralRes.data || [])
-          .map(normalizeAreaRow)
+          .map(row => {
+              const base = normalizeAreaRow(row);
+              const mapData = indeterMap[base.desc_area] || { indeter_seg: 0, hrs_operacionais_seg: 0 };
+              return {
+                  ...base,
+                  indeter_seg: mapData.indeter_seg,
+                  hrs_operacionais_seg: mapData.hrs_operacionais_seg
+              };
+          })
           .filter(
             (row) =>
               row.desc_area !== 'EMPACOTAMENTO' &&
@@ -775,6 +861,12 @@ const OciosoDetailDiario = ({
         />
       </div>
 
+      {/* Nossa Barra de Indeterminado Perfeita, com cálculos precisos */}
+      <ProgressBarIndeterminado 
+        perc={totalAgg.perc_indeterminado} 
+        hrs={totalAgg.hrs_indeterminado} 
+      />
+
       <div className="flex flex-col gap-4 pt-4">
         <div className="flex flex-col gap-1">
           <h2 className="text-[1.35rem] md:text-[1.45rem] font-black uppercase tracking-tight leading-none text-[var(--coa-text)]">
@@ -830,16 +922,14 @@ const OciosoDetailDiario = ({
           </div>
         )}
       </div>
-
       
-        {selectedModalItem && (
+      {selectedModalItem && (
         <OciosoDetailDiarioModal
             item={selectedModalItem}
             selectedDate={selectedDate}
             onClose={() => setSelectedModalItem(null)}
         />
-        )}
-
+      )}
 
     </div>
   );
