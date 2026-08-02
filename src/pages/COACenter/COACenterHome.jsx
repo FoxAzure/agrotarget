@@ -9,6 +9,8 @@ import DateSelectorCOA from '../../components/COACenter/DateSelectorCOA';
 import CardResumo from '../../components/COACenter/CardResumo';
 import CardOcioso from '../../components/COACenter/CardOcioso';
 import CardDisponibilidade from '../../components/COACenter/CardDisponibilidade';
+import CardOperacoes from '../../components/COACenter/CardOperacoes';
+import CardIndeterminado from '../../components/COACenter/CardIndeterminado';
 
 
 
@@ -93,9 +95,12 @@ const COACenterHome = () => {
             </div>
           </div>
 
+          <CardOperacoes selectedDate={selectedDate} />
           <CardResumo selectedDate={selectedDate} />
+          <CardIndeterminado selectedDate={selectedDate} />
           <CardOcioso selectedDate={selectedDate} />
           <CardDisponibilidade selectedDate={selectedDate} />
+
         </section>
       </main>
     </div>

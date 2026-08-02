@@ -18,7 +18,7 @@ const SidebarCOACenter = ({ isOpen, onClose }) => {
     {
       title: 'Indicadores',
       items: [
-        { label: 'Motor Ocioso', path: '/coacenter/motorocioso' },
+        { label: 'Motor Ocioso', path: '/coacenter/ocioso' },
         { label: 'Auditoria de Dados', path: '/coacenter/audit' },
       ],
     },

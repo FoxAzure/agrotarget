@@ -21,6 +21,7 @@ import ResumoDetail from './pages/COACenter/details/ResumoDetail';
 import OciosoDetail from './pages/COACenter/details/OciosoDetail';
 import DispoDetail from './pages/COACenter/details/DispoDetail';
 import COAOperacoes from './pages/COACenter/COAOperacoes';
+import IndeterDetail from './pages/COACenter/details/IndeterDetail';
 //import Operacoes from './pages/COACenter/Operacoes';
 //import Detalhe from './pages/COACenter/Detalhe';
 //import MotorOcioso from './pages/COACenter/MotorOcioso';
@@ -117,6 +118,7 @@ function App() {
         <Route path="/coacenter/ocioso" element={<OciosoDetail />} />
         <Route path="/coacenter/disponibilidade" element={<DispoDetail />} />
         <Route path="/coacenter/operacoes" element={<COAOperacoes />} />
+        <Route path="/coacenter/indeterminado" element={<IndeterDetail />} />
         
         <Route path="/agrotools" element={<AgroToolsHome />} />
         <Route path="/agrotools/cuc" element={<CucGotejoTools />} />
