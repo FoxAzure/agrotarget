@@ -336,7 +336,7 @@ const CardIndeterminado = ({ selectedDate }) => {
       <div className="coa-card coa-card--resumo-home">
         <div className="coa-card__header">
           <h2 className="coa-text-title !mb-0">
-            Tempo Indeterminado 7 Dias
+            Indeterminado 7 Dias
           </h2>
         </div>
 
@@ -347,7 +347,7 @@ const CardIndeterminado = ({ selectedDate }) => {
               value={formatHours(summary.hrsTotal)}
             />
             <MetricCard
-              label="Indeter. Hrs"
+              label="Indeter.Hrs"
               value={formatHours(summary.hrsIndeter)}
             />
             <MetricCard
