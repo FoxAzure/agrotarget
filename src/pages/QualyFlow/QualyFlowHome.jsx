@@ -4,6 +4,7 @@
 // Relationships:
 //   - vw_q_agrotarget_datas
 //   - CardAtividadesDiaria
+//   - CardCUC
 // ==========================================================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -14,6 +15,7 @@ import HeaderQualyFlow from '../../components/QualyFlow/HeaderQualyFlow';
 import Sidebar from '../../components/QualyFlow/Sidebar';
 import DateSelectorQualyFlow from '../../components/QualyFlow/DateSelectorQualyFlow';
 import CardAtividadesDiaria from '../../components/QualyFlow/CardAtividadesDiaria';
+import CardCUC from '../../components/QualyFlow/CardCUC';
 
 // ================================= HELPERS ------------------------------------------------
 
@@ -181,13 +183,12 @@ const QualyFlowHome = () => {
           })
           .filter(Boolean);
 
-        // Remove duplicadas.
+        // Remove datas duplicadas.
         const uniqueDates = [
           ...new Set(rawIsoDates)
         ];
 
         // A view já vem DESC.
-        // Mantemos a ordem recebida.
         setAvailableDates(uniqueDates);
 
         // Seleciona automaticamente a primeira data disponível.
@@ -238,28 +239,41 @@ const QualyFlowHome = () => {
   return (
     <div className="qf-theme">
 
+      {/* ================================================================
+          HEADER
+      ================================================================= */}
+
       <HeaderQualyFlow
         onMenuOpen={() => setSidebarOpen(true)}
       />
+
+      {/* ================================================================
+          SIDEBAR
+      ================================================================= */}
 
       <Sidebar
         isOpen={isSidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />
 
+      {/* ================================================================
+          CONTEÚDO
+      ================================================================= */}
+
       <main className="qf-container py-6 md:py-10">
 
         <section className="flex flex-col gap-6">
 
-          {/* ================================================================
+          {/* ==============================================================
               SELETOR DE DATA
-          ================================================================= */}
+          ============================================================== */}
 
           <div className="w-full flex justify-center">
 
             <div className="w-full max-w-sm md:max-w-md">
 
               {activeYear && (
+
                 <DateSelectorQualyFlow
                   value={selectedDate}
                   onChange={setSelectedDate}
@@ -269,52 +283,63 @@ const QualyFlowHome = () => {
                   yearsList={yearsList}
                   isLoading={isLoadingDates}
                 />
+
               )}
 
             </div>
 
           </div>
 
-          {/* ================================================================
-              ERRO DA BUSCA DE DATAS
-          ================================================================= */}
+          {/* ==============================================================
+              ERRO
+          ============================================================== */}
 
           {errorMsg && (
 
-            <div className="
-              bg-[var(--q-danger-soft)]
-              text-[var(--q-danger)]
-              p-4
-              rounded-[var(--q-radius-md)]
-              border
-              border-[var(--q-danger)]
-              text-sm
-              font-bold
-              text-center
-            ">
+            <div
+              className="
+                bg-[var(--q-danger-soft)]
+                text-[var(--q-danger)]
+                p-4
+                rounded-[var(--q-radius-md)]
+                border
+                border-[var(--q-danger)]
+                text-sm
+                font-bold
+                text-center
+              "
+            >
               Contratempo no processamento: {errorMsg}
             </div>
 
           )}
 
-          {/* ================================================================
+          {/* ==============================================================
               CONTEÚDO PRINCIPAL
-          ================================================================= */}
+          ============================================================== */}
 
           <div className="w-full">
 
             {isLoadingDates ? (
 
+              /* ==========================================================
+                 LOADING
+              ========================================================== */
+
               <div className="qf-home-loading">
 
                 <div className="qf-home-loading__text">
-                  <span>Buscando Avaliações</span>
+
+                  <span>
+                    Buscando Avaliações
+                  </span>
 
                   <span className="qf-loading-dots">
                     <i>.</i>
                     <i>.</i>
                     <i>.</i>
                   </span>
+
                 </div>
 
                 <div className="qf-home-loading__line" />
@@ -323,9 +348,21 @@ const QualyFlowHome = () => {
 
             ) : (
 
-              <CardAtividadesDiaria
-                selectedDate={selectedDate}
-              />
+              /* ==========================================================
+                 CARDS
+              ========================================================== */
+
+              <div className="flex flex-col gap-4">
+
+                <CardAtividadesDiaria
+                  selectedDate={selectedDate}
+                />
+
+                <CardCUC
+                  selectedDate={selectedDate}
+                />
+
+              </div>
 
             )}
 

@@ -1086,3 +1086,384 @@ DESKTOP
         font-size: 1.2rem;
     }
 }
+
+
+
+
+/* ==========================================================================
+   QUALYFLOW | CARD CUC
+   Visual compacto, mobile-first e orientado à leitura rápida.
+   ========================================================================== */
+
+.qf-cuc-card {
+  width: 100%;
+  background: var(--q-surface, #ffffff);
+  border: 1px solid var(--q-border, #e5e7eb);
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+}
+
+/* ==========================================================================
+   HEADER
+   ========================================================================== */
+
+.qf-cuc-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.qf-cuc-title {
+  font-size: 1rem;
+  font-weight: 900;
+  color: var(--q-text, #1f2937);
+  letter-spacing: -0.01em;
+}
+
+/* ==========================================================================
+   CABEÇALHO DAS COLUNAS
+   ========================================================================== */
+
+.qf-cuc-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px 62px 52px;
+  align-items: center;
+
+  padding: 0 4px 7px;
+
+  font-size: 0.68rem;
+  font-weight: 700;
+
+  color: #9ca3af;
+  text-transform: uppercase;
+}
+
+.qf-cuc-columns span:not(.qf-cuc-column-field) {
+  text-align: right;
+}
+
+.qf-cuc-column-field {
+  text-align: left;
+}
+
+/* ==========================================================================
+   LISTA
+   ========================================================================== */
+
+.qf-cuc-list {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ==========================================================================
+   ITEM
+   ========================================================================== */
+
+.qf-cuc-item {
+  padding: 9px 4px 11px;
+}
+
+.qf-cuc-item + .qf-cuc-item {
+  margin-top: 2px;
+}
+
+/* ==========================================================================
+   LINHA
+   ========================================================================== */
+
+.qf-cuc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 58px 62px 52px;
+  align-items: center;
+  column-gap: 0;
+}
+
+/* ==========================================================================
+   CAMPO
+   ========================================================================== */
+
+.qf-cuc-field {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+}
+
+.qf-cuc-field-name {
+  min-width: 0;
+  width: 100%;
+
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qf-cuc-av {
+  flex-shrink: 0;
+
+  font-size: 0.80rem;
+  font-weight: 800;
+
+  
+}
+
+.qf-cuc-name {
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 0.82rem;
+  font-weight: 650;
+
+  color: var(--q-text, #1f2937);
+}
+
+.qf-cuc-year {
+  padding-left: 0px;
+
+  font-size: 0.58rem;
+  line-height: 1;
+
+  color: #a3aab4;
+  font-weight: 500;
+}
+
+/* ==========================================================================
+   VALORES
+   ========================================================================== */
+
+.qf-cuc-value {
+  text-align: right;
+
+  font-size: 0.78rem;
+  font-weight: 750;
+
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   STATUS
+   ========================================================================== */
+
+.qf-cuc-status-good {
+  color: #16a34a;
+}
+
+.qf-cuc-status-warning {
+  color: #d69e00;
+}
+
+.qf-cuc-status-danger {
+  color: #dc2626;
+}
+
+.qf-cuc-status-orange {
+  color: #ea580c;
+}
+
+.qf-cuc-status-blue {
+  color: #2563eb;
+}
+
+.qf-cuc-status-neutral {
+  color: #9ca3af;
+}
+
+/* ==========================================================================
+   BARRA CUC
+   ========================================================================== */
+
+.qf-cuc-progress {
+  width: 100%;
+  height: 8px;
+
+  margin-top: 8px;
+
+  overflow: hidden;
+
+  border-radius: 999px;
+
+  background: #edf0f2;
+}
+
+.qf-cuc-progress-bar {
+  height: 100%;
+  min-width: 3px;
+  border-radius: inherit;
+
+  transform-origin: left center;
+
+  animation: qf-cuc-progress-fill 0.8s ease-out;
+}
+
+@keyframes qf-cuc-progress-fill {
+  from {
+    transform: scaleX(0);
+  }
+
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.qf-cuc-progress-bar.qf-cuc-status-good {
+  background: #22c55e;
+}
+
+.qf-cuc-progress-bar.qf-cuc-status-warning {
+  background: #eab308;
+}
+
+.qf-cuc-progress-bar.qf-cuc-status-danger {
+  background: #ef4444;
+}
+
+.qf-cuc-progress-bar.qf-cuc-status-orange {
+  background: #f97316;
+}
+
+.qf-cuc-progress-bar.qf-cuc-status-blue {
+  background: #3b82f6;
+}
+
+@keyframes qf-cuc-progress-enter {
+
+  from {
+    width: 0 !important;
+    opacity: 0.35;
+  }
+
+  to {
+    opacity: 1;
+  }
+
+}
+
+/* ==========================================================================
+   RODAPÉ
+   ========================================================================== */
+
+.qf-cuc-footer {
+  display: flex;
+  justify-content: flex-end;
+
+  margin-top: 13px;
+  padding-top: 12px;
+
+  border-top: 1px solid #f0f1f2;
+}
+
+/* ==========================================================================
+   BOTÃO DETALHADO
+   ========================================================================== */
+
+.qf-cuc-detail-button {
+  border: 1px solid rgba(25, 135, 84, 0.35);
+  border-radius: 9px;
+
+  background: #ffffff;
+
+  padding: 7px 15px;
+
+  font-size: 0.72rem;
+  font-weight: 750;
+
+  color: var(--q-primary, #198754);
+
+  cursor: pointer;
+
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background 0.15s ease;
+}
+
+.qf-cuc-detail-button:hover {
+  background: #f5faf7;
+
+  box-shadow:
+    0 5px 12px rgba(0, 0, 0, 0.16),
+    0 2px 3px rgba(0, 0, 0, 0.08);
+
+  transform: translateY(-1px);
+}
+
+.qf-cuc-detail-button:active {
+  transform: translateY(0);
+
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.12);
+}
+
+/* ==========================================================================
+   LOADING
+   ========================================================================== */
+
+.qf-cuc-loading {
+  width: 100%;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  padding: 28px 0;
+}
+
+.qf-cuc-spinner {
+  width: 30px;
+  height: 30px;
+
+  border-radius: 50%;
+
+  border: 3px solid #e5e7eb;
+  border-top-color: var(--q-primary, #198754);
+
+  animation: qf-cuc-spin 0.75s linear infinite;
+}
+
+@keyframes qf-cuc-spin {
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
+
+/* ==========================================================================
+   MOBILE
+   ========================================================================== */
+
+@media (max-width: 480px) {
+
+  .qf-cuc-card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .qf-cuc-columns {
+    grid-template-columns: minmax(0, 1fr) 52px 57px 48px;
+  }
+
+  .qf-cuc-row {
+    grid-template-columns: minmax(0, 1fr) 52px 57px 48px;
+  }
+
+  .qf-cuc-name {
+    font-size: 0.79rem;
+  }
+
+  .qf-cuc-value {
+    font-size: 0.73rem;
+  }
+
+  .qf-cuc-progress {
+    height: 5px;
+  }
+
+}

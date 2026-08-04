@@ -319,7 +319,7 @@ const CardAtividadesDiaria = ({ selectedDate }) => {
                           </span>
 
                           <span className="qf-activity__points">
-                            {activity.totalPontos} pts
+                            {activity.totalPontos}
                           </span>
                         </div>
 
