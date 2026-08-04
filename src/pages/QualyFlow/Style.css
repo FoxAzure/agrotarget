@@ -1,4 +1,7 @@
 /* src/pages/QualyFlow/Style.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   /* Paleta Core AgroTarget */
@@ -16,100 +19,64 @@
   --q-danger: #C0392B;
 }
 
+body {
+  background-color: var(--q-bg);
+  -webkit-font-smoothing: antialiased;
+}
+
 /* =======================================================
-   TIPOGRAFIA PADRONIZADA (Chega de fontes aleatórias!)
+   TIPOGRAFIA PADRONIZADA 
 ======================================================== */
 .text-micro {
-  font-size: 9px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  font-weight: 900;
+  font-weight: 800;
   color: var(--q-gray);
 }
 
 .text-title {
-  font-size: 13px;
+  font-size: 14px;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.08em;
   font-weight: 900;
   color: var(--q-green);
 }
 
 .text-highlight {
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 900;
   letter-spacing: -0.05em;
   line-height: 1;
+  color: var(--q-dark);
 }
 
 /* =======================================================
-   ESTRUTURA DE CARDS (O Padrão QualyFlow)
+   ESTRUTURA DE CARDS BASE
 ======================================================== */
 .qualy-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 450px;
   background-color: #FFFFFF;
-  border: 2px solid rgba(226, 232, 240, 0.8);
+  border: 1px solid rgba(226, 232, 240, 0.8);
   border-radius: 16px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
   overflow: hidden;
   transition: all 0.3s ease;
-  position: relative;
   margin: 0 auto;
 }
 
 .qualy-card:hover {
   border-color: rgba(23, 165, 76, 0.3);
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  transform: translateY(-2px);
 }
 
-/* Oculta barra de rolagem nos menus horizontais, mas permite o scroll */
+/* Utilitário de scroll horizontal escondido */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
 .no-scrollbar {
   -ms-overflow-style: none;
   scrollbar-width: none;
-}
-
-
-/* =======================================================
-   ANIMAÇÕES QUALYFLOW (Tickers e Indicadores)
-======================================================== */
-
-/* Letreiro Contínuo (Bolsa de Valores) */
-.ticker-wrap {
-  width: 100%;
-  overflow: hidden;
-  background-color: #F8FAFC;
-  border-top: 1px solid #E2E8F0;
-  border-bottom: 1px solid #E2E8F0;
-  display: flex;
-  white-space: nowrap;
-}
-
-.ticker-content {
-  display: flex;
-  gap: 2rem;
-  padding: 0.5rem 1rem;
-  animation: ticker 25s linear infinite;
-}
-
-.ticker-wrap:hover .ticker-content {
-  animation-play-state: paused;
-}
-
-@keyframes ticker {
-  0% { transform: translateX(10%); }
-  100% { transform: translateX(-100%); }
-}
-
-/* Seta Pulsante de Performance */
-.animate-subtle-bounce {
-  animation: subtle-bounce 2s infinite ease-in-out;
-}
-
-@keyframes subtle-bounce {
-  0%, 100% { transform: translateY(-15%); }
-  50% { transform: translateY(15%); }
 }
