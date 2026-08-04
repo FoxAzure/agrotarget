@@ -5,9 +5,9 @@ import { QUALY_RULES } from '../../pages/QualyFlow/rules';
 import { supabase } from '../../supabaseClient';
 
 // Componentes Reutilizáveis
-import QualyHeader from '../../components/QualyFlow/QualyHeader';
+import HeaderQualyFlow from '../../components/QualyFlow/HeaderQualyFlow';
 import Sidebar from '../../components/QualyFlow/Sidebar';
-import DateSelector from '../../components/QualyFlow/DateSelector';
+import DateSelectorQualyFlow from '../../components/QualyFlow/DateSelectorQualyFlow';
 
 const PerdasDetails = () => {
   const location = useLocation();
@@ -52,15 +52,15 @@ const PerdasDetails = () => {
 
   return (
     <div className="min-h-screen bg-[var(--q-bg)] flex flex-col items-center pb-10 font-sans">
-      <QualyHeader onMenuOpen={() => setSidebarOpen(true)}>
-        <DateSelector 
+      <HeaderQualyFlow onMenuOpen={() => setSidebarOpen(true)}>
+        <DateSelectorQualyFlow 
           date="2026-05-27" 
           availableDates={["2026-05-27"]} 
           onSelectDate={() => {}} 
           onPrev={() => {}} 
           onNext={() => {}} 
         />
-      </QualyHeader>
+      </HeaderQualyFlow>
       
       <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
 

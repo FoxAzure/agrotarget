@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../../../supabaseClient';
-import DateSelector from '../../../components/QualyFlow/DateSelector';
+import DateSelectorQualyFlow from '../../../components/QualyFlow/DateSelectorQualyFlow';
 
 const CUC_ATIVIDADES = ['CUC - Gotejo', 'CUC - Gotejo 9E'];
 
@@ -72,7 +72,7 @@ const CucDetailDiario = ({ selectedDate, setSelectedDate }) => {
   return (
     <div className="flex flex-col gap-6 animate-in slide-in-from-left-4 duration-300">
       <div className="flex justify-end border-b border-slate-200/60 pb-3 px-1">
-        <DateSelector
+        <DateSelectorQualyFlow
           date={selectedDate}
           availableDates={availableDates}
           onSelectDate={(d) => setSelectedDate(d)}

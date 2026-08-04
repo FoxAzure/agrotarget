@@ -1,0 +1,509 @@
+/* ============================================================================
+   QUALYFLOW | CARD ATIVIDADES DIÁRIA
+   Compacto, mobile-first e focado em leitura.
+   ============================================================================ */
+
+.qf-activities-card {
+  width: 100%;
+  background: var(--q-bg);
+  border: 1px solid var(--q-border);
+  border-radius: var(--q-radius-lg);
+  box-shadow: var(--q-shadow-sm);
+  overflow: hidden;
+}
+
+
+/* ============================================================================
+   HEADER PRINCIPAL
+   ============================================================================ */
+
+.qf-activities-card__header {
+  width: 100%;
+  min-height: 54px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0.75rem 0.9rem;
+
+  background: transparent;
+  border: none;
+
+  color: var(--q-dark);
+  font-family: inherit;
+
+  cursor: pointer;
+  text-align: left;
+
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.qf-activities-card__header:hover {
+  background: var(--q-bg-hover);
+}
+
+.qf-activities-card__header:active {
+  background: var(--q-green-soft);
+}
+
+
+/* Grupo esquerdo */
+
+.qf-activities-card__header-info {
+  min-width: 0;
+
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+
+/* Título */
+
+.qf-activities-card__title {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--q-dark);
+
+  white-space: nowrap;
+}
+
+
+/* Número total */
+
+.qf-activities-card__total {
+  min-width: 24px;
+  height: 24px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 0.45rem;
+
+  border-radius: 7px;
+
+  background: var(--q-green-soft);
+  color: var(--q-green-dark);
+
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+
+/* Botão + / - */
+
+.qf-activities-card__toggle {
+  width: 25px;
+  height: 25px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 7px;
+
+  color: var(--q-gray);
+  background: var(--q-bg-app);
+
+  border: 1px solid var(--q-border);
+
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.qf-activities-card__header:hover
+.qf-activities-card__toggle {
+  color: var(--q-green-dark);
+  border-color: var(--q-green);
+}
+
+.qf-activities-card__toggle.is-open {
+  background: var(--q-green-soft);
+  color: var(--q-green-dark);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+
+/* ============================================================================
+   CONTEÚDO
+   ============================================================================ */
+
+.qf-activities-card__content {
+  border-top: 1px solid var(--q-divider);
+  padding: 0.3rem 0.55rem 0.55rem;
+}
+
+
+/* ============================================================================
+   LISTA DE ATIVIDADES
+   ============================================================================ */
+
+.qf-activities-list {
+  display: flex;
+  flex-direction: column;
+}
+
+
+/* ============================================================================
+   ATIVIDADE
+   ============================================================================ */
+
+.qf-activity {
+  border-bottom: 1px solid var(--q-divider);
+}
+
+.qf-activity:last-child {
+  border-bottom: none;
+}
+
+
+/* Header da atividade */
+
+.qf-activity__header {
+  width: 100%;
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 0.5rem;
+
+  padding: 0.55rem 0.4rem;
+
+  background: transparent;
+  border: none;
+
+  color: var(--q-dark);
+  font-family: inherit;
+
+  cursor: pointer;
+  text-align: left;
+
+  transition: background-color 0.18s ease;
+}
+
+.qf-activity__header:hover {
+  background: var(--q-bg-hover);
+}
+
+.qf-activity__header:active {
+  background: var(--q-green-soft);
+}
+
+
+/* Nome + quantidade */
+
+.qf-activity__name-wrapper {
+  min-width: 0;
+
+  flex: 1;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 0.75rem;
+}
+
+
+/* Nome */
+
+.qf-activity__name {
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 0.78rem;
+  font-weight: 700;
+
+  color: var(--q-dark);
+}
+
+
+/* Total de pontos */
+
+.qf-activity__points {
+  flex-shrink: 0;
+
+  font-size: 0.68rem;
+  font-weight: 800;
+
+  color: var(--q-gray);
+
+  white-space: nowrap;
+}
+
+
+/* + / - da atividade */
+
+.qf-activity__toggle {
+  width: 22px;
+  height: 22px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 6px;
+
+  background: transparent;
+
+  color: var(--q-light);
+
+  font-size: 0.9rem;
+  font-weight: 700;
+
+  line-height: 1;
+
+  transition:
+    color 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.qf-activity__header:hover
+.qf-activity__toggle {
+  color: var(--q-green-dark);
+}
+
+.qf-activity.is-expanded
+.qf-activity__toggle {
+  background: var(--q-green-soft);
+  color: var(--q-green-dark);
+}
+
+
+/* ============================================================================
+   LISTA DE CAMPOS
+   ============================================================================ */
+
+/*
+   A lista fica propositalmente mais "apagada" e indentada.
+   Isso cria a hierarquia visual:
+
+   ATIVIDADE
+       ├ campo
+       ├ campo
+       └ campo
+*/
+
+.qf-activity__fields {
+  margin: 0 0.35rem 0.5rem 0.9rem;
+
+  padding: 0.2rem 0 0.2rem 0.75rem;
+
+  border-left: 2px solid var(--q-green-soft);
+
+  display: flex;
+  flex-direction: column;
+
+  animation: qf-fields-in 0.16s ease-out;
+}
+
+
+/* Campo */
+
+.qf-field {
+  min-height: 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 0.5rem;
+
+  padding: 0.25rem 0.35rem;
+
+  border-bottom: 1px solid rgba(0, 0, 0, 0.035);
+}
+
+.qf-field:last-child {
+  border-bottom: none;
+}
+
+
+/* Nome do campo */
+
+.qf-field__name {
+  min-width: 0;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+
+  font-size: 0.69rem;
+  font-weight: 600;
+
+  color: var(--q-gray);
+}
+
+
+/* Quantidade */
+
+.qf-field__points {
+  flex-shrink: 0;
+
+  min-width: 22px;
+
+  text-align: right;
+
+  font-size: 0.67rem;
+  font-weight: 800;
+
+  color: var(--q-light);
+}
+
+
+/* ============================================================================
+   LOADING
+   ============================================================================ */
+
+.qf-activities-card__loading {
+  min-height: 42px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 0.5rem;
+
+  color: var(--q-gray);
+
+  font-size: 0.7rem;
+  font-weight: 700;
+}
+
+
+/* Spinner */
+
+.qf-activities-card__spinner {
+  width: 15px;
+  height: 15px;
+
+  border-radius: 50%;
+
+  border: 2px solid var(--q-green-soft);
+  border-top-color: var(--q-green);
+
+  animation: qf-activities-spin 0.7s linear infinite;
+}
+
+
+/* ============================================================================
+   ESTADOS VAZIOS / ERRO
+   ============================================================================ */
+
+.qf-activities-card__empty,
+.qf-activities-card__error {
+  padding: 0.85rem 0.5rem;
+
+  text-align: center;
+
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.qf-activities-card__empty {
+  color: var(--q-light);
+}
+
+.qf-activities-card__error {
+  color: var(--q-danger);
+}
+
+
+/* ============================================================================
+   ANIMAÇÕES
+   ============================================================================ */
+
+@keyframes qf-activities-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes qf-fields-in {
+  from {
+    opacity: 0;
+    transform: translateY(-3px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+/* ============================================================================
+   MOBILE
+   ============================================================================ */
+
+@media (max-width: 480px) {
+
+  .qf-activities-card {
+    border-radius: 14px;
+  }
+
+  .qf-activities-card__header {
+    min-height: 52px;
+    padding: 0.7rem 0.8rem;
+  }
+
+  .qf-activities-card__title {
+    font-size: 1.0rem;
+    color: #027636
+  }
+
+  .qf-activities-card__content {
+    padding: 0.25rem 0.45rem 0.45rem;
+  }
+
+  .qf-activity__header {
+    min-height: 40px;
+    padding: 0.5rem 0.3rem;
+  }
+
+  .qf-activity__name {
+    font-size: 0.85rem;
+    font-weight: 900;
+    /*color: #f97316*/
+  }
+
+  .qf-activity__points {
+    font-size: 0.65rem;
+  }
+
+  .qf-activity__fields {
+    margin-left: 0.75rem;
+    padding-left: 0.65rem;
+  }
+
+  .qf-field {
+    min-height: 28px;
+  }
+
+  .qf-field__name {
+    font-size: 0.67rem;
+  }
+
+  .qf-field__points {
+    font-size: 0.64rem;
+  }
+}

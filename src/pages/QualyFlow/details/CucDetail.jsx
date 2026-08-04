@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
-import QualyHeader from '../../../components/QualyFlow/QualyHeader';
+import HeaderQualyFlow from '../../../components/QualyFlow/HeaderQualyFlow';
 import Sidebar from '../../../components/QualyFlow/Sidebar';
 
 import CucDetailDiario from './CucDetailDiario';
@@ -32,7 +32,7 @@ const CucDetail = () => {
 
   return (
     <div className="min-h-screen bg-[var(--q-bg)] flex flex-col items-center pb-10 font-sans">
-      <QualyHeader onMenuOpen={() => setSidebarOpen(true)} />
+      <HeaderQualyFlow onMenuOpen={() => setSidebarOpen(true)} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="w-full max-w-5xl px-4 flex flex-col mt-6 animate-in fade-in duration-500">

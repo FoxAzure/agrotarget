@@ -1,0 +1,11 @@
+
+
+git config --global alias.atualizar "pull origin main"
+git atualizar
+
+git add .                                             
+git commit -m "UPDATE: CALENDARIO INDETERMINADO"
+git pull origin main
+
+
+npm run dev
