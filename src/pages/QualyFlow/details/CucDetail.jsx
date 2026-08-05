@@ -15,6 +15,7 @@ const CucDetail = () => {
   // Controle de Abas
   const [activeTab, setActiveTab] = useState('diario');
   
+  // Recupera a data do CardCUC ou usa uma padrão inicial
   const [selectedDate, setSelectedDate] = useState(location.state?.selectedDate || '2026-05-27');
 
   const TabButton = ({ id, label }) => (

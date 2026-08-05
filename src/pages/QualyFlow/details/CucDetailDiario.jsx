@@ -1,23 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { supabase } from '../../../supabaseClient';
+import { supabase } from '../../../lib/supabaseClient';
 import DateSelectorQualyFlow from '../../../components/QualyFlow/DateSelectorQualyFlow';
 
-const CUC_ATIVIDADES = ['CUC - Gotejo', 'CUC - Gotejo 9E'];
-
+// Agora a View Materializada já nos traz apenas os apontamentos limpos, 
+// não precisamos filtrar por "atividade" se não quiser, 
+// mas manteremos a lógica por segurança.
 const normalizarData = (valor) => {
   if (!valor) return null;
-
-  // Se vier como DD/MM/YYYY
-  if (typeof valor === 'string' && valor.includes('/')) {
-    const [dia, mes, ano] = valor.split('/');
-    return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`;
-  }
-
-  // Se vier como YYYY-MM-DD ou ISO
+  // Como a View nova já traz YYYY-MM-DD
   if (typeof valor === 'string' && valor.includes('-')) {
     return valor.slice(0, 10);
   }
-
   return null;
 };
 
@@ -26,10 +19,10 @@ const CucDetailDiario = ({ selectedDate, setSelectedDate }) => {
 
   useEffect(() => {
     async function fetchDates() {
+      // Modificado para a nova View Materializada
       const { data, error } = await supabase
-        .from('vw_atvrealizadas')
-        .select('data_apontamento, atividade')
-        .in('atividade', CUC_ATIVIDADES);
+        .from('vw_q_cucdatas')
+        .select('data_apontamento');
 
       if (error) {
         console.error('Erro ao buscar datas do CUC:', error);

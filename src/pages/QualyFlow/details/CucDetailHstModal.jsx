@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { supabase } from '../../../supabaseClient';
+import { supabase } from '../../../lib/supabaseClient';
 import { QUALY_RULES } from '../rules';
 
 const CUC_OCORRENCIAS = ['CUC - Gotejo', 'CUC - Gotejo 9E'];
@@ -37,15 +37,12 @@ const AnimatedProgressBar = ({ value, color }) => {
 
 const toNumber = (value) => {
   if (value === null || value === undefined || value === '') return null;
-
   const raw = String(value).trim();
-
   if (raw.includes(',')) {
     const normalized = raw.replace(/\./g, '').replace(',', '.');
     const num = Number(normalized);
     return Number.isFinite(num) ? num : null;
   }
-
   const num = Number(raw);
   return Number.isFinite(num) ? num : null;
 };
@@ -75,32 +72,21 @@ const formatLote = (val) => {
 const sortLotes = (a, b) => {
   const na = parseInt(String(a).match(/\d+/)?.[0] || '999999', 10);
   const nb = parseInt(String(b).match(/\d+/)?.[0] || '999999', 10);
-
   if (na !== nb) return na - nb;
   return String(a).localeCompare(String(b), 'pt-BR', { numeric: true });
 };
 
 const calcCuc = (values) => {
   if (!values || values.length === 0) return 0;
-
   const mean = values.reduce((acc, v) => acc + v, 0) / values.length;
   if (!mean) return 0;
-
   const sumAbs = values.reduce((acc, v) => acc + Math.abs(v - mean), 0);
   const cuc = 100 * (1 - (sumAbs / (values.length * mean)));
-
   return Number.isFinite(cuc) ? Math.max(0, cuc) : 0;
 };
 
 const getHistRanges = (values) => {
-  const hist = {
-    lt08: 0,
-    r08_09: 0,
-    r09_11: 0,
-    r11_12: 0,
-    gt12: 0
-  };
-
+  const hist = { lt08: 0, r08_09: 0, r09_11: 0, r11_12: 0, gt12: 0 };
   values.forEach((v) => {
     if (v < 0.8) hist.lt08 += 1;
     else if (v >= 0.8 && v < 0.9) hist.r08_09 += 1;
@@ -108,46 +94,27 @@ const getHistRanges = (values) => {
     else if (v >= 1.1 && v <= 1.2) hist.r11_12 += 1;
     else if (v > 1.2) hist.gt12 += 1;
   });
-
   return hist;
 };
 
 const Histograma = ({ hist }) => {
   const maxVal = Math.max(...HIST_BINS.map((b) => hist[b.key] || 0), 1);
-
   return (
     <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-4">
       <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest border-b border-slate-100 pb-2 text-center">
         Histograma de Vazões
       </h3>
-
       <div className="flex items-end justify-between h-[120px] pt-4 px-2 gap-2">
         {HIST_BINS.map((bar) => {
           const value = hist[bar.key] || 0;
           const heightPerc = (value / maxVal) * 100;
-
           return (
             <div key={bar.key} className="flex flex-col items-center justify-end h-full gap-2 group w-full">
-              <span className="text-[10px] font-black text-slate-600 leading-none">
-                {value}
-              </span>
-
-              <div
-                className="w-8 bg-slate-100 rounded-t-sm relative border-x border-t border-slate-200/50 flex items-end justify-center overflow-hidden"
-                style={{ height: '100%' }}
-              >
-                <div
-                  className="w-full transition-all duration-700"
-                  style={{
-                    height: `${heightPerc}%`,
-                    backgroundColor: bar.color
-                  }}
-                />
+              <span className="text-[10px] font-black text-slate-600 leading-none">{value}</span>
+              <div className="w-8 bg-slate-100 rounded-t-sm relative border-x border-t border-slate-200/50 flex items-end justify-center overflow-hidden" style={{ height: '100%' }}>
+                <div className="w-full transition-all duration-700" style={{ height: `${heightPerc}%`, backgroundColor: bar.color }} />
               </div>
-
-              <span className="text-[9px] font-bold text-slate-400 text-center leading-tight">
-                {bar.label}
-              </span>
+              <span className="text-[9px] font-bold text-slate-400 text-center leading-tight">{bar.label}</span>
             </div>
           );
         })}
@@ -158,15 +125,8 @@ const Histograma = ({ hist }) => {
 
 const SummaryItem = ({ label, value, color }) => (
   <div className="flex flex-col justify-end border-b border-slate-200 pb-2 min-w-[120px]">
-    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">
-      {label}
-    </span>
-    <span
-      className="text-[15px] font-black tracking-tight leading-none"
-      style={{ color: color || 'var(--q-dark)' }}
-    >
-      {value}
-    </span>
+    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1">{label}</span>
+    <span className="text-[15px] font-black tracking-tight leading-none" style={{ color: color || 'var(--q-dark)' }}>{value}</span>
   </div>
 );
 
@@ -181,18 +141,12 @@ const buildEngine = (rows) => {
     const valor = toNumber(row.valor);
 
     if (!lotesMap.has(lote)) {
-      lotesMap.set(lote, {
-        lote,
-        emitterValues: [],
-        entupidosAbs: 0
-      });
+      lotesMap.set(lote, { lote, emitterValues: [], entupidosAbs: 0 });
     }
 
     const group = lotesMap.get(lote);
-
     if (valor === null) return;
 
-    // Conversão para L/h
     if (EMITTER_LABELS.includes(indicador)) {
       const vazaoLh = valor * 0.02;
       group.emitterValues.push(vazaoLh);
@@ -210,10 +164,8 @@ const buildEngine = (rows) => {
       const totalEmissores = group.emitterValues.length;
       const somaVazoes = group.emitterValues.reduce((acc, v) => acc + v, 0);
       const vazaoMedia = totalEmissores > 0 ? somaVazoes / totalEmissores : 0;
-      const entupidosPerc =
-        totalEmissores > 0 ? (group.entupidosAbs / totalEmissores) * 100 : 0;
+      const entupidosPerc = totalEmissores > 0 ? (group.entupidosAbs / totalEmissores) * 100 : 0;
       const cucPerc = calcCuc(group.emitterValues);
-
       return {
         lote: group.lote,
         totalEmissores,
@@ -227,12 +179,8 @@ const buildEngine = (rows) => {
     .sort((a, b) => sortLotes(a.lote, b.lote));
 
   const totalEmissores = allEmitterValues.length;
-  const vazaoMediaGeral =
-    totalEmissores > 0
-      ? allEmitterValues.reduce((acc, v) => acc + v, 0) / totalEmissores
-      : 0;
-  const entupidosPercGeral =
-    totalEmissores > 0 ? (totalEntupidosAbs / totalEmissores) * 100 : 0;
+  const vazaoMediaGeral = totalEmissores > 0 ? allEmitterValues.reduce((acc, v) => acc + v, 0) / totalEmissores : 0;
+  const entupidosPercGeral = totalEmissores > 0 ? (totalEntupidosAbs / totalEmissores) * 100 : 0;
   const cucGeral = calcCuc(allEmitterValues);
 
   return {
@@ -256,21 +204,19 @@ const CucDetailHstModal = ({ item, onClose }) => {
   useEffect(() => {
     const fetchDetalhesCampo = async () => {
       if (!item) return;
-
       setLoading(true);
-
       try {
+        // Ajustado para a tabela bruta correta: tb_q_agrotarget
         const { data, error } = await supabase
-          .from('tb_agrotarget')
+          .from('tb_q_agrotarget')
           .select('lote, indicador, valor, ocorrencia')
           .eq('ano', item.ano)
-          .eq('codigo_campo', item.cod_campo)
-          .eq('extra1', item.avaliacao)
+          .eq('codigo_campo', item.codigo_campo) // Mapeando certo pelo cód campo
+          .eq('extra1', item.avaliacao) // Mapeando a avaliação
           .in('ocorrencia', CUC_OCORRENCIAS)
           .order('lote', { ascending: true });
 
         if (error) throw error;
-
         setDetalhesData(data || []);
       } catch (err) {
         console.error('Erro ao buscar detalhes no Modal:', err);
@@ -279,7 +225,6 @@ const CucDetailHstModal = ({ item, onClose }) => {
         setLoading(false);
       }
     };
-
     fetchDetalhesCampo();
   }, [item]);
 
@@ -287,7 +232,7 @@ const CucDetailHstModal = ({ item, onClose }) => {
 
   if (!item) return null;
 
-  const campoLabel = item.campo || item.cod_campo || 'Campo';
+  const campoLabel = item.campo || item.codigo_campo || 'Campo';
   const avaliacaoLabel = `${item.avaliacao}ª Avaliação`;
 
   return (
@@ -302,12 +247,10 @@ const CucDetailHstModal = ({ item, onClose }) => {
         </button>
 
         <div className="h-full flex flex-col">
-          {/* CABEÇALHO */}
           <div className="flex flex-col p-6 border-b border-slate-200 bg-slate-50/50">
             <h2 className="text-xl font-black text-[var(--q-dark)] uppercase tracking-tighter leading-none mb-1.5 pr-10">
               Detalhe da Avaliação
             </h2>
-
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[11px] font-black text-[var(--q-green)] bg-[var(--q-green)]/10 px-2 py-0.5 rounded border border-[var(--q-green)]/20 uppercase">
                 {campoLabel}
@@ -318,7 +261,6 @@ const CucDetailHstModal = ({ item, onClose }) => {
             </div>
           </div>
 
-          {/* CONTEÚDO */}
           <div className="flex-1 overflow-y-auto p-6 bg-[var(--q-bg)] custom-scrollbar">
             {loading ? (
               <div className="h-full flex flex-col items-center justify-center">
@@ -339,48 +281,23 @@ const CucDetailHstModal = ({ item, onClose }) => {
               </div>
             ) : (
               <div className="flex flex-col gap-5">
-                {/* RESUMO */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
                   <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-x-4 gap-y-3 items-end">
-                    <SummaryItem
-                      label="Total de Lotes Avaliados"
-                      value={formatInt(engine.resumo.totalLotes)}
-                    />
-                    <SummaryItem
-                      label="Emissores Avaliados"
-                      value={formatInt(engine.resumo.totalEmissores)}
-                    />
-                    <SummaryItem
-                      label="Emissores Entupidos"
-                      value={formatInt(engine.resumo.totalEntupidosAbs)}
-                    />
-                    <SummaryItem
-                      label="CUC Geral %"
-                      value={`${formatNumber(engine.resumo.cucGeral, 1)}%`}
-                      color={QUALY_RULES.CUC.meta(engine.resumo.cucGeral)}
-                    />
-                    <SummaryItem
-                      label="Vazão L/h Média"
-                      value={`${formatNumber(engine.resumo.vazaoMediaGeral, 2)}`}
-                      color={QUALY_RULES.CUC.vazaoMeta(engine.resumo.vazaoMediaGeral)}
-                    />
-                    <SummaryItem
-                      label="Entupidos %"
-                      value={`${formatNumber(engine.resumo.entupidosPercGeral, 1)}%`}
-                      color={QUALY_RULES.CUC.entupimentoMeta(engine.resumo.entupidosPercGeral)}
-                    />
+                    <SummaryItem label="Total de Lotes Avaliados" value={formatInt(engine.resumo.totalLotes)} />
+                    <SummaryItem label="Emissores Avaliados" value={formatInt(engine.resumo.totalEmissores)} />
+                    <SummaryItem label="Emissores Entupidos" value={formatInt(engine.resumo.totalEntupidosAbs)} />
+                    <SummaryItem label="CUC Geral %" value={`${formatNumber(engine.resumo.cucGeral, 1)}%`} color={QUALY_RULES.CUC.meta(engine.resumo.cucGeral)} />
+                    <SummaryItem label="Vazão L/h Média" value={`${formatNumber(engine.resumo.vazaoMediaGeral, 2)}`} color={QUALY_RULES.CUC.vazaoMeta(engine.resumo.vazaoMediaGeral)} />
+                    <SummaryItem label="Entupidos %" value={`${formatNumber(engine.resumo.entupidosPercGeral, 1)}%`} color={QUALY_RULES.CUC.entupimentoMeta(engine.resumo.entupidosPercGeral)} />
                   </div>
                 </div>
 
-                {/* HISTOGRAMA */}
                 <Histograma hist={engine.histGeral} />
 
-                {/* RESULTADO POR LOTE */}
                 <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
                   <div className="px-5 pt-5 pb-3 border-b border-slate-100 bg-slate-50/30">
                     <h3 className="text-title">Lotes Avaliados</h3>
                   </div>
-
                   <div className="px-5 py-5 flex flex-col gap-3">
                     <div className="grid grid-cols-4 pb-2 border-b border-slate-200">
                       <span className="text-left text-micro">Lote</span>
@@ -388,48 +305,26 @@ const CucDetailHstModal = ({ item, onClose }) => {
                       <span className="text-center text-micro">Vazão</span>
                       <span className="text-right text-micro">Entup %</span>
                     </div>
-
                     {engine.lotes.map((lote, idx) => {
                       const cucColor = QUALY_RULES.CUC.meta(lote.cucPerc);
                       const vazaoColor = QUALY_RULES.CUC.vazaoMeta(lote.vazaoMedia);
                       const entupColor = QUALY_RULES.CUC.entupimentoMeta(lote.entupidosPerc);
-
                       return (
-                        <div
-                          key={`${lote.lote}-${idx}`}
-                          className="flex flex-col gap-1.5"
-                        >
+                        <div key={`${lote.lote}-${idx}`} className="flex flex-col gap-1.5">
                           <div className="grid grid-cols-4 items-end">
-                            <span
-                              className="text-left text-[12px] font-black text-slate-700 uppercase truncate pr-1"
-                              title={lote.lote}
-                            >
+                            <span className="text-left text-[12px] font-black text-slate-700 uppercase truncate pr-1" title={lote.lote}>
                               {lote.lote}
                             </span>
-
-                            <span
-                              className="text-center text-[13px] font-black tracking-tighter"
-                              style={{ color: cucColor }}
-                            >
+                            <span className="text-center text-[13px] font-black tracking-tighter" style={{ color: cucColor }}>
                               {formatNumber(lote.cucPerc, 2)}%
                             </span>
-
-                            <span
-                              className="text-center text-[13px] font-black tracking-tighter"
-                              style={{ color: vazaoColor }}
-                            >
-                              {formatNumber(lote.vazaoMedia, 2)}
-                              <span className="text-[8px] font-bold opacity-40 ml-0.5">L/h</span>
+                            <span className="text-center text-[13px] font-black tracking-tighter" style={{ color: vazaoColor }}>
+                              {formatNumber(lote.vazaoMedia, 2)}<span className="text-[8px] font-bold opacity-40 ml-0.5">L/h</span>
                             </span>
-
-                            <span
-                              className="text-right text-[13px] font-black tracking-tighter"
-                              style={{ color: entupColor }}
-                            >
+                            <span className="text-right text-[13px] font-black tracking-tighter" style={{ color: entupColor }}>
                               {formatNumber(lote.entupidosPerc, 1)}%
                             </span>
                           </div>
-
                           <AnimatedProgressBar value={lote.cucPerc} color={cucColor} />
                         </div>
                       );
