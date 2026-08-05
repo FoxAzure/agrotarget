@@ -1,3 +1,8 @@
+// ================================= DOCUMENTATION ------------------------------------------
+// Script: CucDetail
+// Purpose: Gerenciador de Abas do CUC Gotejo (Agora forçando 4 abas na mesma linha)
+// ==========================================================================================
+
 import React, { useState } from 'react';
 import { useLocation } from 'react-router-dom';
 
@@ -6,6 +11,7 @@ import Sidebar from '../../../components/QualyFlow/Sidebar';
 
 import CucDetailDiario from './CucDetailDiario';
 import CucDetailHst from './CucDetailHst';
+import CucDetailAvaliacoes from './CucDetailAvaliacoes';
 import '../Style.css';
 
 const CucDetail = () => {
@@ -14,19 +20,18 @@ const CucDetail = () => {
   
   const [activeTab, setActiveTab] = useState('diario');
   
-  // Pega a data que veio lá do CardCUC da Home, ou pega a de hoje se entrar direto
   const [initialDate] = useState(location.state?.selectedDate || new Date().toISOString().split('T')[0]);
 
   const TabButton = ({ id, label }) => (
     <button
       onClick={() => setActiveTab(id)}
-      className={`py-3 px-6 text-[11px] font-black uppercase tracking-widest transition-all border-b-[3px] flex-1 sm:flex-none text-center ${
+      className={`py-3 px-1 flex-1 text-[9px] sm:text-[10px] md:text-[11px] font-black uppercase tracking-widest transition-all border-b-[3px] text-center flex items-center justify-center ${
         activeTab === id 
           ? 'text-[var(--q-green)] border-[var(--q-green)] bg-white' 
           : 'text-[var(--q-gray)] border-transparent hover:text-[var(--q-orange)] hover:bg-slate-50'
       }`}
     >
-      {label}
+      <span className="truncate block w-full">{label}</span>
     </button>
   );
 
@@ -45,16 +50,16 @@ const CucDetail = () => {
           </h1>
         </div>
 
-        {/* NAVEGAÇÃO DE ABAS */}
-        <div className="flex flex-wrap w-full border-b border-slate-200 mb-6">
+        {/* NAVEGAÇÃO DE ABAS (Forçando as 4 colarem lado a lado) */}
+        <div className="flex w-full border-b border-slate-200 mb-6 bg-slate-50/30 rounded-t-lg">
           <TabButton id="diario" label="Diário" />
           <TabButton id="comparativo" label="Comparativo" />
+          <TabButton id="avaliacoes" label="Avaliações" />
           <TabButton id="historico" label="Histórico" />
         </div>
 
-        {/* RENDERIZAÇÃO DAS ABAS - Mantidas no DOM para cache de dados */}
+        {/* RENDERIZAÇÃO DAS ABAS */}
         <div className={activeTab === 'diario' ? 'block' : 'hidden'}>
-          {/* Note a passagem limpa da prop initialDate */}
           <CucDetailDiario initialDate={initialDate} />
         </div>
 
@@ -64,6 +69,10 @@ const CucDetail = () => {
               <span className="text-xs font-bold uppercase tracking-widest">🚧 Em Desenvolvimento 🚧</span>
             </div>
           </div>
+        </div>
+
+        <div className={activeTab === 'avaliacoes' ? 'block' : 'hidden'}>
+          <CucDetailAvaliacoes />
         </div>
 
         <div className={activeTab === 'historico' ? 'block' : 'hidden'}>

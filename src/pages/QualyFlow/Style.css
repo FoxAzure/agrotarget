@@ -1602,3 +1602,41 @@ DESKTOP
 .bg-v-green { background-color: #22c55e; }
 .bg-v-yellow { background-color: #f59e0b; }
 .bg-v-blue { background-color: #0ea5e9; }
+
+
+
+/* =========================================
+   ABAS RESPONSIVAS (SCROLL INVISÍVEL)
+========================================= */
+.qf-hide-scroll::-webkit-scrollbar {
+  display: none;
+}
+.qf-hide-scroll {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* =========================================
+   ACORDEÃO SLIM & MODERNO (AVALIAÇÕES)
+========================================= */
+.qf-accordion-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.qf-accordion-content.is-open {
+  grid-template-rows: 1fr;
+}
+
+.qf-accordion-inner {
+  overflow: hidden;
+}
+
+.qf-tree-icon {
+  transition: transform 0.3s ease;
+}
+
+.qf-tree-icon.is-open {
+  transform: rotate(90deg);
+}
