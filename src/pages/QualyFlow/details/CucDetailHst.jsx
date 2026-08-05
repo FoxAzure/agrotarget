@@ -1,8 +1,7 @@
 // ================================= DOCUMENTATION ------------------------------------------
 // Script: CucDetailHst
-// Purpose: Exibe o histórico geral de CUC em formato de lista slim e permite filtragem.
-// Relationships:
-//   - vw_q_cucgeral
+// Purpose: Exibe o histórico geral de CUC em formato de lista slim com filtros e cards de resumo.
+// Relationships: vw_q_cucgeral
 // ==========================================================================================
 
 import React, { useState, useEffect } from 'react';
@@ -24,12 +23,9 @@ const formatValue = (value, decimals = 2) => {
   return Number.isNaN(num) ? '-' : num.toFixed(decimals).replace('.', ',');
 };
 
-// -------------------------------------------------------------------------
-// Cores equivalentes às classes do CardCUC para o estilo inline
-// -------------------------------------------------------------------------
 const getCucColor = (value) => {
   const cuc = Number(value);
-  if (Number.isNaN(cuc)) return 'var(--coa-text-muted)';
+  if (Number.isNaN(cuc)) return 'var(--q-gray)';
   if (cuc >= 90) return '#22c55e';
   if (cuc >= 80) return '#f59e0b';
   return '#ef4444';
@@ -37,7 +33,7 @@ const getCucColor = (value) => {
 
 const getEntupColor = (value) => {
   const entup = Number(value);
-  if (Number.isNaN(entup)) return 'var(--coa-text-muted)';
+  if (Number.isNaN(entup)) return 'var(--q-gray)';
   if (entup <= 5) return '#22c55e';
   if (entup <= 10) return '#f59e0b';
   return '#ef4444';
@@ -45,12 +41,12 @@ const getEntupColor = (value) => {
 
 const getVazaoColor = (value) => {
   const vazao = Number(value);
-  if (Number.isNaN(vazao)) return 'var(--coa-text-muted)';
+  if (Number.isNaN(vazao)) return 'var(--q-gray)';
+  if (vazao > 1.2) return '#0ea5e9';
+  if (vazao > 1.1 && vazao <= 1.2) return '#f59e0b';
   if (vazao >= 0.9 && vazao <= 1.1) return '#22c55e';
   if (vazao >= 0.8 && vazao < 0.9) return '#f97316';
-  if (vazao < 0.8) return '#ef4444';
-  if (vazao > 1.1 && vazao <= 1.2) return '#f59e0b';
-  return '#0ea5e9';
+  return '#ef4444';
 };
 
 // ================================= COMPONENT ----------------------------------------------
@@ -65,14 +61,13 @@ const CucDetailHst = () => {
   const [filtroAvaliacao, setFiltroAvaliacao] = useState('Todos');
   const [filtroDepa, setFiltroDepa] = useState('Todos');
   const [filtroSetor, setFiltroSetor] = useState('Todos');
+  
+  // Filtro dos Cards de Total
+  const [filtroMeta, setFiltroMeta] = useState('Todos'); // 'Todos' | 'Abaixo' | 'Acima'
 
   const [selectedModalItem, setSelectedModalItem] = useState(null);
 
-  const hasFilters = searchCampo !== '' || 
-                     filtroAno !== 'Todos' || 
-                     filtroAvaliacao !== 'Todos' || 
-                     filtroDepa !== 'Todos' || 
-                     filtroSetor !== 'Todos';
+  const hasFilters = searchCampo !== '' || filtroAno !== 'Todos' || filtroAvaliacao !== 'Todos' || filtroDepa !== 'Todos' || filtroSetor !== 'Todos' || filtroMeta !== 'Todos';
 
   // =========================================================================
   // BUSCA DADOS
@@ -99,31 +94,37 @@ const CucDetailHst = () => {
   const anosUnicos = [...new Set(historicoData.map(d => d.ano).filter(Boolean))].sort((a, b) => b - a);
   const avaliacoesUnicas = [...new Set(historicoData.map(d => d.avaliacao).filter(Boolean))].sort();
   const depasUnicos = [...new Set(historicoData.map(d => d.depa).filter(Boolean))].sort();
+  const setoresDisponiveis = [...new Set(historicoData.filter(d => filtroDepa === 'Todos' || d.depa === filtroDepa).map(d => d.setor).filter(Boolean))].sort();
+
+  // =========================================================================
+  // LÓGICA DE FILTRAGEM E CONTAGEM
+  // =========================================================================
   
-  const setoresDisponiveis = [...new Set(
-    historicoData
-      .filter(d => filtroDepa === 'Todos' || d.depa === filtroDepa)
-      .map(d => d.setor)
-      .filter(Boolean)
-  )].sort();
+  // 1. Aplica todos os filtros (EXCETO a Meta <80 ou >80) para calcular os Cards
+  const baseFilteredData = historicoData.filter(item => {
+    const termo = searchCampo.toLowerCase().trim();
+    const campoStr = String(item.campo || '').toLowerCase();
+    const codigoStr = String(item.codigo_campo || '').toLowerCase();
+    
+    const matchCampo = termo === '' || campoStr.includes(termo) || codigoStr.includes(termo);
+    const matchAno = filtroAno === 'Todos' || String(item.ano) === String(filtroAno);
+    const matchAv = filtroAvaliacao === 'Todos' || String(item.avaliacao) === String(filtroAvaliacao);
+    const matchDepa = filtroDepa === 'Todos' || String(item.depa) === String(filtroDepa);
+    const matchSetor = filtroSetor === 'Todos' || String(item.setor) === String(filtroSetor);
 
-  // =========================================================================
-  // APLICAÇÃO DOS FILTROS (EM TEMPO REAL)
-  // =========================================================================
-  const filteredAndSortedData = historicoData
+    return matchCampo && matchAno && matchAv && matchDepa && matchSetor;
+  });
+
+  const countTotal = baseFilteredData.length;
+  const countAbaixo = baseFilteredData.filter(i => i.cuc < 80).length;
+  const countAcima = baseFilteredData.filter(i => i.cuc >= 80).length;
+
+  // 2. Aplica o filtro de Meta (Cards) e Ordena a lista final
+  const filteredAndSortedData = baseFilteredData
     .filter(item => {
-      const termo = searchCampo.toLowerCase().trim();
-      const campoStr = String(item.campo || '').toLowerCase();
-      const codigoStr = String(item.codigo_campo || '').toLowerCase();
-      
-      // O campo de busca continua pesquisando pelo código, mesmo que ele não apareça na lista!
-      const matchCampo = termo === '' || campoStr.includes(termo) || codigoStr.includes(termo);
-      const matchAno = filtroAno === 'Todos' || String(item.ano) === String(filtroAno);
-      const matchAv = filtroAvaliacao === 'Todos' || String(item.avaliacao) === String(filtroAvaliacao);
-      const matchDepa = filtroDepa === 'Todos' || String(item.depa) === String(filtroDepa);
-      const matchSetor = filtroSetor === 'Todos' || String(item.setor) === String(filtroSetor);
-
-      return matchCampo && matchAno && matchAv && matchDepa && matchSetor;
+      if (filtroMeta === 'Abaixo') return item.cuc < 80;
+      if (filtroMeta === 'Acima') return item.cuc >= 80;
+      return true; // 'Todos'
     })
     .sort((a, b) => parseDate(b.dt_final) - parseDate(a.dt_final));
 
@@ -133,26 +134,54 @@ const CucDetailHst = () => {
     setFiltroAvaliacao('Todos');
     setFiltroDepa('Todos');
     setFiltroSetor('Todos');
+    setFiltroMeta('Todos');
   };
 
   // =========================================================================
   // RENDER
   // =========================================================================
   return (
-    <div className="flex flex-col gap-4 animate-in slide-in-from-right-4 duration-300">
+    <div className="flex flex-col gap-5 animate-in slide-in-from-right-4 duration-300">
       
+      {/* ================================================================
+          CARDS DE RESUMO (TOTAIS)
+      ================================================================= */}
+      <div className="grid grid-cols-3 gap-3">
+        <button 
+          onClick={() => setFiltroMeta('Todos')}
+          className={`bg-white border rounded-xl p-4 shadow-sm flex flex-col items-center gap-1 transition-all ${filtroMeta === 'Todos' ? 'border-slate-400 ring-2 ring-slate-100' : 'border-slate-200 hover:border-slate-300'}`}
+        >
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Avaliações</span>
+          <span className="text-2xl sm:text-3xl font-black tracking-tighter text-[var(--q-dark)]">{countTotal}</span>
+        </button>
+
+        <button 
+          onClick={() => setFiltroMeta('Abaixo')}
+          className={`bg-white border rounded-xl p-4 shadow-sm flex flex-col items-center gap-1 transition-all ${filtroMeta === 'Abaixo' ? 'border-red-400 ring-2 ring-red-50' : 'border-slate-200 hover:border-red-200'}`}
+        >
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-tight">Atenção<br/><span className="text-[8px]">&lt; 80%</span></span>
+          <span className="text-2xl sm:text-3xl font-black tracking-tighter text-red-500">{countAbaixo}</span>
+        </button>
+
+        <button 
+          onClick={() => setFiltroMeta('Acima')}
+          className={`bg-white border rounded-xl p-4 shadow-sm flex flex-col items-center gap-1 transition-all ${filtroMeta === 'Acima' ? 'border-green-400 ring-2 ring-green-50' : 'border-slate-200 hover:border-green-200'}`}
+        >
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center leading-tight">Meta<br/><span className="text-[8px]">≥ 80%</span></span>
+          <span className="text-2xl sm:text-3xl font-black tracking-tighter text-green-500">{countAcima}</span>
+        </button>
+      </div>
+
       {/* ================================================================
           PAINEL DE FILTROS
       ================================================================= */}
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col gap-3">
         <div className="flex w-full gap-2 items-end">
           <div className="flex-1 flex flex-col transition-all duration-300">
-            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">
-              Campo
-            </label>
+            <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Campo</label>
             <input 
               type="text" 
-              placeholder="Procurar"
+              placeholder="Procurar (Nome ou Código)"
               value={searchCampo}
               onChange={(e) => setSearchCampo(e.target.value)}
               className="w-full h-[38px] bg-slate-50 border border-slate-200 rounded-lg px-4 text-xs font-bold text-[var(--q-dark)] outline-none focus:border-[var(--q-green)] focus:bg-white transition-all shadow-inner"
@@ -172,50 +201,28 @@ const CucDetailHst = () => {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 w-full">
           <div className="flex flex-col">
             <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Ano</label>
-            <select 
-              value={filtroAno}
-              onChange={(e) => setFiltroAno(e.target.value)}
-              className="w-full h-[38px] bg-slate-50 border border-slate-200 rounded-lg px-3 text-xs font-bold text-[var(--q-dark)] outline-none focus:border-[var(--q-green)] cursor-pointer shadow-inner"
-            >
+            <select value={filtroAno} onChange={(e) => setFiltroAno(e.target.value)} className="w-full h-[38px] bg-slate-50 border border-slate-200 rounded-lg px-3 text-xs font-bold text-[var(--q-dark)] outline-none focus:border-[var(--q-green)] cursor-pointer shadow-inner">
               <option value="Todos">Todos</option>
               {anosUnicos.map(ano => <option key={`ano-${ano}`} value={ano}>{ano}</option>)}
             </select>
           </div>
-          
           <div className="flex flex-col">
             <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Avaliação</label>
-            <select 
-              value={filtroAvaliacao}
-              onChange={(e) => setFiltroAvaliacao(e.target.value)}
-              className="w-full h-[38px] bg-slate-50 border border-slate-200 rounded-lg px-3 text-xs font-bold text-[var(--q-dark)] outline-none focus:border-[var(--q-green)] cursor-pointer shadow-inner"
-            >
+            <select value={filtroAvaliacao} onChange={(e) => setFiltroAvaliacao(e.target.value)} className="w-full h-[38px] bg-slate-50 border border-slate-200 rounded-lg px-3 text-xs font-bold text-[var(--q-dark)] outline-none focus:border-[var(--q-green)] cursor-pointer shadow-inner">
               <option value="Todos">Todas</option>
               {avaliacoesUnicas.map(av => <option key={`av-${av}`} value={av}>{av}ª Avaliação</option>)}
             </select>
           </div>
-
           <div className="flex flex-col">
             <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">DEPA</label>
-            <select 
-              value={filtroDepa}
-              onChange={(e) => {
-                setFiltroDepa(e.target.value);
-                setFiltroSetor('Todos'); 
-              }}
-              className="w-full h-[38px] bg-slate-50 border border-slate-200 rounded-lg px-3 text-xs font-bold text-[var(--q-dark)] outline-none focus:border-[var(--q-green)] cursor-pointer shadow-inner"
-            >
+            <select value={filtroDepa} onChange={(e) => { setFiltroDepa(e.target.value); setFiltroSetor('Todos'); }} className="w-full h-[38px] bg-slate-50 border border-slate-200 rounded-lg px-3 text-xs font-bold text-[var(--q-dark)] outline-none focus:border-[var(--q-green)] cursor-pointer shadow-inner">
               <option value="Todos">Todos</option>
               {depasUnicos.map(depa => <option key={`depa-${depa}`} value={depa}>{depa}</option>)}
             </select>
           </div>
-
           <div className="flex flex-col">
             <label className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1 ml-1">Setor</label>
-            <select 
-              value={filtroSetor}
-              onChange={(e) => setFiltroSetor(e.target.value)}
-              className="w-full h-[38px] bg-slate-50 border border-slate-200 rounded-lg px-3 text-xs font-bold text-[var(--q-dark)] outline-none focus:border-[var(--q-green)] cursor-pointer shadow-inner"
-            >
+            <select value={filtroSetor} onChange={(e) => setFiltroSetor(e.target.value)} className="w-full h-[38px] bg-slate-50 border border-slate-200 rounded-lg px-3 text-xs font-bold text-[var(--q-dark)] outline-none focus:border-[var(--q-green)] cursor-pointer shadow-inner">
               <option value="Todos">Todos</option>
               {setoresDisponiveis.map(setor => <option key={`setor-${setor}`} value={setor}>{setor}</option>)}
             </select>
@@ -224,27 +231,19 @@ const CucDetailHst = () => {
       </div>
 
       {/* ================================================================
-          TABELA (LINHA SLIM COM MAIS RESPIRO)
+          TABELA (LINHA SLIM PRIORIZANDO O CAMPO)
       ================================================================= */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
-        {/* 
-          Ajuste do Grid:
-          - 28px para o Ano
-          - 24px para a Avaliação
-          - 1fr (todo o espaço restante) para o Campo
-          - 55px (fixos e à direita) para os 3 indicadores 
-          - gap-3 para dar uma leve distância entre as colunas
-        */}
-        <div className="grid grid-cols-[28px_24px_1fr_55px_55px_55px] gap-3 items-center px-4 py-2.5 bg-slate-50 border-b border-slate-100">
+        {/* Grid pensado para mobile: Campo amassa o resto pra direita, sem quebrar linha */}
+        <div className="grid grid-cols-[25px_22px_1fr_40px_40px_40px] md:grid-cols-[30px_30px_1fr_55px_55px_55px] gap-2 md:gap-3 items-center px-4 py-2.5 bg-slate-50 border-b border-slate-100">
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left">Ano</span>
-          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left">Avº</span>
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left">Av</span>
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-left">Campo</span>
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">CUC</span>
           <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-center">L/h</span>
-          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Entup.</span>
+          <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest text-right">Ent.</span>
         </div>
 
-        {/* Corpo da Lista */}
         <div className="flex flex-col max-h-[500px] overflow-y-auto custom-scrollbar relative min-h-[150px]">
           {loading ? (
              <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 z-10">
@@ -261,40 +260,17 @@ const CucDetailHst = () => {
               <button 
                 key={`${item.codigo_campo}-${item.avaliacao}-${item.ano}-${index}`}
                 onClick={() => setSelectedModalItem(item)}
-                className="grid grid-cols-[28px_24px_1fr_55px_55px_55px] gap-3 items-center px-4 py-2 border-b border-slate-100 last:border-0 hover:bg-slate-50/80 transition-colors w-full cursor-pointer group"
+                className="grid grid-cols-[25px_22px_1fr_40px_40px_40px] md:grid-cols-[30px_30px_1fr_55px_55px_55px] gap-2 md:gap-3 items-center px-4 py-2.5 border-b border-slate-100 last:border-0 hover:bg-slate-50/80 transition-colors w-full cursor-pointer group"
               >
-                {/* 1. Ano */}
-                <span className="text-[9px] font-bold text-slate-400 text-left">
-                  {item.ano}
-                </span>
-
-                {/* 2. Avº */}
-                <span className="text-[9px] font-bold text-slate-400 text-left">
-                  {item.avaliacao}º
-                </span>
-
-                {/* 3. Campo (Sem código visualmente, mas ocupando o espaço livre) */}
-                <span 
-                  className="text-[11px] font-black text-slate-700 uppercase group-hover:text-[var(--q-green)] transition-colors text-left truncate" 
-                  title={item.campo}
-                >
+                <span className="text-[8px] md:text-[9px] font-bold text-slate-400 text-left">{String(item.ano).slice(-2)}</span>
+                <span className="text-[8px] md:text-[9px] font-bold text-slate-400 text-left">{item.avaliacao}º</span>
+                <span className="text-[10px] md:text-[11px] font-black text-slate-700 uppercase group-hover:text-[var(--q-green)] transition-colors text-left truncate" title={item.campo}>
                   {item.campo}
                 </span>
                 
-                {/* 4. CUC */}
-                <span className="text-[13px] font-black tracking-tighter text-center" style={{ color: getCucColor(item.cuc) }}>
-                  {formatValue(item.cuc)}%
-                </span>
-                
-                {/* 5. Vazão (L/h) */}
-                <span className="text-[13px] font-black tracking-tighter text-center" style={{ color: getVazaoColor(item.vazao) }}>
-                  {formatValue(item.vazao)}
-                </span>
-                
-                {/* 6. Entupidos */}
-                <span className="text-[13px] font-black tracking-tighter text-right" style={{ color: getEntupColor(item['entup%']) }}>
-                  {formatValue(item['entup%'])}%
-                </span>
+                <span className="text-[11px] md:text-[13px] font-black tracking-tighter text-center" style={{ color: getCucColor(item.cuc) }}>{formatValue(item.cuc)}%</span>
+                <span className="text-[11px] md:text-[13px] font-black tracking-tighter text-center" style={{ color: getVazaoColor(item.vazao) }}>{formatValue(item.vazao)}</span>
+                <span className="text-[11px] md:text-[13px] font-black tracking-tighter text-right" style={{ color: getEntupColor(item['entup%']) }}>{formatValue(item['entup%'])}%</span>
               </button>
             ))
           )}
