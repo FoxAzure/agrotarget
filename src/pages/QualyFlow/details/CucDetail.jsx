@@ -55,17 +55,17 @@ const CucDetail = () => {
 
         {/* RENDERIZAÇÃO DAS ABAS */}
         {activeTab === 'diario' && (
-          <CucDetailDiario 
-            selectedDate={selectedDate} 
-            setSelectedDate={setSelectedDate} 
-          />
+          <div className="flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-300">
+             <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-slate-400 mt-4">
+              <span className="text-xs font-bold uppercase tracking-widest">🚧 Em Desenvolvimento 🚧</span>
+            </div>
+          </div>
         )}
 
         {activeTab === 'comparativo' && (
           <div className="flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-300">
              <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-slate-400 mt-4">
-              <span className="text-3xl mb-2">📊</span>
-              <span className="text-xs font-bold uppercase tracking-widest">Comparativo em Construção</span>
+              <span className="text-xs font-bold uppercase tracking-widest">🚧 Em Desenvolvimento 🚧</span>
             </div>
           </div>
         )}
