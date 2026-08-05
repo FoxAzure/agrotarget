@@ -12,11 +12,10 @@ const CucDetail = () => {
   const location = useLocation();
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   
-  // Controle de Abas
   const [activeTab, setActiveTab] = useState('diario');
   
-  // Recupera a data do CardCUC ou usa uma padrão inicial
-  const [selectedDate, setSelectedDate] = useState(location.state?.selectedDate || '2026-05-27');
+  // Pega a data que veio lá do CardCUC da Home, ou pega a de hoje se entrar direto
+  const [initialDate] = useState(location.state?.selectedDate || new Date().toISOString().split('T')[0]);
 
   const TabButton = ({ id, label }) => (
     <button
@@ -53,26 +52,23 @@ const CucDetail = () => {
           <TabButton id="historico" label="Histórico" />
         </div>
 
-        {/* RENDERIZAÇÃO DAS ABAS */}
-        {activeTab === 'diario' && (
+        {/* RENDERIZAÇÃO DAS ABAS - Mantidas no DOM para cache de dados */}
+        <div className={activeTab === 'diario' ? 'block' : 'hidden'}>
+          {/* Note a passagem limpa da prop initialDate */}
+          <CucDetailDiario initialDate={initialDate} />
+        </div>
+
+        <div className={activeTab === 'comparativo' ? 'block' : 'hidden'}>
           <div className="flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-300">
              <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-slate-400 mt-4">
               <span className="text-xs font-bold uppercase tracking-widest">🚧 Em Desenvolvimento 🚧</span>
             </div>
           </div>
-        )}
+        </div>
 
-        {activeTab === 'comparativo' && (
-          <div className="flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-300">
-             <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-slate-400 mt-4">
-              <span className="text-xs font-bold uppercase tracking-widest">🚧 Em Desenvolvimento 🚧</span>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'historico' && (
+        <div className={activeTab === 'historico' ? 'block' : 'hidden'}>
           <CucDetailHst />
-        )}
+        </div>
 
       </main>
     </div>
