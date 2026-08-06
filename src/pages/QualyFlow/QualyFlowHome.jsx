@@ -1,10 +1,11 @@
 // ================================= DOCUMENTATION ------------------------------------------
 // Script: QualyFlowHome
-// Purpose: Página inicial do QualyFlow.
+// Purpose: Página inicial do QualyFlow (Com resiliência anti-timeout).
 // Relationships:
 //   - vw_q_agrotarget_datas
 //   - CardAtividadesDiaria
 //   - CardCUC
+//   - CardPerdaMec
 // ==========================================================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -16,6 +17,7 @@ import Sidebar from '../../components/QualyFlow/Sidebar';
 import DateSelectorQualyFlow from '../../components/QualyFlow/DateSelectorQualyFlow';
 import CardAtividadesDiaria from '../../components/QualyFlow/CardAtividadesDiaria';
 import CardCUC from '../../components/QualyFlow/CardCUC';
+import CardPerdaMec from '../../components/QualyFlow/CardPerdaMec';
 
 // ================================= HELPERS ------------------------------------------------
 
@@ -27,91 +29,69 @@ const toIsoDate = (date = new Date()) => {
   return `${year}-${month}-${day}`;
 };
 
+// Motor de resiliência: Tenta executar a query até 3 vezes antes de desistir silenciosamente
+const runWithRetry = async (queryFn, maxRetries = 3) => {
+  for (let i = 0; i < maxRetries; i++) {
+    try {
+      const result = await queryFn();
+      if (result.error) throw result.error;
+      return result.data;
+    } catch (err) {
+      if (i === maxRetries - 1) throw err;
+      // Espera 1s, depois 2s, antes de tentar novamente (Exponential Backoff)
+      await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
+    }
+  }
+};
+
 // ================================= EXECUTOR -----------------------------------------------
 
 const QualyFlowHome = () => {
-
   const [isSidebarOpen, setSidebarOpen] = useState(false);
-
-  const [selectedDate, setSelectedDate] = useState(
-    toIsoDate(new Date())
-  );
+  const [selectedDate, setSelectedDate] = useState(toIsoDate(new Date()));
 
   // Controle dos anos disponíveis
-  const [maxYearDb, setMaxYearDb] = useState(
-    new Date().getFullYear()
-  );
-
+  const [maxYearDb, setMaxYearDb] = useState(new Date().getFullYear());
   const [activeYear, setActiveYear] = useState(null);
 
   // Datas disponíveis
   const [availableDates, setAvailableDates] = useState([]);
-
   const [isLoadingDates, setIsLoadingDates] = useState(true);
 
-  const [errorMsg, setErrorMsg] = useState('');
-
   // =========================================================================
-  // 1. DESCOBRE O MAIOR ANO
+  // 1. DESCOBRE O MAIOR ANO (COM RETENTATIVA)
   // =========================================================================
 
   useEffect(() => {
-
     let mounted = true;
 
     const fetchMaxYear = async () => {
-
       try {
-
-        const { data, error } = await supabase
-          .from('vw_q_agrotarget_datas')
-          .select('ano')
-          .limit(1);
-
-        if (error) throw error;
-
-        if (mounted && data && data.length > 0) {
-
-          const highestYear = data[0].ano;
-
-          setMaxYearDb(highestYear);
-          setActiveYear(highestYear);
-
-        } else if (mounted) {
-
-          const currentYear = new Date().getFullYear();
-
-          setMaxYearDb(currentYear);
-          setActiveYear(currentYear);
-
-        }
-
-      } catch (err) {
-
-        console.error(
-          '🚨 [QualyFlow] Erro ao buscar ano máximo:',
-          err
+        const data = await runWithRetry(() => 
+          supabase.from('vw_q_agrotarget_datas').select('ano').limit(1)
         );
 
-        if (mounted) {
-
+        if (mounted && data && data.length > 0) {
+          const highestYear = data[0].ano;
+          setMaxYearDb(highestYear);
+          setActiveYear(highestYear);
+        } else if (mounted) {
           const currentYear = new Date().getFullYear();
-
           setMaxYearDb(currentYear);
           setActiveYear(currentYear);
-
         }
-
+      } catch (err) {
+        // Falhou silenciosamente, assume o ano atual para não quebrar a tela
+        if (mounted) {
+          const currentYear = new Date().getFullYear();
+          setMaxYearDb(currentYear);
+          setActiveYear(currentYear);
+        }
       }
-
     };
 
     fetchMaxYear();
-
-    return () => {
-      mounted = false;
-    };
-
+    return () => { mounted = false; };
   }, []);
 
   // =========================================================================
@@ -119,117 +99,55 @@ const QualyFlowHome = () => {
   // =========================================================================
 
   const yearsList = useMemo(() => {
-
     const list = [];
-
-    for (
-      let year = maxYearDb;
-      year >= 2024;
-      year--
-    ) {
+    for (let year = maxYearDb; year >= 2024; year--) {
       list.push(year);
     }
-
     return list;
-
   }, [maxYearDb]);
 
   // =========================================================================
-  // 3. BUSCA DATAS DO ANO SELECIONADO
+  // 3. BUSCA DATAS DO ANO SELECIONADO (COM RETENTATIVA)
   // =========================================================================
 
   useEffect(() => {
-
     if (!activeYear) return;
-
     let mounted = true;
 
     const loadAvailableDates = async () => {
-
       setIsLoadingDates(true);
-      setErrorMsg('');
 
       try {
-
-        const { data, error } = await supabase
-          .from('vw_q_agrotarget_datas')
-          .select('data_apontamento')
-          .eq('ano', activeYear);
-
-        if (error) throw error;
+        const data = await runWithRetry(() => 
+          supabase.from('vw_q_agrotarget_datas').select('data_apontamento').eq('ano', activeYear)
+        );
 
         if (!mounted) return;
 
-        // A view entrega DD/MM/YYYY.
-        // O DateSelector trabalha com YYYY-MM-DD.
         const rawIsoDates = (data || [])
           .map((row) => {
-
-            if (
-              !row.data_apontamento ||
-              !row.data_apontamento.includes('/')
-            ) {
-              return null;
-            }
-
-            const [
-              day,
-              month,
-              year
-            ] = row.data_apontamento.split('/');
-
+            if (!row.data_apontamento || !row.data_apontamento.includes('/')) return null;
+            const [day, month, year] = row.data_apontamento.split('/');
             return `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`;
-
           })
           .filter(Boolean);
 
-        // Remove datas duplicadas.
-        const uniqueDates = [
-          ...new Set(rawIsoDates)
-        ];
+        const uniqueDates = [...new Set(rawIsoDates)];
 
-        // A view já vem DESC.
         setAvailableDates(uniqueDates);
-
-        // Seleciona automaticamente a primeira data disponível.
         if (uniqueDates.length > 0) {
           setSelectedDate(uniqueDates[0]);
         }
-
       } catch (err) {
-
-        console.error(
-          '🚨 [QualyFlow] Erro ao carregar datas:',
-          err
-        );
-
-        if (mounted) {
-
-          setErrorMsg(
-            err.message ||
-            'Erro de comunicação com o banco.'
-          );
-
-          setAvailableDates([]);
-
-        }
-
+        // Falhou silenciosamente, deixa a lista de datas vazia e a vida segue
+        if (mounted) setAvailableDates([]);
       } finally {
-
-        if (mounted) {
-          setIsLoadingDates(false);
-        }
-
+        if (mounted) setIsLoadingDates(false);
       }
-
     };
 
     loadAvailableDates();
-
-    return () => {
-      mounted = false;
-    };
-
+    return () => { mounted = false; };
   }, [activeYear]);
 
   // =========================================================================
@@ -238,42 +156,19 @@ const QualyFlowHome = () => {
 
   return (
     <div className="qf-theme">
-
-      {/* ================================================================
-          HEADER
-      ================================================================= */}
-
-      <HeaderQualyFlow
-        onMenuOpen={() => setSidebarOpen(true)}
-      />
-
-      {/* ================================================================
-          SIDEBAR
-      ================================================================= */}
-
-      <Sidebar
-        isOpen={isSidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
-
-      {/* ================================================================
-          CONTEÚDO
-      ================================================================= */}
+      
+      <HeaderQualyFlow onMenuOpen={() => setSidebarOpen(true)} />
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="qf-container py-6 md:py-10">
-
         <section className="flex flex-col gap-6">
 
           {/* ==============================================================
               SELETOR DE DATA
           ============================================================== */}
-
           <div className="w-full flex justify-center">
-
             <div className="w-full max-w-sm md:max-w-md">
-
               {activeYear && (
-
                 <DateSelectorQualyFlow
                   value={selectedDate}
                   onChange={setSelectedDate}
@@ -283,95 +178,33 @@ const QualyFlowHome = () => {
                   yearsList={yearsList}
                   isLoading={isLoadingDates}
                 />
-
               )}
-
             </div>
-
           </div>
-
-          {/* ==============================================================
-              ERRO
-          ============================================================== */}
-
-          {errorMsg && (
-
-            <div
-              className="
-                bg-[var(--q-danger-soft)]
-                text-[var(--q-danger)]
-                p-4
-                rounded-[var(--q-radius-md)]
-                border
-                border-[var(--q-danger)]
-                text-sm
-                font-bold
-                text-center
-              "
-            >
-              Contratempo no processamento: {errorMsg}
-            </div>
-
-          )}
 
           {/* ==============================================================
               CONTEÚDO PRINCIPAL
           ============================================================== */}
-
           <div className="w-full">
-
             {isLoadingDates ? (
-
-              /* ==========================================================
-                 LOADING
-              ========================================================== */
-
               <div className="qf-home-loading">
-
                 <div className="qf-home-loading__text">
-
-                  <span>
-                    Buscando Avaliações
-                  </span>
-
-                  <span className="qf-loading-dots">
-                    <i>.</i>
-                    <i>.</i>
-                    <i>.</i>
-                  </span>
-
+                  <span>Buscando Avaliações</span>
+                  <span className="qf-loading-dots"><i>.</i><i>.</i><i>.</i></span>
                 </div>
-
                 <div className="qf-home-loading__line" />
-
               </div>
-
             ) : (
-
-              /* ==========================================================
-                 CARDS
-              ========================================================== */
-
               <div className="flex flex-col gap-4">
-
-                <CardAtividadesDiaria
-                  selectedDate={selectedDate}
-                />
-
-                <CardCUC
-                  selectedDate={selectedDate}
-                />
-
+                <CardAtividadesDiaria selectedDate={selectedDate}/>
+                <CardCUC selectedDate={selectedDate}/>
+                <CardPerdaMec selectedDate={selectedDate}/>
               </div>
-
             )}
-
           </div>
 
         </section>
-
       </main>
-
     </div>
   );
 };

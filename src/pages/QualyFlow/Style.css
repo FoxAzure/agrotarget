@@ -815,7 +815,7 @@ DESKTOP
     /*color: var(--q-dark);*/
     color: var(--q-orange);
 
-    font-size: 1rem;
+    font-size: 1.3rem;
     font-weight: 900;
 
     line-height: 1;
@@ -1639,4 +1639,242 @@ DESKTOP
 
 .qf-tree-icon.is-open {
   transform: rotate(90deg);
+}
+
+
+
+
+
+
+/* =========================================
+   CARD PERDA MECANIZADA
+========================================= */
+.qf-pmec-table-header {
+  /* Caso precise travar o cabeçalho no futuro, basta trocar relative por sticky top-0 */
+  position: relative; 
+  z-index: 10;
+}
+
+/* Custom Scrollbar suave para a tabelinha slim */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1; /* slate-300 */
+  border-radius: 10px;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: #94a3b8; /* slate-400 */
+}
+
+
+/* =========================================
+   ANIMAÇÕES DE COMPARAÇÃO (TRIÂNGULOS)
+========================================= */
+@keyframes qfSlideDownFast {
+  0% { transform: translateY(-4px); opacity: 0; }
+  15% { transform: translateY(0); opacity: 1; }
+  85% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(4px); opacity: 0; }
+}
+
+@keyframes qfSlideUpFast {
+  0% { transform: translateY(4px); opacity: 0; }
+  15% { transform: translateY(0); opacity: 1; }
+  85% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-4px); opacity: 0; }
+}
+
+.qf-anim-triangle-down {
+  display: inline-block;
+  animation: qfSlideDownFast 1.5s infinite ease-in-out;
+  color: var(--q-green);
+  font-size: 10px;
+}
+
+.qf-anim-triangle-up {
+  display: inline-block;
+  animation: qfSlideUpFast 1.5s infinite ease-in-out;
+  color: var(--q-danger);
+  font-size: 10px;
+}
+
+/* Custom Scrollbar para a tabelinha slim */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: #94a3b8;
+}
+
+
+
+/* =========================================
+   PADRÕES GERAIS DOS CARDS (QUALYFLOW)
+========================================= */
+.qf-card {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 0.75rem;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  margin-top: 1rem;
+  font-family: inherit;
+}
+
+.qf-card-top-bar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 6px;
+  background: linear-gradient(to right, var(--q-green), var(--q-orange));
+  opacity: 0.9;
+}
+
+.qf-card-header {
+  padding: 2px 2px 8px 2px; /* Título mais encostado na esquerda e com menos sobra */
+  border-bottom: 1px solid #f1f5f9;
+  background-color: rgba(248, 250, 252, 0.3);
+}
+
+.qf-card-title {
+  font-size: 16px; /* Cravado no tamanho que você pediu */
+  font-weight: 900; 
+  color: var(--q-dark);
+  text-transform: uppercase;
+  letter-spacing: -0.05em;
+  margin: 0;
+}
+
+.qf-kpi-list {
+  padding: 5px 2px; /* Reduzimos bem o padding lateral e vertical */
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-bottom: 1px solid #f1f5f9;
+  background-color: rgba(248, 250, 252, 0.5);
+}
+
+.qf-kpi-row {
+  display: grid;
+  grid-template-columns: 1fr 60px 20px 60px;
+  gap: 8px;
+  padding: 6px 4px;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.5);
+  align-items: center;
+  transition: background-color 0.2s;
+}
+.qf-kpi-row:last-child {
+  border-bottom: none;
+}
+.qf-kpi-row:hover {
+  background-color: rgba(241, 245, 249, 0.5);
+}
+
+.qf-table-wrapper {
+  padding: 5px 2px; /* Lista de campos mais compacta */
+  display: flex;
+  flex-direction: column;
+}
+
+.qf-table-container {
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  border: 1px solid #e2e8f0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.qf-table-header {
+  display: grid;
+  grid-template-columns: 1fr 45px 50px 55px;
+  gap: 8px;
+  padding: 8px 12px;
+  background-color: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+  position: relative;
+  z-index: 10;
+}
+
+.qf-table-row {
+  display: grid;
+  grid-template-columns: 1fr 45px 50px 55px;
+  gap: 8px;
+  padding: 8px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: background-color 0.2s;
+}
+.qf-table-row:last-child {
+  border-bottom: none;
+}
+.qf-table-row:hover {
+  background-color: #f8fafc;
+}
+
+.qf-card-footer {
+  padding: 2px 2px;
+  border-top: 1px solid #f1f5f9;
+  display: flex;
+  justify-content: flex-end; /* O botão Detalhado travado na direita */
+}
+
+/* =========================================
+   ANIMAÇÕES DE COMPARAÇÃO (TRIÂNGULOS)
+========================================= */
+@keyframes qfSlideDownFast {
+  0% { transform: translateY(-4px); opacity: 0; }
+  15% { transform: translateY(0); opacity: 1; }
+  85% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(4px); opacity: 0; }
+}
+
+@keyframes qfSlideUpFast {
+  0% { transform: translateY(4px); opacity: 0; }
+  15% { transform: translateY(0); opacity: 1; }
+  85% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-4px); opacity: 0; }
+}
+
+.qf-anim-triangle-down {
+  display: inline-block;
+  animation: qfSlideDownFast 1.5s infinite ease-in-out;
+  color: var(--q-green);
+  font-size: 10px;
+}
+
+.qf-anim-triangle-up {
+  display: inline-block;
+  animation: qfSlideUpFast 1.5s infinite ease-in-out;
+  color: var(--q-danger);
+  font-size: 10px;
+}
+
+/* Custom Scrollbar para a tabelinha slim */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 10px;
+}
+.custom-scrollbar:hover::-webkit-scrollbar-thumb {
+  background-color: #94a3b8;
 }

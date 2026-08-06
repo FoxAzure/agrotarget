@@ -126,11 +126,17 @@ const CardCUC = ({ selectedDate }) => {
   if (isLoading) return <LoadingSpinner />;
 
   return (
-    <section className="qf-cuc-card">
-      <div className="qf-cuc-header">
-        <div className="qf-cuc-title">CUC - Gotejo</div>
+    <section className="qf-card animate-in zoom-in-95 duration-300 mt-4">
+      
+      {/* Detalhe superior de cor padrão */}
+      <div className="qf-card-top-bar" />
+
+      {/* HEADER PADRONIZADO */}
+      <div className="qf-card-header">
+        <h2 className="qf-card-title">CUC - Gotejo</h2>
       </div>
 
+      {/* O RECHEIO CONTINUA INTOCADO PARA PRESERVAR A LÓGICA DAS BARRAS */}
       <div className="qf-cuc-columns">
         <span className="qf-cuc-column-field">Campo</span>
         <span>CUC</span>
@@ -164,11 +170,11 @@ const CardCUC = ({ selectedDate }) => {
         })}
       </div>
 
-      <div className="qf-cuc-footer">
+      {/* FOOTER PADRONIZADO */}
+      <div className="qf-card-footer">
         <button
           type="button"
           className="qf-cuc-detail-button"
-          /* A MÁGICA ACONTECE AQUI: Passando a data adiante */
           onClick={() => navigate('/qualyflow/cuc', { state: { selectedDate } })}
         >
           Detalhado

@@ -11,7 +11,7 @@ import agroToolsLogo from './gallery/logo/agrotools.png'; // ➔ Logo do AgroToo
 
 // Importando a página principal do QualyFlow
 import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
-import PerdasDetails from './pages/QualyFlow/PerdasDetails';
+import PerdaMecDetail from './pages/QualyFlow/details/PerdaMecDetail';
 import CucDetail from './pages/QualyFlow/details/CucDetail';
 import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
 
@@ -110,7 +110,7 @@ function App() {
         <Route path="/" element={<Hub />} />
         
         <Route path="/qualyflow" element={<QualyFlowHome />} />
-        <Route path="/qualyflow/perdasmec" element={<PerdasDetails />} />
+        <Route path="/qualyflow/perdasmec" element={<PerdaMecDetail />} />
         <Route path="/qualyflow/cuc" element={<CucDetail />} />
 
         <Route path="/coacenter" element={<COACenterHome />} />
