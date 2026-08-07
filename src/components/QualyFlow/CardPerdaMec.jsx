@@ -1,7 +1,9 @@
 // ================================= DOCUMENTATION ------------------------------------------
 // Script: CardPerdaMec
 // Purpose: Exibe os indicadores de Perda Mecanizada, comparando o Dia com o Ano (YTD).
-// Relationships: vw_q_perdamecgeral
+// Relationships: 
+//   - vw_q_perdamecgeral (Para granularidade diária e campos)
+//   - vw_q_perdamec_ano  (Para consolidação anual de safra)
 // ==========================================================================================
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -41,8 +43,8 @@ const CompareTriangle = ({ daily, yearly }) => {
   return <span className="qf-anim-triangle-up font-black text-center">▲</span>;
 };
 
-// Motor de Cálculo
-const calcularIndicadores = (rows) => {
+// Motor de Cálculo Diário
+const calcularIndicadoresDiario = (rows) => {
   let sumPerda = 0, sumTch = 0;
   let sumMtPisoteioSimples = 0, sumAvPisoteioSimples = 0;
   let sumMtPisoteioDuplo = 0, sumAvPisoteioDuplo = 0;
@@ -97,24 +99,34 @@ const CardPerdaMec = ({ selectedDate }) => {
 
       try {
         if (!selectedDate) return;
-        const currentYear = selectedDate.split('-')[0];
+        const currentYear = parseInt(selectedDate.split('-')[0], 10);
 
-        const { data, error } = await supabase
-          .from('vw_q_perdamecgeral')
-          .select('*')
-          .eq('ano', currentYear);
+        // Dispara as requisições em paralelo. A geral busca SÓ O DIA, a anual busca SÓ O ANO.
+        const [resDia, resAno] = await Promise.all([
+          supabase.from('vw_q_perdamecgeral').select('*').eq('data_apontamento', selectedDate),
+          supabase.from('vw_q_perdamec_ano').select('*').eq('ano', currentYear).single()
+        ]);
 
-        if (error) throw error;
-        
-        const dataDia = (data || []).filter(d => d.data_apontamento === selectedDate);
+        if (resDia.error) throw resDia.error;
+        if (resAno.error && resAno.error.code !== 'PGRST116') throw resAno.error; // Ignora se não houver consolidação do ano ainda
+
+        const dataDia = resDia.data || [];
+        const dataAno = resAno.data || null;
 
         if (dataDia.length === 0) {
           if (mounted) setIsLoading(false);
           return;
         }
 
-        const indAno = calcularIndicadores(data || []);
-        const indDia = calcularIndicadores(dataDia);
+        // Recupera os KPIs anuais calculados direto da nova View
+        const indAno = dataAno ? {
+          perda: dataAno.perda_perc,
+          pisoteioSimples: dataAno.pisoteio_simples_perc,
+          pisoteioDuplo: dataAno.pisoteio_duplo_perc,
+          arranquio: dataAno.arranquio_perc
+        } : { perda: null, pisoteioSimples: null, pisoteioDuplo: null, arranquio: null };
+
+        const indDia = calcularIndicadoresDiario(dataDia);
 
         const mapCampos = new Map();
         dataDia.forEach(row => {
@@ -174,7 +186,6 @@ const CardPerdaMec = ({ selectedDate }) => {
   if (!isLoading && !hasData) return null;
   if (isLoading) return <LoadingSpinner />;
 
-  // Linha de KPI usando as novas classes CSS
   const KpiRow = ({ label, valDia, valAno, meta }) => {
     if (valDia === null) return null;
     return (
@@ -190,7 +201,7 @@ const CardPerdaMec = ({ selectedDate }) => {
         </div>
         
         <span className="text-[12px] font-black text-right tracking-tight" style={{ color: getStatusColor(valAno, meta) }}>
-          {valAno !== null ? `${formatValue(valAno)}%` : '-'}
+          {valAno !== null && valAno !== undefined ? `${formatValue(valAno)}%` : '-'}
         </span>
       </div>
     );
@@ -199,18 +210,13 @@ const CardPerdaMec = ({ selectedDate }) => {
   return (
     <section className="qf-card animate-in zoom-in-95 duration-300">
       
-      {/* Detalhe superior de cor */}
       <div className="qf-card-top-bar" />
 
-      {/* HEADER */}
       <div className="qf-card-header">
         <h2 className="qf-card-title">Perdas Mecanizada</h2>
       </div>
 
-      {/* SESSÃO 1: INDICADORES GERAIS (Flat List) */}
       <div className="qf-kpi-list">
-        
-        {/* Cabeçalho da Lista KPI */}
         <div className="grid grid-cols-[1fr_60px_20px_60px] gap-2 px-1 pb-1 pt-1 border-b border-slate-200 items-end">
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-left">Indicador</span>
           <span className="text-[10px] font-black uppercase tracking-widest text-[var(--q-dark)] text-right">{diaMouthStr}</span>
@@ -218,14 +224,12 @@ const CardPerdaMec = ({ selectedDate }) => {
           <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">{anoStr}</span>
         </div>
 
-        {/* Linhas */}
         <KpiRow label="Perdas" valDia={indicadoresDia.perda} valAno={indicadoresAno.perda} meta={metas.perda} />
         <KpiRow label="Pisoteio Simples" valDia={indicadoresDia.pisoteioSimples} valAno={indicadoresAno.pisoteioSimples} meta={metas.pisoteio_simples} />
         <KpiRow label="Pisoteio Duplo" valDia={indicadoresDia.pisoteioDuplo} valAno={indicadoresAno.pisoteioDuplo} meta={metas.pisoteio_duplo} />
         <KpiRow label="Arranquio" valDia={indicadoresDia.arranquio} valAno={indicadoresAno.arranquio} meta={metas.arranquio} />
       </div>
 
-      {/* SESSÃO 2: TABELA DE CAMPOS (Com Bordas e Tighter Padding) */}
       <div className="qf-table-wrapper">
         <div className="qf-table-container shadow-sm">
           
@@ -258,7 +262,6 @@ const CardPerdaMec = ({ selectedDate }) => {
         </div>
       </div>
 
-      {/* FOOTER: BOTÃO DETALHADO */}
       <div className="qf-card-footer">
         <button 
           onClick={() => navigate('/qualyflow/perdasmec', { state: { selectedDate } })}
