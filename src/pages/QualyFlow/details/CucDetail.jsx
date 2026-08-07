@@ -12,6 +12,7 @@ import Sidebar from '../../../components/QualyFlow/Sidebar';
 import CucDetailDiario from './CucDetailDiario';
 import CucDetailHst from './CucDetailHst';
 import CucDetailAvaliacoes from './CucDetailAvaliacoes';
+import CucDetailComparativo from './CucDetailComparativo';
 import '../Style.css';
 
 const CucDetail = () => {
@@ -64,11 +65,7 @@ const CucDetail = () => {
         </div>
 
         <div className={activeTab === 'comparativo' ? 'block' : 'hidden'}>
-          <div className="flex flex-col gap-4 animate-in fade-in zoom-in-95 duration-300">
-             <div className="bg-slate-50 border border-slate-200 border-dashed rounded-xl p-10 flex flex-col items-center justify-center text-slate-400 mt-4">
-              <span className="text-xs font-bold uppercase tracking-widest">🚧 Em Desenvolvimento 🚧</span>
-            </div>
-          </div>
+          <CucDetailComparativo />
         </div>
 
         <div className={activeTab === 'avaliacoes' ? 'block' : 'hidden'}>
