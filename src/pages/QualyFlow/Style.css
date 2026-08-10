@@ -2096,3 +2096,75 @@ DESKTOP
 .custom-scrollbar:hover::-webkit-scrollbar-thumb {
   background-color: #94a3b8;
 }
+
+
+
+
+
+/* ================================= PERDAS MECANIZADA (CUSTOM) ================================= */
+
+/* Scrollbar vertical discreta para o gráfico de categorias e tabelas */
+.qf-scroll-y-240 {
+  max-height: 240px; /* Mostra +- 4 categorias por vez */
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Tooltip do Gráfico */
+.qf-chart-tooltip {
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 12px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+  font-family: inherit;
+}
+
+
+/* ================================= RANKING COLHEDORAS (ATUALIZADO) ================================= */
+
+@keyframes qf-bg-flow {
+  0% { background-position: 100% 100%; }
+  50% { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
+}
+
+/* Pódio Ouro */
+.qf-podium-1 {
+  background: linear-gradient(225deg, rgba(250, 204, 21, 0.25) 0%, rgba(250, 204, 21, 0.02) 60%, rgba(255, 255, 255, 1) 100%);
+  background-size: 200% 200%;
+  animation: qf-bg-flow 6s ease infinite;
+  border: 1px solid rgba(250, 204, 21, 0.5);
+}
+
+/* Pódio Prata */
+.qf-podium-2 {
+  background: linear-gradient(225deg, rgba(148, 163, 184, 0.25) 0%, rgba(148, 163, 184, 0.02) 60%, rgba(255, 255, 255, 1) 100%);
+  background-size: 200% 200%;
+  animation: qf-bg-flow 6s ease infinite;
+  border: 1px solid rgba(148, 163, 184, 0.5);
+}
+
+/* Pódio Bronze */
+.qf-podium-3 {
+  background: linear-gradient(225deg, rgba(249, 115, 22, 0.2) 0%, rgba(249, 115, 22, 0.02) 60%, rgba(255, 255, 255, 1) 100%);
+  background-size: 200% 200%;
+  animation: qf-bg-flow 6s ease infinite;
+  border: 1px solid rgba(249, 115, 22, 0.4);
+}
+
+/* Triângulos Animados */
+@keyframes qf-bounce-up { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-2px); } }
+@keyframes qf-bounce-down { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(2px); } }
+.qf-anim-triangle-up { display: inline-block; animation: qf-bounce-up 1.5s ease-in-out infinite; }
+.qf-anim-triangle-down { display: inline-block; animation: qf-bounce-down 1.5s ease-in-out infinite; }
+
+/* Highlights do Comparativo (Fácil de alterar a cor depois) */
+.qf-compare-highlight-t1, .qf-compare-highlight-t2 {
+  background-color: var(--q-green-soft) !important;
+  color: var(--q-green-dark) !important;
+  transition: all 0.2s ease-in-out;
+}
+.qf-compare-highlight-t1 .qf-machine-name, .qf-compare-highlight-t2 .qf-machine-name {
+  color: var(--q-green-dark) !important;
+}

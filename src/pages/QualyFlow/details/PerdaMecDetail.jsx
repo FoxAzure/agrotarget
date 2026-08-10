@@ -8,6 +8,8 @@ import { useLocation } from 'react-router-dom';
 
 import HeaderQualyFlow from '../../../components/QualyFlow/HeaderQualyFlow';
 import Sidebar from '../../../components/QualyFlow/Sidebar';
+import PerdaMecDetailDiario from './PerdaMecDetailDiario';
+import PerdaMecDetailRank from './PerdaMecDetailRank';
 import '../Style.css';
 
 const PerdaMecDetail = () => {
@@ -67,11 +69,11 @@ const PerdaMecDetail = () => {
         {/* RENDERIZAÇÃO DAS ABAS (Mantidas no DOM para não recarregar dados atoa) */}
         <div className={activeTab === 'diario' ? 'block' : 'hidden'}>
           {/* Futuramente: <PerdaMecDetailDiario initialDate={initialDate} /> */}
-          <EmDesenvolvimento />
+          <PerdaMecDetailDiario />
         </div>
 
         <div className={activeTab === 'ranking' ? 'block' : 'hidden'}>
-          <EmDesenvolvimento />
+          <PerdaMecDetailRank />
         </div>
 
         <div className={activeTab === 'historico' ? 'block' : 'hidden'}>
