@@ -1,58 +1,75 @@
 // ================================= DOCUMENTATION ------------------------------------------
 // Script: YearSelectorQualyFlow
-// Purpose: Seletor limpo e dedicado apenas para Anos (Safras).
+// Purpose: Seletor limpo e padronizado para Anos (Safras), estruturalmente idêntico ao DateSelector.
 // ==========================================================================================
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 
 const YearSelectorQualyFlow = ({ value, onChange, availableYears = [], isLoading = false }) => {
   
   const [isOpen, setIsOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
-  // Garante que a lista esteja ordenada do maior para o menor
+  // Garante que a lista esteja ordenada do maior para o menor (Mais recente primeiro)
   const sortedYears = useMemo(() => {
     return [...new Set(availableYears)].sort((a, b) => b - a);
-  }, [availableDates, availableYears]);
+  }, [availableYears]);
+
+  // Filtra as safras com base na busca
+  const filteredYears = useMemo(() => {
+    if (!searchTerm) return sortedYears;
+    return sortedYears.filter(year => String(year).includes(searchTerm));
+  }, [sortedYears, searchTerm]);
+
+  // Reseta a busca sempre que o modal fechar ou abrir
+  useEffect(() => {
+    if (!isOpen) setSearchTerm('');
+  }, [isOpen]);
 
   const currentIndex = useMemo(() => sortedYears.indexOf(value), [sortedYears, value]);
   
+  // Lógica de navegação: "Anterior" (<) vai para a safra MAIS ANTIGA (avança no array DESC)
+  // "Próximo" (>) vai para a safra MAIS RECENTE (retrocede no array DESC)
   const handlePrev = () => { if (currentIndex < sortedYears.length - 1) onChange(sortedYears[currentIndex + 1]); };
   const handleNext = () => { if (currentIndex > 0) onChange(sortedYears[currentIndex - 1]); };
 
   return (
-    <div className="relative inline-flex flex-col items-center z-50">
-      <div className="flex items-center bg-white border border-slate-200 rounded-full shadow-sm p-1">
+    <div className="qf-date-shell">
+      <div className="qf-date-inline">
         
         <button
           type="button"
-          disabled={isLoading || currentIndex >= sortedYears.length - 1}
+          className="qf-date-nav"
+          disabled={isLoading || currentIndex >= sortedYears.length - 1 || sortedYears.length === 0}
           onClick={handlePrev}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-30 transition-colors font-bold text-lg"
         >
           ‹
         </button>
 
         <button
           type="button"
-          onClick={() => !isLoading && setIsOpen(!isOpen)}
+          onClick={() => !isLoading && setIsOpen(true)}
+          className={`qf-date-chip ${isLoading ? 'is-loading' : ''}`}
           disabled={isLoading}
-          className="px-6 py-1.5 flex flex-col items-center justify-center min-w-[120px] rounded-full hover:bg-slate-50 transition-colors"
         >
           {isLoading ? (
-            <span className="text-[11px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Buscando...</span>
-          ) : (
             <>
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-tight">Safra</span>
-              <span className="text-sm font-black text-[var(--q-dark)] leading-tight">{value || '----'}</span>
+              <span className="qf-date-spinner"></span>
+              <span>Buscando...</span>
             </>
+          ) : (
+            <div className="flex flex-col items-center leading-none justify-center">
+              <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-0.5">Safra</span>
+              <span className="text-sm font-black">{value || '----'}</span>
+            </div>
           )}
         </button>
 
         <button
           type="button"
-          disabled={isLoading || currentIndex <= 0}
+          className="qf-date-nav"
+          disabled={isLoading || currentIndex <= 0 || sortedYears.length === 0}
           onClick={handleNext}
-          className="w-8 h-8 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 hover:text-slate-700 disabled:opacity-30 transition-colors font-bold text-lg"
         >
           ›
         </button>
@@ -60,29 +77,63 @@ const YearSelectorQualyFlow = ({ value, onChange, availableYears = [], isLoading
       </div>
 
       {isOpen && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-          <div className="absolute top-[110%] left-1/2 -translate-x-1/2 w-48 bg-white border border-slate-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-            <div className="p-3 bg-slate-50 border-b border-slate-100">
-              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block text-center">Selecione a Safra</span>
+        <div className="qf-calendar-backdrop" onClick={() => setIsOpen(false)}>
+          <div className="qf-calendar" onClick={(e) => e.stopPropagation()}>
+            
+            <div className="qf-calendar__top">
+              <span className="qf-calendar__title">Selecione a Safra</span>
+              <button onClick={() => setIsOpen(false)} className="text-[var(--q-gray)] hover:text-[var(--q-danger)] font-bold transition-colors">✕</button>
             </div>
-            <div className="flex flex-col max-h-[250px] overflow-y-auto custom-scrollbar p-1">
-              {sortedYears.map(year => (
-                <button
-                  key={year}
-                  onClick={() => { onChange(year); setIsOpen(false); }}
-                  className={`py-3 px-4 text-center rounded-lg text-sm font-black transition-colors ${
-                    value === year 
-                      ? 'bg-[var(--q-green-soft)] text-[var(--q-green-dark)]' 
-                      : 'text-slate-600 hover:bg-slate-50'
-                  }`}
+
+            <div className="p-3 bg-white">
+              {/* Barra de Busca */}
+              <div className="relative mb-3">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40 text-xs">🔍</span>
+                <input 
+                  type="text" 
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder="Buscar safra..."
+                  className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-8 pr-3 py-2 text-xs font-bold text-slate-700 outline-none focus:border-[var(--q-green)] focus:ring-1 focus:ring-[var(--q-green)] transition-all"
+                />
+              </div>
+
+              {/* Lista de Safras com tamanho fixo */}
+              <div className="flex flex-col h-[200px] overflow-y-auto custom-scrollbar pr-1 border border-slate-100 rounded-lg p-1 bg-slate-50">
+                {filteredYears.length > 0 ? (
+                  filteredYears.map(year => (
+                    <button
+                      key={year}
+                      onClick={() => { onChange(year); setIsOpen(false); }}
+                      className={`py-2.5 px-4 mb-1 text-center rounded-md text-xs font-black uppercase tracking-widest transition-colors last:mb-0 ${
+                        value === year 
+                          ? 'bg-[var(--q-green-soft)] text-[var(--q-green-dark)] shadow-sm border border-[var(--q-green)]' 
+                          : 'bg-white text-slate-600 hover:bg-slate-100 border border-transparent'
+                      }`}
+                    >
+                      Safra {year}
+                    </button>
+                  ))
+                ) : (
+                  <div className="flex flex-col items-center justify-center h-full text-slate-400">
+                    <span className="text-xl mb-1 grayscale opacity-50">🍂</span>
+                    <span className="text-[9px] font-black uppercase tracking-widest">Nenhuma encontrada</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-3 border-t border-[var(--q-border)] bg-[var(--q-bg-hover)]">
+                <button 
+                  onClick={() => { if(sortedYears.length > 0) onChange(sortedYears[0]); setIsOpen(false); }}
+                  className="w-full py-2 bg-[var(--q-orange-soft)] text-[var(--q-orange-dark)] rounded-lg text-xs font-bold uppercase tracking-widest hover:bg-[var(--q-orange)] hover:text-white transition-colors"
                 >
-                  {year}
+                  Ir para Safra mais Recente
                 </button>
-              ))}
             </div>
+
           </div>
-        </>
+        </div>
       )}
     </div>
   );

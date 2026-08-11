@@ -4,11 +4,14 @@
 // Relationships: vw_q_perdamec_colhedora, vw_q_perdamec_ano, rulesPerdaMec
 // ==========================================================================================
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import YearSelectorQualyFlow from '../../../components/QualyFlow/YearSelectorQualyFlow';
 import { getMetasParaData, getStatusColor } from '../../../components/QualyFlow/rulesPerdaMec';
 import PerdaMecDetailRankEquip from './PerdaMecDetailRankEquip';
+
+// IMPORTAÇÕES DO RECHARTS
+import { ComposedChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, LabelList } from 'recharts';
 
 import imgOuro from '../../../gallery/logo/medalha-de-ouro.png';
 import imgPrata from '../../../gallery/logo/medalha-de-prata.png';
@@ -30,12 +33,39 @@ const parseColhedora = (fullName) => {
   return { shortName: fullName.split(' - ')[0].trim() };
 };
 
+const getMedalEmoji = (pos) => pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `${pos}º`;
+
 const CompareTriangle = ({ valDia, valAno }) => {
-  if (valDia === null || valAno === null) return <span className="w-4 text-[10px] text-slate-300 font-bold text-center">-</span>;
+  if (valDia === null || valAno === null) return <span className="w-4 inline-block text-[10px] text-slate-300 font-bold text-center">-</span>;
   const diff = valDia - valAno;
-  if (Math.abs(diff) < 0.01) return <span className="w-4 text-[10px] text-slate-300 font-bold text-center">-</span>;
-  if (diff < 0) return <span className="w-4 font-black text-center text-[var(--q-green)] text-[10px]">▼</span>;
-  return <span className="w-4 font-black text-center text-[var(--q-danger)] text-[10px]">▲</span>;
+  
+  if (Math.abs(diff) < 0.01) return <span className="w-4 inline-block text-[10px] text-slate-300 font-bold text-center">-</span>;
+  if (diff < 0) return <span className="w-4 inline-block qf-anim-triangle-down font-black text-center text-[10px] text-[var(--q-green)]">▼</span>;
+  return <span className="w-4 inline-block qf-anim-triangle-up font-black text-center text-[10px] text-[var(--q-danger)]">▲</span>;
+};
+
+// Ícones de medalha ou posição para a Tabela Minimalista
+const getMedalIcon = (pos, isSelected) => {
+  if (pos === 1) return <img src={imgOuro} alt="1º" className="w-5 h-5 drop-shadow-sm mx-auto" />;
+  if (pos === 2) return <img src={imgPrata} alt="2º" className="w-5 h-5 drop-shadow-sm mx-auto" />;
+  if (pos === 3) return <img src={imgBronze} alt="3º" className="w-5 h-5 drop-shadow-sm mx-auto" />;
+  return <span className={`text-[12px] font-black block text-center ${isSelected ? 'text-[var(--q-dark)]' : 'text-slate-400'}`}>{pos}º</span>;
+};
+
+// Eixo X do Gráfico - Ajustado para 10px 
+const CustomXAxisTick = ({ x, y, payload }) => {
+  const words = payload.value.split(' ');
+  const line1 = words[0];
+  const line2 = words.slice(1).join(' ');
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <text x={0} y={0} textAnchor="middle" fill="#64748b" fontSize={10} fontWeight={900}>
+        <tspan x={0} dy="14">{line1}</tspan>
+        {line2 && <tspan x={0} dy="12">{line2}</tspan>}
+      </text>
+    </g>
+  );
 };
 
 // ================================= EXECUTOR PRINCIPAL -------------------------------------
@@ -52,9 +82,13 @@ const PerdaMecDetailRank = () => {
   const [viewMode, setViewMode] = useState('1º Turno'); 
   const [selectedMachineToView, setSelectedMachineToView] = useState(null);
   const [highlightedColhedora, setHighlightedColhedora] = useState(null);
-  const [mobileKpi, setMobileKpi] = useState('perda'); // Controle do KPI na lista compacta (celular)
+  const [mobileKpi, setMobileKpi] = useState('perda');
 
   const metas = useMemo(() => getMetasParaData(`${activeYear}-12-31`) || {}, [activeYear]);
+
+  // Refs para sincronização de Scroll nos gráficos
+  const chart1ScrollRef = useRef(null);
+  const chart2ScrollRef = useRef(null);
 
   // 1. Busca Anos Disponíveis
   useEffect(() => {
@@ -102,8 +136,6 @@ const PerdaMecDetailRank = () => {
 
   // 3. Processamento
   const processamento = useMemo(() => {
-    
-    // KPIs Globais baseados na vw_q_perdamec_ano
     const kpisGlobais = {
       perda: globalAnoData ? Number(globalAnoData.perda_perc) : null,
       pSimples: globalAnoData ? Number(globalAnoData.pisoteio_simples_perc) : null,
@@ -120,7 +152,6 @@ const PerdaMecDetailRank = () => {
         .filter(r => r.turno === turno)
         .map(r => {
           const per = Number(r.perda_perc);
-          // Cálculo raiz dos pisoteios
           const avS = Number(r.av_pisoteio_simples) || 0;
           const mtS = Number(r.mt_pisoteio_simples) || 0;
           const calcPisotSimp = avS > 0 ? (mtS / avS) * 100 : null;
@@ -146,6 +177,25 @@ const PerdaMecDetailRank = () => {
     return { rankT1: buildRank('1º Turno'), rankT2: buildRank('2º Turno'), kpisGlobais };
   }, [rawDataColh, globalAnoData]);
 
+  // 4. Efeito para Auto-Scroll dos Gráficos Comparativos
+  useEffect(() => {
+    if (viewMode === 'Comparativo' && highlightedColhedora) {
+      const t1Idx = processamento?.rankT1.findIndex(r => r.colhedora === highlightedColhedora) ?? -1;
+      const t2Idx = processamento?.rankT2.findIndex(r => r.colhedora === highlightedColhedora) ?? -1;
+
+      const scrollToCenter = (ref, idx) => {
+        if (ref.current && idx !== -1) {
+          const itemWidth = 50; // barSize + margins
+          const xPos = (idx * itemWidth) + (itemWidth / 2) - (ref.current.clientWidth / 2);
+          ref.current.scrollTo({ left: Math.max(0, xPos), behavior: 'smooth' });
+        }
+      };
+
+      scrollToCenter(chart1ScrollRef, t1Idx);
+      scrollToCenter(chart2ScrollRef, t2Idx);
+    }
+  }, [highlightedColhedora, viewMode, processamento]);
+
   // ================================= RENDERIZADORES COMPONENTIZADOS =========================
 
   const renderTopKpiRow = (label, val, meta) => (
@@ -160,9 +210,11 @@ const PerdaMecDetailRank = () => {
   const SubKpiRow = ({ label, val, refGlobal, meta }) => (
     <div className="flex justify-between items-center border-b border-white/40 pb-1.5 last:border-0 last:pb-0">
       <span className="text-[10px] md:text-[11px] font-black text-slate-500 uppercase tracking-widest">{label}</span>
-      <div className="flex items-center gap-3">
-        <CompareTriangle valDia={val} valAno={refGlobal} />
-        <span className="text-[12px] md:text-[13px] font-black" style={{ color: getStatusColor(val, meta) }}>
+      <div className="flex items-center justify-end gap-1 min-w-[70px]">
+        <div className="w-4 flex justify-center">
+          <CompareTriangle valDia={val} valAno={refGlobal} />
+        </div>
+        <span className="w-10 text-right text-[12px] md:text-[13px] font-black" style={{ color: getStatusColor(val, meta) }}>
           {val !== null ? `${formatValue(val)}%` : '-'}
         </span>
       </div>
@@ -228,8 +280,6 @@ const PerdaMecDetailRank = () => {
 
     return (
       <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col mt-4">
-        
-        {/* Toggle de KPIs só aparece no Celular */}
         <div className="md:hidden flex w-full bg-slate-100 p-1 border-b border-slate-200">
           {['perda', 'simp', 'dup', 'arr'].map(kpiKey => {
             const labels = { perda: 'Perda', simp: 'Simples', dup: 'Duplo', arr: 'Arranquio' };
@@ -247,19 +297,14 @@ const PerdaMecDetailRank = () => {
           })}
         </div>
 
-        {/* Cabeçalho da Lista */}
-        <div className="grid grid-cols-[25px_1fr_40px_45px_45px_50px] md:grid-cols-[25px_1fr_40px_45px_45px_45px_45px_45px_45px] gap-2 px-3 py-2 bg-slate-50 border-b border-slate-100 cursor-default items-center">
+        <div className="grid grid-cols-[25px_1fr_40px_45px_45px_55px] md:grid-cols-[25px_1fr_40px_45px_45px_55px_45px_45px_45px] gap-2 px-3 py-2 bg-slate-50 border-b border-slate-100 cursor-default items-center">
           <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-center">#</span>
           <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Colhedora</span>
           <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-center">Pts</span>
           <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-center">TCH</span>
           <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-center">Md.Kg</span>
-          
-          {/* Coluna Dinâmica no Mobile */}
           <span className="md:hidden text-[8px] font-black uppercase tracking-widest text-[var(--q-dark)] text-right">Valor</span>
-          
-          {/* Colunas Fixas no Desktop */}
-          <span className="hidden md:block text-[8px] font-black uppercase tracking-widest text-[var(--q-dark)] text-center">Perda</span>
+          <span className="hidden md:block text-[8px] font-black uppercase tracking-widest text-[var(--q-dark)] text-right pr-2">Perda</span>
           <span className="hidden md:block text-[8px] font-black uppercase tracking-widest text-slate-400 text-center">Simples</span>
           <span className="hidden md:block text-[8px] font-black uppercase tracking-widest text-slate-400 text-center">Duplo</span>
           <span className="hidden md:block text-[8px] font-black uppercase tracking-widest text-slate-400 text-right">Arran.</span>
@@ -269,7 +314,6 @@ const PerdaMecDetailRank = () => {
           {listToRender.map((r, idx) => {
             const actualPos = START_LIST_AT_INDEX + idx + 1;
             
-            // Resolve o valor dinâmico para o mobile
             let mVal = '-'; let mColor = ''; let mTriangle = null;
             if (mobileKpi === 'perda') { mVal = formatValue(r.calcPerda); mColor = getStatusColor(r.calcPerda, metas?.perda); mTriangle = <CompareTriangle valDia={r.calcPerda} valAno={processamento.kpisGlobais.perda} />; }
             if (mobileKpi === 'simp') { mVal = r.calcPisotSimp !== null ? formatValue(r.calcPisotSimp) : '-'; mColor = getStatusColor(r.calcPisotSimp, metas?.pisoteio_simples); mTriangle = <CompareTriangle valDia={r.calcPisotSimp} valAno={processamento.kpisGlobais.pSimples} />; }
@@ -280,7 +324,7 @@ const PerdaMecDetailRank = () => {
               <div 
                 key={r.colhedora} 
                 onClick={() => setSelectedMachineToView(r)}
-                className="grid grid-cols-[25px_1fr_40px_45px_45px_50px] md:grid-cols-[25px_1fr_40px_45px_45px_45px_45px_45px_45px] gap-2 px-2 py-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-50 last:border-0 items-center group"
+                className="grid grid-cols-[25px_1fr_40px_45px_45px_55px] md:grid-cols-[25px_1fr_40px_45px_45px_55px_45px_45px_45px] gap-2 px-2 py-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors border-b border-slate-50 last:border-0 items-center group"
               >
                 <span className="text-[11px] font-black text-slate-400 text-center">{actualPos}º</span>
                 <span className="text-[12px] font-black text-slate-700 truncate group-hover:text-[var(--q-green)]">{parseColhedora(r.colhedora).shortName}</span>
@@ -288,16 +332,16 @@ const PerdaMecDetailRank = () => {
                 <span className="text-[10px] font-bold text-slate-500 text-center">{formatValue(r.calcTch, 0)}</span>
                 <span className="text-[10px] font-bold text-slate-500 text-center">{formatValue(r.mediaKg, 1)}</span>
                 
-                {/* Mobile Dynamic Cell */}
                 <div className="md:hidden flex items-center justify-end gap-1">
-                  {mTriangle}
-                  <span className="text-[11px] font-black text-right" style={{ color: mColor }}>{mVal !== '-' ? `${mVal}%` : '-'}</span>
+                  <div className="w-3 flex justify-center">{mTriangle}</div>
+                  <span className="w-9 text-[11px] font-black text-right" style={{ color: mColor }}>{mVal !== '-' ? `${mVal}%` : '-'}</span>
                 </div>
                 
-                {/* Desktop Cells */}
-                <div className="hidden md:flex items-center justify-center gap-1">
-                  <CompareTriangle valDia={r.calcPerda} valAno={processamento.kpisGlobais.perda} />
-                  <span className="text-[11px] font-black text-center" style={{ color: getStatusColor(r.calcPerda, metas?.perda) }}>{formatValue(r.calcPerda)}%</span>
+                <div className="hidden md:flex items-center justify-end gap-1">
+                  <div className="w-3 flex justify-center">
+                    <CompareTriangle valDia={r.calcPerda} valAno={processamento.kpisGlobais.perda} />
+                  </div>
+                  <span className="w-9 text-[11px] font-black text-right" style={{ color: getStatusColor(r.calcPerda, metas?.perda) }}>{formatValue(r.calcPerda)}%</span>
                 </div>
                 
                 <span className="hidden md:block text-[10px] font-black text-center text-slate-400">{r.calcPisotSimp !== null ? `${formatValue(r.calcPisotSimp)}%` : '-'}</span>
@@ -323,15 +367,14 @@ const PerdaMecDetailRank = () => {
 
     return (
       <div className="mt-12 pt-8 border-t-2 border-slate-200 border-dashed relative">
-        
         <div className="flex justify-between items-end mb-4">
           <div className="flex flex-col">
             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Resumo Outro Turno</span>
-            <h2 className="text-xl font-black text-[var(--q-dark)] uppercase tracking-tighter">Top 3 - <span className={isT1 ? 'text-yellow-500' : 'text-blue-500'}>{shiftName}</span></h2>
+            <h2 className="text-xl font-black text-[var(--q-dark)] uppercase tracking-tighter">Top 3 - <span className="text-slate-700">{shiftName}</span></h2>
           </div>
           <button 
             onClick={() => { setViewMode(shiftName); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-            className="text-[10px] font-black uppercase tracking-widest text-[var(--q-green)] hover:text-[var(--q-green-dark)] bg-[var(--q-green-soft)] px-3 py-1.5 rounded-lg transition-colors"
+            className="text-[10px] font-black uppercase tracking-widest text-[var(--q-green-dark)] bg-[var(--q-green-soft)] border border-[var(--q-green)] px-3 py-1.5 rounded-lg transition-colors hover:shadow-sm"
           >
             Ver Todos
           </button>
@@ -345,7 +388,7 @@ const PerdaMecDetailRank = () => {
               <div 
                 key={idx} 
                 onClick={() => setSelectedMachineToView(r)}
-                className={`flex justify-between items-center p-4 rounded-xl border-2 cursor-pointer shadow-sm hover:shadow-md transition-all ${colorClasses}`}
+                className={`flex justify-between items-center p-4 rounded-xl border cursor-pointer shadow-sm hover:shadow-md transition-all ${colorClasses}`}
               >
                 <div className="flex items-center gap-3">
                   <img src={medals[idx]} alt="Medalha" className="w-8 h-8 object-contain drop-shadow" />
@@ -366,73 +409,165 @@ const PerdaMecDetailRank = () => {
     );
   };
 
-  const renderComparativo = () => {
-    const allMachines = [...new Set(rawDataColh.map(r => r.colhedora))].sort();
+  // ================================= NOVO RENDER COMPARATIVO ================================
 
-    const mapT1 = new Map((processamento?.rankT1 || []).map((r, i) => [r.colhedora, { ...r, pos: i + 1 }]));
-    const mapT2 = new Map((processamento?.rankT2 || []).map((r, i) => [r.colhedora, { ...r, pos: i + 1 }]));
+  const renderComparativoDashboard = () => {
+    const rankT1 = processamento?.rankT1 || [];
+    const rankT2 = processamento?.rankT2 || [];
+    
+    // Preparando os dados para os gráficos
+    const chartDataT1 = rankT1.map((r, i) => ({
+      ...r,
+      nameStr: `${getMedalEmoji(i+1)} ${parseColhedora(r.colhedora).shortName}`,
+      isHighlighted: highlightedColhedora === r.colhedora,
+      pos: i + 1
+    }));
+    
+    const chartDataT2 = rankT2.map((r, i) => ({
+      ...r,
+      nameStr: `${getMedalEmoji(i+1)} ${parseColhedora(r.colhedora).shortName}`,
+      isHighlighted: highlightedColhedora === r.colhedora,
+      pos: i + 1
+    }));
 
-    const buildCompareList = (turnoMap) => {
-      const inShift = Array.from(turnoMap.values()).sort((a, b) => a.pos - b.pos);
-      const notInShift = allMachines
-        .filter(m => !turnoMap.has(m))
-        .map(m => ({ colhedora: m, pos: null, calcPerda: null }));
-      return [...inShift, ...notInShift];
+    // Prepara a Tabela Limpa
+    const maxLen = Math.max(rankT1.length, rankT2.length);
+    const nodeRows = Array.from({ length: maxLen }, (_, i) => ({
+      t1: rankT1[i] ? { ...rankT1[i], pos: i + 1, shortName: parseColhedora(rankT1[i].colhedora).shortName } : null,
+      t2: rankT2[i] ? { ...rankT2[i], pos: i + 1, shortName: parseColhedora(rankT2[i].colhedora).shortName } : null,
+    }));
+
+    const renderChart = (title, chartData, scrollRef, isT1) => {
+      const bgClass = isT1 ? 'bg-yellow-50' : 'bg-blue-50';
+      const borderClass = isT1 ? 'border-yellow-200' : 'border-blue-200';
+      const headerBgClass = isT1 ? 'bg-yellow-200/50' : 'bg-blue-200/50';
+      const titleColor = isT1 ? 'text-yellow-800' : 'text-blue-800';
+
+      return (
+        <div className={`flex flex-col border rounded-xl overflow-hidden shadow-sm ${bgClass} ${borderClass}`}>
+          {/* HUD Header Simples */}
+          <div className={`py-3 shadow-sm z-10 border-b ${borderClass} ${headerBgClass}`}>
+            <span className={`text-[13px] font-black uppercase tracking-widest block text-center ${titleColor}`}>{title}</span>
+          </div>
+          
+          {/* Gráfico Scrollável */}
+          <div className="w-full overflow-x-auto custom-scrollbar" ref={scrollRef}>
+            <div style={{ minWidth: Math.max(100, chartData.length * 50) + 'px', height: '220px', padding: '10px 0' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <ComposedChart data={chartData} margin={{ top: 20, right: 10, left: 10, bottom: 25 }}>
+                  <XAxis 
+                    dataKey="nameStr" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={<CustomXAxisTick />} 
+                    interval={0} 
+                  />
+                  <YAxis hide domain={[0, dataMax => dataMax * 1.2]} />
+                  <ReferenceLine y={metas.perda} stroke="#22c55e" strokeDasharray="3 3" opacity={0.5} />
+                  
+                  <Bar 
+                    dataKey="calcPerda" 
+                    barSize={32} 
+                    radius={[4, 4, 0, 0]}
+                    onClick={(data) => setHighlightedColhedora(data.colhedora)} // Apenas acende o realce no gráfico
+                    className="cursor-pointer transition-all"
+                  >
+                    {chartData.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`} 
+                        fill={entry.calcPerda <= metas.perda ? 'var(--q-green)' : 'var(--q-danger)'}
+                        fillOpacity={highlightedColhedora ? (entry.isHighlighted ? 1 : 0.3) : 1} 
+                      />
+                    ))}
+                    <LabelList 
+                      dataKey="calcPerda" 
+                      position="top" 
+                      formatter={(val) => formatValue(val)} 
+                      style={{ fontSize: '10px', fontWeight: '900', fill: '#475569' }} 
+                    />
+                  </Bar>
+                </ComposedChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+      );
     };
 
-    const renderList = (listData, title, bgHeader) => (
-      <div className="flex flex-col bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex-1">
-        <div className={`py-4 border-b border-slate-200 shadow-sm z-10 ${bgHeader}`}>
-          <span className="text-[14px] font-black text-white uppercase tracking-widest block text-center">{title}</span>
-        </div>
+    return (
+      <div className="flex flex-col gap-4 w-full animate-in fade-in duration-300">
         
-        <div className="flex flex-col overflow-y-auto custom-scrollbar p-2 pb-4">
-          {listData.map((r) => {
-            const isMissing = r.pos === null;
-            const isHighlighted = highlightedColhedora === r.colhedora;
-            
-            return (
-              <div 
-                key={r.colhedora} 
-                onClick={() => setHighlightedColhedora(isHighlighted ? null : r.colhedora)}
-                className={`flex flex-col p-3 rounded-xl cursor-pointer transition-all border-b border-slate-100 last:border-0 mb-1
-                  ${isMissing ? 'opacity-40 grayscale' : ''}
-                  ${isHighlighted ? 'qf-compare-highlight' : 'hover:bg-slate-50'}
-                `}
-              >
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-end gap-2">
-                    <span className="text-xl font-black opacity-80 leading-none">{r.pos ? `${r.pos}º` : '-'}</span>
-                    <span className="text-[11px] font-black uppercase tracking-widest leading-none pb-0.5">{parseColhedora(r.colhedora).shortName}</span>
+        {/* GRÁFICOS */}
+        {renderChart('1º Turno', chartDataT1, chart1ScrollRef, true)}
+        {renderChart('2º Turno', chartDataT2, chart2ScrollRef, false)}
+
+        {/* TABELA DE COMPARAÇÃO MINIMALISTA */}
+        <div className="flex flex-col bg-white border border-slate-200 rounded-xl shadow-sm mt-2">
+          
+          {/* Cabeçalhos Colados */}
+          <div className="grid grid-cols-[45px_1fr_1fr_45px] rounded-t-xl overflow-hidden border-b border-slate-200">
+            <div className="col-span-2 bg-yellow-200 py-3 flex items-center">
+               <div className="w-[45px] text-center"><span className="text-[10px] font-black text-yellow-800/60 uppercase">#</span></div>
+               <div className="flex-1"><span className="text-[12px] font-black uppercase tracking-widest text-yellow-900">1º Turno</span></div>
+            </div>
+            <div className="col-span-2 bg-blue-200 py-3 flex items-center border-l border-slate-200">
+               <div className="flex-1 text-right"><span className="text-[12px] font-black uppercase tracking-widest text-blue-900">2º Turno</span></div>
+               <div className="w-[45px] text-center"><span className="text-[10px] font-black text-blue-800/60 uppercase">#</span></div>
+            </div>
+          </div>
+
+          {/* Lista Fluída (Sem scroll interno) */}
+          <div className="flex flex-col pb-2">
+            {nodeRows.map((r, i) => {
+              const isSelT1 = r.t1 && r.t1.colhedora === highlightedColhedora;
+              const isSelT2 = r.t2 && r.t2.colhedora === highlightedColhedora;
+
+              return (
+                <div key={i} className="grid grid-cols-[45px_1fr_1fr_45px] items-stretch border-b border-slate-100 last:border-0 hover:bg-slate-50/50 transition-colors">
+                  
+                  {/* LADO T1 */}
+                  <div className="flex justify-center items-center py-2">
+                     {r.t1 ? getMedalIcon(r.t1.pos, isSelT1) : '-'}
                   </div>
                   
-                  {isHighlighted && r.pos && (
-                    <button 
-                      onClick={(e) => { e.stopPropagation(); setSelectedMachineToView(r); }}
-                      className="bg-white/20 hover:bg-white text-white hover:text-[var(--q-dark)] px-3 py-1 rounded text-[10px] font-black uppercase tracking-widest transition-colors shadow-sm"
-                    >
-                      {`{ ... }`}
-                    </button>
-                  )}
-                </div>
+                  <div className="p-1.5 border-r border-slate-200">
+                    {r.t1 && (
+                      <div 
+                        onClick={() => { setHighlightedColhedora(r.t1.colhedora); setSelectedMachineToView(r.t1); }}
+                        className={`h-full flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                          isSelT1 ? 'bg-yellow-100 border border-yellow-300 shadow-sm ring-1 ring-yellow-400/50' : 'bg-transparent hover:bg-slate-100 border border-transparent'
+                        }`}
+                      >
+                         <span className="font-black text-[12px] uppercase tracking-widest" style={{ color: getStatusColor(r.t1.calcPerda, metas?.perda) }}>{r.t1.shortName}</span>
+                         <CompareTriangle valDia={r.t1.calcPerda} valAno={processamento?.kpisGlobais?.perda} />
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* LADO T2 */}
+                  <div className="p-1.5">
+                    {r.t2 && (
+                      <div 
+                        onClick={() => { setHighlightedColhedora(r.t2.colhedora); setSelectedMachineToView(r.t2); }}
+                        className={`h-full flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-colors ${
+                          isSelT2 ? 'bg-blue-100 border border-blue-300 shadow-sm ring-1 ring-blue-400/50' : 'bg-transparent hover:bg-slate-100 border border-transparent'
+                        }`}
+                      >
+                         <CompareTriangle valDia={r.t2.calcPerda} valAno={processamento?.kpisGlobais?.perda} />
+                         <span className="font-black text-[12px] uppercase tracking-widest" style={{ color: getStatusColor(r.t2.calcPerda, metas?.perda) }}>{r.t2.shortName}</span>
+                      </div>
+                    )}
+                  </div>
 
-                <div className="flex items-center gap-2">
-                  <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Perda:</span>
-                  <span className="text-[13px] font-black" style={{ color: !isMissing && !isHighlighted ? getStatusColor(r.calcPerda, metas?.perda) : undefined }}>
-                    {r.calcPerda !== null ? `${formatValue(r.calcPerda)}%` : '-'}
-                  </span>
+                  <div className="flex justify-center items-center py-2">
+                     {r.t2 ? getMedalIcon(r.t2.pos, isSelT2) : '-'}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            })}
+          </div>
         </div>
-      </div>
-    );
 
-    return (
-      <div className="flex gap-3 w-full animate-in fade-in duration-300 items-stretch min-h-[600px]">
-        {renderList(buildCompareList(mapT1), '1º Turno', 'bg-yellow-500')}
-        {renderList(buildCompareList(mapT2), '2º Turno', 'bg-blue-500')}
       </div>
     );
   };
@@ -468,7 +603,7 @@ const PerdaMecDetailRank = () => {
       ) : (
         <div className="flex flex-col gap-5 mt-2">
           
-          {/* CARDS GLOBAIS DA SAFRA (SÓ VW ANO) */}
+          {/* CARDS GLOBAIS DA SAFRA */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {renderTopKpiRow("Média Perdas", processamento?.kpisGlobais?.perda, metas?.perda)}
             {renderTopKpiRow("P. Simples", processamento?.kpisGlobais?.pSimples, metas?.pisoteio_simples)} 
@@ -476,7 +611,7 @@ const PerdaMecDetailRank = () => {
             {renderTopKpiRow("Arranquio", processamento?.kpisGlobais?.arranquio, metas?.arranquio)}
           </div>
 
-          {/* SELETOR DE MODO (TURNOS / COMPARATIVO) */}
+          {/* SELETOR DE MODO */}
           <div className="flex w-full bg-slate-200/50 p-1 rounded-xl shadow-inner mt-4 border border-slate-200/60">
             {['1º Turno', '2º Turno', 'Comparativo'].map(t => (
               <button
@@ -495,10 +630,9 @@ const PerdaMecDetailRank = () => {
 
           {/* RENDERIZAÇÃO CONDICIONAL */}
           {viewMode === 'Comparativo' ? (
-            renderComparativo()
+            renderComparativoDashboard()
           ) : (
             <div className="flex flex-col animate-in fade-in duration-300">
-              
               {activeRankData && activeRankData.length > 0 ? (
                 <>
                   <div className="mb-4">{renderPodiumCard(activeRankData[0], 1)}</div>
@@ -514,7 +648,6 @@ const PerdaMecDetailRank = () => {
                   Sem dados para este turno
                 </div>
               )}
-
             </div>
           )}
         </div>
