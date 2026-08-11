@@ -654,11 +654,21 @@ const PerdaMecDetailRank = () => {
       )}
 
       {/* MODAL HISTÓRICO DA COLHEDORA */}
-      <PerdaMecDetailRankEquip 
-        colhedora={selectedMachineToView ? parseColhedora(selectedMachineToView.colhedora) : null}
-        ano={activeYear}
-        onClose={() => setSelectedMachineToView(null)}
-      />
+      <PerdaMecDetailRankEquip
+      colhedora={selectedMachineToView ? parseColhedora(selectedMachineToView.colhedora) : null}
+      ano={activeYear}
+      initialShift={selectedMachineToView?.turno || (viewMode === '2º Turno' ? '2º Turno' : '1º Turno')}
+      rankPosition={
+        selectedMachineToView
+          ? (
+              selectedMachineToView.turno === '1º Turno'
+                ? processamento?.rankT1?.findIndex(r => r.colhedora === selectedMachineToView.colhedora) + 1
+                : processamento?.rankT2?.findIndex(r => r.colhedora === selectedMachineToView.colhedora) + 1
+            )
+          : null
+      }
+      onClose={() => setSelectedMachineToView(null)}
+    />
 
     </div>
   );
