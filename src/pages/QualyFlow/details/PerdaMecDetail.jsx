@@ -10,6 +10,8 @@ import HeaderQualyFlow from '../../../components/QualyFlow/HeaderQualyFlow';
 import Sidebar from '../../../components/QualyFlow/Sidebar';
 import PerdaMecDetailDiario from './PerdaMecDetailDiario';
 import PerdaMecDetailRank from './PerdaMecDetailRank';
+import PerdaMecDetailHst from './PerdaMecDetailHst';
+import PerdaMecDetailCampo from './PerdaMecDetailCampo';
 import '../Style.css';
 
 const PerdaMecDetail = () => {
@@ -77,11 +79,11 @@ const PerdaMecDetail = () => {
         </div>
 
         <div className={activeTab === 'historico' ? 'block' : 'hidden'}>
-          <EmDesenvolvimento />
+          <PerdaMecDetailHst />
         </div>
 
         <div className={activeTab === 'campos' ? 'block' : 'hidden'}>
-          <EmDesenvolvimento />
+          <PerdaMecDetailCampo />
         </div>
 
       </main>

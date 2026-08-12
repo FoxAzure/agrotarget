@@ -87,6 +87,9 @@ const PerdaMecDetailRankEquipEvo = ({ colhedora, turno, ano, onClose }) => {
   
   const [loading, setLoading] = useState(false);
   const [rawData, setRawData] = useState([]);
+  
+  // Variável/Estado de controle dos eixos do gráfico (Dual = TCH de um lado, Kg do outro)
+  const [useDualAxis, setUseDualAxis] = useState(true);
 
   const metas = useMemo(() => getMetasParaData(`${ano}-12-31`), [ano]);
 
@@ -136,7 +139,7 @@ const PerdaMecDetailRankEquipEvo = ({ colhedora, turno, ano, onClose }) => {
       const kgAcum = sumKg / count;
       const perdaPerc = (sumKg + sumTch) > 0 ? (sumKg / (sumKg + sumTch)) * 100 : 0;
 
-      let trendTch = 0; // 1 (subiu), -1 (caiu), 0 (igual)
+      let trendTch = 0;
       let trendKg = 0;
 
       if (i > 0) {
@@ -167,8 +170,8 @@ const PerdaMecDetailRankEquipEvo = ({ colhedora, turno, ano, onClose }) => {
     }
 
     return { 
-      lista, // Cronológica (Bom pro gráfico)
-      listaReversa: [...lista].reverse(), // Do mais novo pro mais velho (Bom pra tabela)
+      lista, 
+      listaReversa: [...lista].reverse(), 
       ultimo: lista[lista.length - 1] 
     };
   }, [rawData, metas]);
@@ -208,23 +211,28 @@ const PerdaMecDetailRankEquipEvo = ({ colhedora, turno, ano, onClose }) => {
     <div className="fixed inset-0 z-[130] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 animate-in fade-in zoom-in-95 duration-200" onClick={onClose}>
       <div className="bg-slate-50 rounded-2xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[95vh]" onClick={e => e.stopPropagation()}>
         
-        {/* HEADER */}
-        <div className="p-4 md:p-5 border-b border-slate-200 bg-white shrink-0 shadow-sm z-10 flex justify-between items-start">
-          <div className="flex flex-col pr-4 min-w-0">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
-              <span onClick={onClose} className="cursor-pointer hover:text-[var(--q-dark)] transition-colors">← Voltar</span> 
-              <span>| Evolução e Tendência</span>
-            </span>
-            <h3 className="text-xl md:text-2xl font-black text-[var(--q-dark)] uppercase leading-none tracking-tight mt-2 flex items-center gap-2 truncate">
-              {colhedora.shortName} <span className="text-slate-300 text-base md:text-lg">| {turno}</span>
-            </h3>
-            <span className="text-[9px] md:text-[10px] font-bold text-slate-500 uppercase mt-1 line-clamp-1">Safra {ano}</span>
-          </div>
-          <button onClick={onClose} className="w-8 h-8 shrink-0 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-red-100 hover:text-red-500 font-bold transition-colors">✕</button>
+        {/* NOVO HEADER: Padronizado com o botão Voltar em destaque */}
+        <div className="p-3 md:p-4 border-b border-slate-200 bg-white shrink-0 flex items-center justify-between shadow-sm z-10">
+          <button 
+            onClick={onClose} 
+            className="flex items-center gap-2 bg-white border border-slate-200 text-slate-600 hover:text-[var(--q-dark)] hover:bg-slate-50 shadow-sm transition-colors px-3 py-1.5 rounded-lg"
+          >
+            <span className="text-[10px] font-black uppercase tracking-widest">Voltar</span>
+          </button>
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2">Evolução e Tendência</span>
         </div>
 
         {/* CORPO SCROLLÁVEL */}
         <div className="p-4 md:p-5 overflow-y-auto custom-scrollbar flex-1 flex flex-col">
+          
+          {/* Identificação da Colhedora dentro do corpo scrollável (como na Tela 2) */}
+          <div className="flex flex-col mb-5">
+            <h3 className="text-xl md:text-2xl font-black text-[var(--q-dark)] uppercase leading-none tracking-tight flex items-center gap-2 truncate">
+              {colhedora.shortName} <span className="text-slate-300 text-base md:text-lg">| {turno}</span>
+            </h3>
+            <span className="text-[10px] md:text-[11px] font-bold text-slate-500 uppercase mt-1 line-clamp-1">Safra {ano}</span>
+          </div>
+
           {loading ? (
             <div className="flex flex-col items-center justify-center py-20">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Desenhando Tendências...</span>
@@ -240,16 +248,28 @@ const PerdaMecDetailRankEquipEvo = ({ colhedora, turno, ano, onClose }) => {
               {/* KPIS GERAIS DO ACUMULADO */}
               {renderTopResume()}
 
-              {/* GRÁFICO DUPLO EIXO (Tendência do Acumulado) */}
+              {/* GRÁFICO DE TENDÊNCIA */}
               <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm mb-5">
                 <div className="flex justify-between items-end border-b border-slate-100 pb-2 mb-4">
                   <div className="flex flex-col">
-                    <h4 className="text-[10px] font-black text-[var(--q-dark)] uppercase tracking-widest">Gráfico de Tendência (Acumulada)</h4>
-                    <span className="text-[8px] font-bold text-slate-400 uppercase mt-0.5">Visão ponto a ponto da safra</span>
+                    <h4 className="text-[10px] font-black text-[var(--q-dark)] uppercase tracking-widest">Gráfico de Tendência</h4>
+                    <span className="text-[8px] font-bold text-slate-400 uppercase mt-0.5">Visão Acumulada da Safra</span>
                   </div>
-                  <div className="flex gap-4">
-                    <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span><span className="text-[9px] font-black text-slate-500 uppercase">TCH</span></div>
-                    <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-500"></span><span className="text-[9px] font-black text-slate-500 uppercase">Média Kg</span></div>
+                  
+                  <div className="flex flex-col items-end gap-2">
+                    {/* Legenda */}
+                    <div className="flex gap-4">
+                      <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-blue-500"></span><span className="text-[9px] font-black text-slate-500 uppercase">TCH</span></div>
+                      <div className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-orange-500"></span><span className="text-[9px] font-black text-slate-500 uppercase">Média Kg</span></div>
+                    </div>
+                    {/* Toggle de Eixos Interativo */}
+                    <button 
+                      onClick={() => setUseDualAxis(!useDualAxis)}
+                      className="text-[8px] font-black uppercase tracking-widest px-2 py-1 border border-slate-200 rounded text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
+                      title="Alternar entre um eixo comum ou escalas separadas"
+                    >
+                      {useDualAxis ? '⇆ Eixos Separados' : '⇈ Eixo Único'}
+                    </button>
                   </div>
                 </div>
 
@@ -258,19 +278,41 @@ const PerdaMecDetailRankEquipEvo = ({ colhedora, turno, ano, onClose }) => {
                     <ResponsiveContainer width="100%" height="100%">
                       <ComposedChart data={processamento.lista} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <XAxis dataKey="dataLabel" tick={{ fill: '#94a3b8', fontSize: 9, fontWeight: 900 }} tickLine={false} axisLine={false} minTickGap={30} />
-                        <YAxis yAxisId="left" orientation="left" stroke="#3b82f6" tick={{ fill: '#3b82f6', fontSize: 9, fontWeight: 900 }} axisLine={false} tickLine={false} domain={['auto', 'auto']} />
-                        <YAxis yAxisId="right" orientation="right" stroke="#f97316" tick={{ fill: '#f97316', fontSize: 9, fontWeight: 900 }} axisLine={false} tickLine={false} domain={[0, 'auto']} />
+                        
+                        {/* Eixo Esquerdo (TCH - ou Geral se for eixo único) */}
+                        <YAxis 
+                          yAxisId="left" 
+                          orientation="left" 
+                          stroke={useDualAxis ? "#3b82f6" : "#94a3b8"} 
+                          tick={{ fill: useDualAxis ? '#3b82f6' : '#94a3b8', fontSize: 9, fontWeight: 900 }} 
+                          axisLine={false} 
+                          tickLine={false} 
+                          domain={[0, 'auto']} 
+                        />
+                        
+                        {/* Eixo Direito (Kg) - Exibido apenas se for Dual Axis */}
+                        {useDualAxis && (
+                          <YAxis 
+                            yAxisId="right" 
+                            orientation="right" 
+                            stroke="#f97316" 
+                            tick={{ fill: '#f97316', fontSize: 9, fontWeight: 900 }} 
+                            axisLine={false} 
+                            tickLine={false} 
+                            domain={[0, 'auto']} 
+                          />
+                        )}
                         
                         <Tooltip content={<CustomEvoTooltip />} cursor={{ stroke: 'rgba(203, 213, 225, 0.5)', strokeWidth: 2, strokeDasharray: '3 3' }} />
                         
                         <Line yAxisId="left" type="monotone" dataKey="tchAcum" stroke="#3b82f6" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#3b82f6', stroke: '#fff', strokeWidth: 2 }} />
-                        <Line yAxisId="right" type="monotone" dataKey="kgAcum" stroke="#f97316" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#f97316', stroke: '#fff', strokeWidth: 2 }} />
+                        <Line yAxisId={useDualAxis ? "right" : "left"} type="monotone" dataKey="kgAcum" stroke="#f97316" strokeWidth={3} dot={false} activeDot={{ r: 6, fill: '#f97316', stroke: '#fff', strokeWidth: 2 }} />
                         
                         {/* Marcação Forte no Último Ponto para Foco */}
                         {processamento.ultimo && (
                           <>
                             <ReferenceDot yAxisId="left" x={processamento.ultimo.dataLabel} y={processamento.ultimo.tchAcum} r={5} fill="#3b82f6" stroke="#fff" strokeWidth={2} />
-                            <ReferenceDot yAxisId="right" x={processamento.ultimo.dataLabel} y={processamento.ultimo.kgAcum} r={5} fill="#f97316" stroke="#fff" strokeWidth={2} />
+                            <ReferenceDot yAxisId={useDualAxis ? "right" : "left"} x={processamento.ultimo.dataLabel} y={processamento.ultimo.kgAcum} r={5} fill="#f97316" stroke="#fff" strokeWidth={2} />
                           </>
                         )}
                       </ComposedChart>
@@ -288,7 +330,6 @@ const PerdaMecDetailRankEquipEvo = ({ colhedora, turno, ano, onClose }) => {
                 <div className="w-full overflow-x-auto custom-scrollbar">
                   <div className="min-w-[650px] flex flex-col">
                     
-                    {/* CABEÇALHO TABELA */}
                     <div className="grid grid-cols-[30px_55px_1fr_45px_60px_45px_65px_55px] gap-2 px-3 py-2 bg-slate-100 border-b-2 border-slate-200 cursor-default">
                       <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 self-center text-center">#</span>
                       <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 self-center text-center">Data</span>
@@ -300,7 +341,6 @@ const PerdaMecDetailRankEquipEvo = ({ colhedora, turno, ano, onClose }) => {
                       <span className="text-[8px] font-black uppercase tracking-widest text-[var(--q-dark)] text-right self-center pr-1 leading-tight">Perda<br/>Acum.</span>
                     </div>
 
-                    {/* CORPO TABELA (Lista Reversa - Mais novo no topo) */}
                     <div className="flex flex-col bg-white">
                       {processamento.listaReversa.map((r, idx) => (
                         <div key={idx} className="grid grid-cols-[30px_55px_1fr_45px_60px_45px_65px_55px] gap-2 px-3 py-2.5 hover:bg-slate-50 transition-colors border-b border-slate-100 last:border-0 items-center">
