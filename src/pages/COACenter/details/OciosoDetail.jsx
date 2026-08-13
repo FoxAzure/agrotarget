@@ -1,4 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+// ================================= DOCUMENTATION ------------------------------------------
+// Script: OciosoDetail
+// Purpose: Gerenciador de abas do Motor Ocioso. Mantém o estado via CSS (hidden/block) para 
+// evitar múltiplas requisições.
+// Relationships: Importa os paineis Diário, Resumo, Semanal e Mensal.
+// ==========================================================================================
+
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import '../Style.css';
 
@@ -12,6 +19,8 @@ import OciosoDetailResumo from './OciosoDetailResumo';
 import OciosoDetailSemanal from './OciosoDetailSemanal';
 import OciosoDetailMensal from './OciosoDetailMensal';
 
+// ================================= HELPERS ------------------------------------------------
+
 const toIsoDate = (date = new Date()) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -24,6 +33,8 @@ const brToIso = (brDate) => {
   const [dd, mm, yyyy] = brDate.split('/');
   return `${yyyy}-${String(mm).padStart(2, '0')}-${String(dd).padStart(2, '0')}`;
 };
+
+// ================================= EXECUTOR -----------------------------------------------
 
 const OciosoDetail = () => {
   const location = useLocation();
@@ -115,7 +126,7 @@ const OciosoDetail = () => {
           <TabButton id="mensal" label="Mensal" />
         </div>
 
-        {activeTab === 'diario' && (
+        <div className={activeTab === 'diario' ? 'block animate-in fade-in duration-300' : 'hidden'}>
           <OciosoDetailDiario
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
@@ -123,32 +134,32 @@ const OciosoDetail = () => {
             setSelectedCategories={setSelectedCategories}
             availableDates={availableDates}
           />
-        )}
+        </div>
 
-        {activeTab === 'resumo' && (
+        <div className={activeTab === 'resumo' ? 'block animate-in fade-in duration-300' : 'hidden'}>
           <OciosoDetailResumo
             selectedDate={selectedDate}
             setSelectedDate={setSelectedDate}
             selectedCategories={selectedCategories}
             availableDates={availableDates}
           />
-        )}
+        </div>
 
-        {activeTab === 'semanal' && (
+        <div className={activeTab === 'semanal' ? 'block animate-in fade-in duration-300' : 'hidden'}>
           <OciosoDetailSemanal
             selectedDate={selectedDate}
             selectedCategories={selectedCategories}
             availableDates={availableDates}
           />
-        )}
+        </div>
 
-        {activeTab === 'mensal' && (
+        <div className={activeTab === 'mensal' ? 'block animate-in fade-in duration-300' : 'hidden'}>
           <OciosoDetailMensal
             selectedDate={selectedDate}
             selectedCategories={selectedCategories}
             availableDates={availableDates}
           />
-        )}
+        </div>
       </main>
     </div>
   );
