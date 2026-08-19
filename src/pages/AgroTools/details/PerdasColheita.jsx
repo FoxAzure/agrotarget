@@ -159,7 +159,7 @@ ${item.turno}º Turno\n`;
     if (item.hasCat) {
       txt += `\n📊 *Categorias*\n`;
       txt += `Pedaço Solto......${item.cat.solto || '0'}\nLascas......${item.cat.lasca || '0'}\nEstilhaço......${item.cat.estilhaco || '0'}\n`;
-      txt += `Tolete Repicado......${item.cat.repicado || '0'}\nCana Inteira......${item.cat.inteira || '0'}\nPedaço Fixo......${item.cat.fixo || '0'}\n`;
+      txt += `Rebolo......${item.cat.repicado || '0'}\nCana Inteira......${item.cat.inteira || '0'}\nPedaço Fixo......${item.cat.fixo || '0'}\n`;
       txt += `Toco > 7cm......${item.cat.toco7 || '0'}\nCana Ponta......${item.cat.ponta || '0'}\n`;
     }
 
@@ -292,7 +292,7 @@ ${checkColor(results.perdasPercent, config.metaPerda)} Perdas.................${
                 <div className="grid grid-cols-2 gap-x-4 gap-y-2">
                   {[
                     { id: 'solto', label: 'Pedaço Solto' }, { id: 'lasca', label: 'Lascas' },
-                    { id: 'estilhaco', label: 'Estilhaço' }, { id: 'repicado', label: 'Repicado' },
+                    { id: 'estilhaco', label: 'Estilhaço' }, { id: 'repicado', label: 'Rebolo' },
                     { id: 'inteira', label: 'Cana Inteira' }, { id: 'fixo', label: 'Pedaço Fixo' },
                     { id: 'toco7', label: 'Toco > 7cm' }, { id: 'ponta', label: 'Cana Ponta' }
                   ].map(cat => (
