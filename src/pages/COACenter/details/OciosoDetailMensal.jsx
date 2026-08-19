@@ -218,6 +218,11 @@ const ModalEquipamentoMensal = ({ equipRecords, initialFrente, onClose }) => {
     valor: currentEquip[key] !== null && currentEquip[key] !== undefined ? Number(currentEquip[key]) : null,
   })), [currentEquip]);
   
+  // Calcula o Motor Ocioso (%) exato para garantir fidelidade matemática baseada nas horas reais
+  const pctMotorOcioso = currentEquip.total_hrs_operacionais_seg > 0 
+    ? (currentEquip.total_hrs_ocioso_seg / currentEquip.total_hrs_operacionais_seg) * 100 
+    : (currentEquip.geral || 0);
+
   const scrollRef = useRef(null);
 
   useEffect(() => {
@@ -282,14 +287,18 @@ const ModalEquipamentoMensal = ({ equipRecords, initialFrente, onClose }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-[rgba(255,255,255,0.02)] border rounded-[14px] p-5 flex flex-col items-center text-center justify-center" style={{ borderColor: 'var(--coa-divider)' }}>
-              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--coa-text-muted)] mb-1">Total Hrs</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="bg-[rgba(255,255,255,0.02)] border rounded-[14px] p-4 flex flex-col items-center text-center justify-center transition-colors" style={{ borderColor: 'var(--coa-divider)' }}>
+              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--coa-text-muted)] mb-1">Hrs Operacionais</span>
               <span className="text-2xl font-black text-[var(--coa-text)]">{formatHours(currentEquip.total_hrs_operacionais_seg)}</span>
             </div>
-            <div className="bg-[rgba(255,255,255,0.02)] border rounded-[14px] p-5 flex flex-col items-center text-center justify-center" style={{ borderColor: 'var(--coa-divider)' }}>
-              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--coa-text-muted)] mb-1">Ocioso Hrs</span>
-              <span className="text-2xl font-black" style={{ color: getOciosoColor(currentEquip.geral, 5) }}>{formatHours(currentEquip.total_hrs_ocioso_seg)}</span>
+            <div className="bg-[rgba(255,255,255,0.02)] border rounded-[14px] p-4 flex flex-col items-center text-center justify-center transition-colors" style={{ borderColor: 'var(--coa-divider)' }}>
+              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--coa-text-muted)] mb-1">Hrs Ociosas</span>
+              <span className="text-2xl font-black" style={{ color: getOciosoColor(pctMotorOcioso, 5) }}>{formatHours(currentEquip.total_hrs_ocioso_seg)}</span>
+            </div>
+            <div className="bg-[rgba(255,255,255,0.02)] border rounded-[14px] p-4 flex flex-col items-center text-center justify-center transition-colors" style={{ borderColor: 'var(--coa-divider)' }}>
+              <span className="text-[10px] font-black uppercase tracking-widest text-[var(--coa-text-muted)] mb-1">Motor Ocioso (%)</span>
+              <span className="text-2xl font-black" style={{ color: getOciosoColor(pctMotorOcioso, 5) }}>{formatPercent(pctMotorOcioso)}</span>
             </div>
           </div>
 
@@ -478,20 +487,25 @@ const OciosoDetailMensal = () => {
     return new Set(filteredEquips.map(e => e.cod_equip)).size;
   }, [filteredEquips]);
 
-  const chartData = useMemo(() => {
-    let row = null;
+  // Isola a linha de dados ativa para ser usada tanto no gráfico quanto nos novos cards
+  const activeRowData = useMemo(() => {
     if (frenteFilter !== 'Todos') {
-      row = dataFrente.find(f => f.desc_grupo === frenteFilter && (areaFilter === 'Todos' || f.desc_area === areaFilter));
+      return dataFrente.find(f => f.desc_grupo === frenteFilter && (areaFilter === 'Todos' || f.desc_area === areaFilter));
     } else if (areaFilter !== 'Todos') {
-      row = dataArea.find(a => a.desc_area === areaFilter);
+      return dataArea.find(a => a.desc_area === areaFilter);
     } else {
-      row = dataGeral[0];
+      return dataGeral[0];
     }
-    if (!row) return [];
-    return MONTHS_KEYS.map((key, index) => ({
-      mes_key: key, mes_label: MONTHS_LABELS[index], valor: row[key] !== null && row[key] !== undefined ? Number(row[key]) : null,
-    }));
   }, [dataGeral, dataArea, dataFrente, areaFilter, frenteFilter]);
+
+  const chartData = useMemo(() => {
+    if (!activeRowData) return [];
+    return MONTHS_KEYS.map((key, index) => ({
+      mes_key: key, 
+      mes_label: MONTHS_LABELS[index], 
+      valor: activeRowData[key] !== null && activeRowData[key] !== undefined ? Number(activeRowData[key]) : null,
+    }));
+  }, [activeRowData]);
 
   useEffect(() => {
     if (mainChartScrollRef.current) mainChartScrollRef.current.scrollLeft = mainChartScrollRef.current.scrollWidth;
@@ -538,36 +552,59 @@ const OciosoDetailMensal = () => {
             frenteFilter={frenteFilter} setFrenteFilter={setFrenteFilter}
             categoryOptions={categoryOptions} areaOptions={areaOptions} frenteOptions={frenteOptions} />
 
-          <div className="coa-panel p-4 flex flex-col gap-2">
-            <div className="flex flex-col">
-              <span className="text-sm font-black text-[var(--coa-text)] uppercase tracking-wide">Motor Ocioso - {selectedYear}</span>
-              <span className="text-[10px] text-[var(--coa-text-muted)] font-bold">
-                {frenteFilter !== 'Todos' ? `Frente: ${frenteFilter}` : areaFilter !== 'Todos' ? `Área: ${areaFilter}` : 'Visão Geral'}
-              </span>
-            </div>
+          {/* SESSÃO DO GRÁFICO E CARDS GERAIS */}
+          <div className="coa-panel p-4 flex flex-col md:flex-row gap-4">
             
-            <div className="w-full overflow-x-auto custom-scrollbar pb-2" ref={mainChartScrollRef}>
-              <div className="min-w-[550px] h-[250px] mt-4">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={chartData} margin={{ top: 25, right: 20, left: 10, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="var(--coa-border)" vertical={false} />
-                    <XAxis dataKey="mes_label" stroke="var(--coa-text-muted)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
-                    <YAxis hide domain={[0, 'dataMax + 2']} />
-                    <RechartsTooltip content={<CustomLineTooltip />} cursor={{ stroke: 'var(--coa-border)', strokeWidth: 1, strokeDasharray: '5 5' }} />
-                    <ReferenceLine y={5} stroke="rgba(61,220,151,0.5)" strokeDasharray="3 3" strokeWidth={2} />
-                    <Line type="monotone" dataKey="valor" stroke="var(--coa-text-soft)" strokeWidth={3} isAnimationActive={false} connectNulls={true}
-                      dot={(props) => {
-                        const { cx, cy, payload } = props;
-                        if (cx == null || cy == null || payload.valor === null) return null;
-                        return <circle cx={cx} cy={cy} r={5} fill={getOciosoColor(payload.valor, 5)} stroke="var(--coa-bg-soft)" strokeWidth={2} />;
-                      }}>
-                      <LabelList content={<CustomLineLabel />} />
-                    </Line>
-                  </LineChart>
-                </ResponsiveContainer>
+            {/* Esquerda: Gráfico Ocioso */}
+            <div className="flex flex-col gap-2 flex-1 min-w-0">
+              <div className="flex flex-col">
+                <span className="text-sm font-black text-[var(--coa-text)] uppercase tracking-wide">Motor Ocioso - {selectedYear}</span>
+                <span className="text-[10px] text-[var(--coa-text-muted)] font-bold">
+                  {frenteFilter !== 'Todos' ? `Frente: ${frenteFilter}` : areaFilter !== 'Todos' ? `Área: ${areaFilter}` : 'Visão Geral'}
+                </span>
+              </div>
+              
+              <div className="w-full overflow-x-auto custom-scrollbar pb-2" ref={mainChartScrollRef}>
+                <div className="min-w-[550px] h-[250px] mt-4">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <LineChart data={chartData} margin={{ top: 25, right: 20, left: 10, bottom: 5 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--coa-border)" vertical={false} />
+                      <XAxis dataKey="mes_label" stroke="var(--coa-text-muted)" fontSize={11} tickLine={false} axisLine={false} dy={10} />
+                      <YAxis hide domain={[0, 'dataMax + 2']} />
+                      <RechartsTooltip content={<CustomLineTooltip />} cursor={{ stroke: 'var(--coa-border)', strokeWidth: 1, strokeDasharray: '5 5' }} />
+                      <ReferenceLine y={5} stroke="rgba(61,220,151,0.5)" strokeDasharray="3 3" strokeWidth={2} />
+                      <Line type="monotone" dataKey="valor" stroke="var(--coa-text-soft)" strokeWidth={3} isAnimationActive={false} connectNulls={true}
+                        dot={(props) => {
+                          const { cx, cy, payload } = props;
+                          if (cx == null || cy == null || payload.valor === null) return null;
+                          return <circle cx={cx} cy={cy} r={5} fill={getOciosoColor(payload.valor, 5)} stroke="var(--coa-bg-soft)" strokeWidth={2} />;
+                        }}>
+                        <LabelList content={<CustomLineLabel />} />
+                      </Line>
+                    </LineChart>
+                  </ResponsiveContainer>
+                </div>
               </div>
             </div>
+
+            {/* Direita (ou Abaixo no Mobile): Cards de Resultados */}
+            <div className="grid grid-cols-2 md:grid-cols-1 gap-3 shrink-0 md:w-[220px]">
+              <div className="bg-[rgba(255,255,255,0.02)] border rounded-[14px] p-4 flex flex-col items-center text-center justify-center h-full min-h-[100px] transition-colors" style={{ borderColor: 'var(--coa-divider)' }}>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--coa-text-muted)] mb-1">Ocioso Hrs</span>
+                <span className="text-2xl font-black" style={{ color: getOciosoColor(activeRowData?.geral, 5) }}>
+                  {formatHours(activeRowData?.total_hrs_ocioso_seg)}
+                </span>
+              </div>
+              <div className="bg-[rgba(255,255,255,0.02)] border rounded-[14px] p-4 flex flex-col items-center text-center justify-center h-full min-h-[100px] transition-colors" style={{ borderColor: 'var(--coa-divider)' }}>
+                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--coa-text-muted)] mb-1">Resultado Geral</span>
+                <span className="text-2xl font-black" style={{ color: getOciosoColor(activeRowData?.geral, 5) }}>
+                  {formatPercent(activeRowData?.geral)}
+                </span>
+              </div>
+            </div>
+
           </div>
+          {/* FIM DA SESSÃO DO GRÁFICO E CARDS */}
 
           <SearchBar searchTerm={searchTerm} setSearchTerm={setSearchTerm} showClear={hasActiveFilters} onClearAll={clearAllFilters} />
 
