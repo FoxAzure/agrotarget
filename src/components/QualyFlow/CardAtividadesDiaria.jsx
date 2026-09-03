@@ -7,9 +7,12 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '../../lib/supabaseClient';
+import { useNavigate } from 'react-router-dom';
 import './CardAtividadesDiaria.css';
 
 const CardAtividadesDiaria = ({ selectedDate }) => {
+  const navigate = useNavigate();
+
   // ============================================================================
   // ESTADOS
   // ============================================================================
@@ -114,19 +117,6 @@ const CardAtividadesDiaria = ({ selectedDate }) => {
   // ============================================================================
   // AGRUPAMENTO
   // ============================================================================
-  //
-  // A view traz uma linha por atividade/campo.
-  //
-  // Aqui transformamos:
-  //
-  // Perdas Mecanizada
-  //   PALMEIRA       6
-  //   JAGUARARI      6
-  //   BOM CONSELHO   5
-  //
-  // em uma estrutura própria para o componente.
-  // ============================================================================
-
   const activities = useMemo(() => {
     const grouped = {};
 
@@ -187,18 +177,6 @@ const CardAtividadesDiaria = ({ selectedDate }) => {
   // ============================================================================
   // TOTAL DE ATIVIDADES
   // ============================================================================
-  //
-  // IMPORTANTE:
-  // Aqui NÃO usamos qnt.
-  //
-  // Se existirem:
-  // - Perdas Mecanizada
-  // - Perdas Manual
-  // - CUC - Gotejo
-  //
-  // o total será 3.
-  // ============================================================================
-
   const totalActivities = activities.length;
 
   // ============================================================================
@@ -364,6 +342,20 @@ const CardAtividadesDiaria = ({ selectedDate }) => {
 
         </div>
       )}
+
+      {/* ================================================================
+          FOOTER PADRONIZADO COM O BOTÃO NOVO
+          ================================================================ */}
+      <div className="qf-card-footer">
+        <button
+          type="button"
+          className="qf-cuc-detail-button"
+          onClick={() => navigate('/qualyflow/dashboard')}
+        >
+          Dashboards
+        </button>
+      </div>
+
     </section>
   );
 };

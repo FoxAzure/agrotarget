@@ -15,6 +15,8 @@ import PerdaMecDetail from './pages/QualyFlow/details/PerdaMecDetail';
 import CucDetail from './pages/QualyFlow/details/CucDetail';
 import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
 
+import DashboardHome from './pages/QualyFlow/dashboard/DashboardHome';
+
 // Importando Páginas do COA Center
 import COACenterHome from './pages/COACenter/COACenterHome';
 import ResumoDetail from './pages/COACenter/details/ResumoDetail';
@@ -112,6 +114,8 @@ function App() {
         <Route path="/qualyflow" element={<QualyFlowHome />} />
         <Route path="/qualyflow/perdasmec" element={<PerdaMecDetail />} />
         <Route path="/qualyflow/cuc" element={<CucDetail />} />
+
+        <Route path="/qualyflow/dashboard" element={<DashboardHome />} />
 
         <Route path="/coacenter" element={<COACenterHome />} />
         <Route path="/coacenter/resumo" element={<ResumoDetail />} />
