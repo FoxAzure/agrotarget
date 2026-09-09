@@ -22,6 +22,7 @@ import {
   YAxis,
 } from 'recharts';
 import './BaseDash.css';
+import './DashPreparo.css';
 
 // ==========================================================================================
 // CONFIGURAÇÕES
@@ -67,7 +68,7 @@ const DASH_LAYOUT = {
 
   // 3 colunas de cada uma das 4 linhas:
   // 1 = tabela | 2 = Dia x Ano | 3 = Histórico Mensal
-  table: 2.1,
+  table: 1.40,
   dayYear: 0.52,
   monthly: 1.18,
 
@@ -76,6 +77,30 @@ const DASH_LAYOUT = {
 
   // Largura padronizada das colunas dos gráficos.
   BAR_WIDTH: 26,
+
+  // --------------------------------------------------------------------------
+  // TABELA — CONTROLE INDIVIDUAL DAS COLUNAS
+  // --------------------------------------------------------------------------
+  // Você pode alterar cada valor sem precisar mexer no CSS.
+  // Os percentuais foram configurados para fechar em 100%.
+  tableFieldWidth: '5%',
+  tableLotWidth: '7%',
+  tablePointWidths: [
+    '5.2%', // 1
+    '5.2%', // 2
+    '5.2%', // 3
+    '5.2%', // 4
+    '5.2%', // 5
+    '5.2%', // 6
+    '5.2%', // 7
+    '5.2%', // 8
+    '5.2%', // 9
+    '5.2%', // 10
+    '5.2%', // 11
+    '5.2%', // 12
+  ],
+  tableStandardWidth: '7%',
+  tablePercentWidth: '7.6%',
 
   // Espaçamentos dos gráficos.
   dayYearBarGap: 7,
@@ -90,43 +115,47 @@ const DASH_LAYOUT = {
 const METRICS = [
   {
     key: 'profund_haste',
-    label: 'Profundidade da Haste',
+    label: 'Profund. Haste',
     tableTitle: 'Profundidade da Haste (Mín 23cm)',
     unitDecimals: 0,
     monthlyKey: 'profund_haste',
     metaGroup: 'profundidade',
     compliance: value => Number.isFinite(value) && value >= 23,
     targetText: '≥ 23 cm',
+    unit: 'cm',
   },
   {
     key: 'profund_cana',
-    label: 'Profundidade da Cana',
+    label: 'Profund. Cana',
     tableTitle: 'Profundidade da Cana (Mín 18cm)',
     unitDecimals: 0,
     monthlyKey: 'profund_cana',
     metaGroup: 'profundidade',
     compliance: value => Number.isFinite(value) && value >= 18,
     targetText: '≥ 18 cm',
+    unit: 'cm',
   },
   {
     key: 'paralelismo_sulco',
-    label: 'Paralelismo entre Sulcos',
+    label: 'Paralelismo Sulco',
     tableTitle: 'Paralelismo entre Sulcos (Entre 1,45 a 1,55cm)',
     unitDecimals: 2,
     monthlyKey: 'paralelismo_sulco',
     metaGroup: 'paralelismo',
     compliance: value => Number.isFinite(value) && value >= 1.45 && value <= 1.55,
     targetText: '1,45–1,55 cm',
+    unit: 'cm',
   },
   {
     key: 'paralelismo_fita',
-    label: 'Paralelismo entre Fitas',
+    label: 'Paralelismo Fita',
     tableTitle: 'Paralelismo entre Fitas (Entre 2,15 a 2,25cm)',
     unitDecimals: 2,
     monthlyKey: 'paralelismo_fita',
     metaGroup: 'paralelismo',
     compliance: value => Number.isFinite(value) && value >= 2.15 && value <= 2.25,
     targetText: '2,15–2,25 cm',
+    unit: 'cm',
   },
 ];
 
@@ -215,6 +244,30 @@ const calculateCompliance = (metric, values) => {
 // O slot físico permanece vazio somente para preservar a posição dos 12 pontos.
 // Divide a field/lote sequence em blocos de 12 pontos.
 // Isso mantém o padrão visual da avaliação 12x12 e aceita 24, 36, 48... pontos.
+
+const calculateTableSummary = (items, metric) => {
+  const values = (Array.isArray(items) ? items : [])
+    .flatMap(item => Array.isArray(item.points) ? item.points.map(point => num(point.value)) : [])
+    .filter(Number.isFinite);
+
+  if (!values.length) {
+    return {
+      measuredCount: 0,
+      average: null,
+      standardCount: 0,
+    };
+  }
+
+  const standardCount = values.filter(value => metric.compliance(value)).length;
+  const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+
+  return {
+    measuredCount: values.length,
+    average,
+    standardCount,
+  };
+};
+
 const buildMetricRows = (rows, metric) => {
   const grouped = new Map();
 
@@ -480,6 +533,11 @@ function MetricTable({ metric, rows }) {
   const items = buildMetricRows(rows, metric);
   // A tabela sempre mantém exatamente as 12 colunas estruturais de medição.
   const displayPoints = Array.from({ length: 12 }, (_, index) => index + 1);
+  const pointWidths = Array.isArray(DASH_LAYOUT.tablePointWidths)
+    ? DASH_LAYOUT.tablePointWidths
+    : [];
+
+  const tableSummary = calculateTableSummary(items, metric);
 
   return (
     <div className="preparo-table-panel">
@@ -490,6 +548,18 @@ function MetricTable({ metric, rows }) {
 
       <div className="preparo-table-scroll">
         <table className="preparo-table">
+          <colgroup>
+            <col style={{ width: DASH_LAYOUT.tableFieldWidth }} />
+            <col style={{ width: DASH_LAYOUT.tableLotWidth }} />
+            {displayPoints.map((point, index) => (
+              <col
+                key={`${metric.key}-col-${point}`}
+                style={{ width: pointWidths[index] || '5.2%' }}
+              />
+            ))}
+            <col style={{ width: DASH_LAYOUT.tableStandardWidth }} />
+            <col style={{ width: DASH_LAYOUT.tablePercentWidth }} />
+          </colgroup>
           <thead>
             <tr>
               <th>Campo</th>
@@ -559,10 +629,18 @@ function MetricTable({ metric, rows }) {
 
       <div className="preparo-table-footer">
         <span>
-          {items.reduce((sum, item) => sum + item.measuredCount, 0)} ponto(s) avaliados
+          {tableSummary.measuredCount} ponto(s) avaliados
         </span>
+
         <span>
-          Padrão: {metric.targetText}
+          Média:{' '}
+          {Number.isFinite(tableSummary.average)
+            ? `${formatNumber(tableSummary.average, metric.unitDecimals)}${metric.unit ? ` ${metric.unit}` : ''}`
+            : '—'}
+        </span>
+
+        <span>
+          Padrão: {tableSummary.standardCount}
         </span>
       </div>
     </div>
@@ -753,6 +831,7 @@ export default function DashPreparo() {
         '--preparo-grid-gap': `${DASH_LAYOUT.gap}px`,
         '--preparo-row-height': `${DASH_LAYOUT.rowHeight}px`,
         '--preparo-sidebar-width': `${DASH_LAYOUT.sidebarWidth}px`,
+        '--preparo-content-padding': `${DASH_LAYOUT.contentPadding}px`,
         '--preparo-bar-width': `${DASH_LAYOUT.BAR_WIDTH}px`,
         '--preparo-font-base': `${FONT_SIZE.base}px`,
         '--preparo-font-xs': `${FONT_SIZE.xs}px`,

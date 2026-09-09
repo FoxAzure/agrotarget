@@ -37,9 +37,9 @@ const MONTHS = ['JAN', 'FEV', 'MAR', 'ABR', 'MAI', 'JUN', 'JUL', 'AGO', 'SET', '
 // Estas variáveis controlam diretamente as 4 colunas principais do dashboard.
 // Aumente/diminua cada valor para redistribuir espaço entre as colunas.
 const DASH_LAYOUT = {
-  table: 1.20,
-  categories: 0.82,
-  dayYear: 0.68,
+  table: 1.30,
+  categories: 0.72,
+  dayYear: 0.38,
   monthly: 1.00,
   gap: 9,
   barSize: 28,
