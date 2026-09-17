@@ -24,18 +24,18 @@ const DASH_MODULES = [
     description: 'Visão geral dos indicadores e equipamentos',
     component: <BoletimDiario />,
   },
-  {
-    id: 'motor-ocioso',
-    name: 'Motor Ocioso',
-    description: 'Visão geral dos indicadores e equipamentos',
-    component: <DashMotorOcioso />,
-  },
-  {
-    id: 'sem-apontamento',
-    name: 'Sem Apontamento',
-    description: 'Visão geral dos indicadores e equipamentos',
-    component: <DashSemApontamento />,
-  },
+  //{
+  //  id: 'motor-ocioso',
+  //  name: 'Motor Ocioso',
+  //  description: 'Visão geral dos indicadores e equipamentos',
+  //  component: <DashMotorOcioso />,
+  //},
+  //{
+  //  id: 'sem-apontamento',
+  //  name: 'Sem Apontamento',
+  //  description: 'Visão geral dos indicadores e equipamentos',
+  //  component: <DashSemApontamento />,
+  //},
   {
     id: 'boletim-semanal',
     name: 'Boletim Semanal',
