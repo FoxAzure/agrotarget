@@ -53,28 +53,28 @@ const AgroToolsHome = () => {
         </svg>
       )
     },
-    { 
-      id: 'cuc', 
-      titulo: 'CUC Gotejo', 
-      descricao: 'Uniformidade da Irrigação, Vazão L/h',
-      rota: '/agrotools/cuc',
-      icon: (
-        <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25c-1.383 1.956-6.75 8.784-6.75 12.375a6.75 6.75 0 0013.5 0c0-3.591-5.367-10.419-6.75-12.375z" />
-        </svg>
-      )
-    },
-    { 
-      id: 'cucpivot', 
-      titulo: 'CUC Pivot', 
-      descricao: 'Uniformidade de Irrigação de Pivô Central',
-      rota: '/agrotools/cucpivot',
-      icon: (
-        <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
-          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25a.75.75 0 01.75.75v13.5a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM5.25 10.5a6.75 6.75 0 1013.5 0" />
-        </svg>
-      )
-    },
+//    { 
+//      id: 'cuc', 
+//      titulo: 'CUC Gotejo', 
+//      descricao: 'Uniformidade da Irrigação, Vazão L/h',
+//      rota: '/agrotools/cuc',
+//      icon: (
+//        <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+//          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25c-1.383 1.956-6.75 8.784-6.75 12.375a6.75 6.75 0 0013.5 0c0-3.591-5.367-10.419-6.75-12.375z" />
+//        </svg>
+//      )
+//    },
+//    { 
+//      id: 'cucpivot', 
+//      titulo: 'CUC Pivot', 
+//      descricao: 'Uniformidade de Irrigação de Pivô Central',
+//      rota: '/agrotools/cucpivot',
+//      icon: (
+//        <svg fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+//          <path strokeLinecap="round" strokeLinejoin="round" d="M12 2.25a.75.75 0 01.75.75v13.5a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM5.25 10.5a6.75 6.75 0 1013.5 0" />
+//        </svg>
+//      )
+//    },
     { 
       id: 'vinhaca', 
       titulo: 'Vinhaça', 

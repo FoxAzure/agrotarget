@@ -1,0 +1,199 @@
+/* =========================================
+   RESUMO DETAIL | MODULAR CSS
+   Foco: Mobile-First, grids limpos e manutenção fácil.
+========================================= */
+
+/* Container Principal e Animação */
+.rd-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  animation: rd-fade-in 0.3s ease-out;
+}
+
+@keyframes rd-fade-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* Barra do Seletor de Data */
+.rd-top-bar {
+  display: flex;
+  justify-content: flex-end;
+}
+.rd-top-bar-inner {
+  width: 100%;
+}
+
+/* Grids Principais */
+.rd-main-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.rd-metrics-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile: 1 coluna */
+  gap: 0.75rem;
+}
+
+.rd-efficiency-col {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.rd-kpi-progress-grid {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile: 1 coluna */
+  gap: 0.75rem;
+}
+
+/* Componentes de Cards Padronizados */
+.rd-card-metric {
+  border-radius: var(--coa-radius-md);
+  border: 1px solid var(--coa-divider);
+  background: rgba(255, 255, 255, 0.02);
+  padding: 0.75rem;
+}
+
+.rd-card-kpi {
+  border-radius: var(--coa-radius-md);
+  border: 1px solid var(--coa-divider);
+  background: rgba(255, 255, 255, 0.015);
+  padding: 0.75rem;
+}
+
+/* Barra de Detalhamento Produtivo */
+.rd-breakdown-bar-bg {
+  width: 100%;
+  height: 14px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--coa-divider);
+  background: rgba(255, 255, 255, 0.05);
+  display: flex;
+}
+
+.rd-breakdown-legend {
+  display: grid;
+  grid-template-columns: 1fr; /* Mobile */
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+/* Ofensores e Tabelas Específicas */
+.rd-offenders-panel {
+  border: 1px solid rgba(239, 68, 68, 0.18);
+  margin-top: 0 !important;
+}
+.rd-offenders-header {
+  border-bottom: 1px solid rgba(239, 68, 68, 0.16);
+}
+.rd-offenders-badge {
+  background: rgba(239, 68, 68, 0.10);
+  color: var(--coa-danger);
+  border: 1px solid rgba(239, 68, 68, 0.18);
+}
+.rd-offenders-row {
+  border-bottom: 1px solid rgba(239, 68, 68, 0.14);
+}
+
+/* =========================================
+   RESPONSIVIDADE (TABLET & DESKTOP)
+========================================= */
+
+/* Tablet (md) */
+@media (min-width: 768px) {
+  .rd-top-bar-inner {
+    max-width: 28rem;
+  }
+  
+  .rd-metrics-grid {
+    grid-template-columns: repeat(2, 1fr); /* 2x2 no tablet */
+  }
+
+  .rd-kpi-progress-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .rd-breakdown-legend {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* Desktop (xl) */
+@media (min-width: 1280px) {
+  .rd-main-layout {
+    /* O pulo do gato pro PC: O dashboard fica lado a lado com a coluna de eficiências */
+    grid-template-columns: minmax(0, 1.15fr) 320px;
+  }
+
+  .rd-metrics-grid {
+    grid-template-columns: repeat(4, 1fr); /* 4 colunas no PC */
+  }
+}
+
+
+/* =========================================
+   NAVEGAÇÃO E TABS (ResumoDetail)
+========================================= */
+.rd-page-container {
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.rd-page-title {
+  font-size: clamp(1.35rem, 3vw, 1.45rem);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 1;
+  color: var(--coa-text);
+}
+
+.rd-tabs-wrapper {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  width: 100%;
+  border-bottom: 1px solid var(--coa-divider);
+}
+
+.rd-tab-button {
+  width: 100%;
+  padding: 0.75rem 0.5rem;
+  font-size: 10px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: center;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  border-bottom: 3px solid transparent;
+  color: var(--coa-text-soft);
+  cursor: pointer;
+  background: transparent;
+}
+
+.rd-tab-button:hover {
+  color: var(--coa-text);
+}
+
+.rd-tab-button--active {
+  color: var(--coa-accent);
+  border-bottom-color: var(--coa-accent);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+@media (min-width: 768px) {
+  .rd-tab-button {
+    font-size: 11px;
+    padding: 0.75rem 1.25rem;
+    letter-spacing: 0.1em;
+  }
+}

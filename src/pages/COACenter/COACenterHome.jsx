@@ -11,6 +11,7 @@ import CardOcioso from '../../components/COACenter/CardOcioso';
 import CardDisponibilidade from '../../components/COACenter/CardDisponibilidade';
 import CardOperacoes from '../../components/COACenter/CardOperacoes';
 import CardIndeterminado from '../../components/COACenter/CardIndeterminado';
+import CardDashboards from '../../components/COACenter/CardDashboards';
 
 
 
@@ -95,6 +96,7 @@ const COACenterHome = () => {
             </div>
           </div>
 
+          <CardDashboards selectedDate={selectedDate} />
           <CardOperacoes selectedDate={selectedDate} />
           <CardResumo selectedDate={selectedDate} />
           <CardIndeterminado selectedDate={selectedDate} />
