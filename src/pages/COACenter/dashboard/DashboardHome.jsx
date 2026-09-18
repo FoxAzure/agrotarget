@@ -1,8 +1,9 @@
 // ================================= DOCUMENTATION ------------------------------------------
-// Script: DashboardHome
-// Purpose: Container fullscreen com motor de playlist dos dashboards do COA Center.
+// Script: DashboardHome V2
+// Purpose: Container fullscreen com motor de playlist e renderizacao exclusiva do dashboard ativo.
 // Relationships:
 //   - BoletimDiario
+//   - BoletimSemanal
 // ==========================================================================================
 
 import React, { useEffect, useMemo, useState } from 'react';
@@ -11,36 +12,38 @@ import './DashboardHome.css';
 
 // Dashboards modulares
 import BoletimDiario from './BoletimDiario';
-import DashMotorOcioso from './DashMotorOcioso'
-import DashSemApontamento from './DashSemApontamento'
-import BoletimSemanal from './BoletimSemanal'
+import BoletimSemanal from './BoletimSemanal';
 
-// Lista central dos dashboards disponíveis.
-// Para incluir um novo dashboard, importe o componente e adicione um item neste array.
+// Dashboards opcionais. Descomente os imports e os itens em DASH_MODULES quando necessario.
+// import DashMotorOcioso from './DashMotorOcioso';
+// import DashSemApontamento from './DashSemApontamento';
+
+// Use a referencia do componente, e nao <Componente />.
+// Assim, somente o dashboard ativo sera instanciado e montado.
 const DASH_MODULES = [
   {
     id: 'boletim-diario',
     name: 'Boletim Diário',
     description: 'Visão geral dos indicadores e equipamentos',
-    component: <BoletimDiario />,
+    Component: BoletimDiario,
   },
-  //{
-  //  id: 'motor-ocioso',
-  //  name: 'Motor Ocioso',
-  //  description: 'Visão geral dos indicadores e equipamentos',
-  //  component: <DashMotorOcioso />,
-  //},
-  //{
-  //  id: 'sem-apontamento',
-  //  name: 'Sem Apontamento',
-  //  description: 'Visão geral dos indicadores e equipamentos',
-  //  component: <DashSemApontamento />,
-  //},
+  // {
+  //   id: 'motor-ocioso',
+  //   name: 'Motor Ocioso',
+  //   description: 'Visão geral dos indicadores e equipamentos',
+  //   Component: DashMotorOcioso,
+  // },
+  // {
+  //   id: 'sem-apontamento',
+  //   name: 'Sem Apontamento',
+  //   description: 'Visão geral dos indicadores e equipamentos',
+  //   Component: DashSemApontamento,
+  // },
   {
     id: 'boletim-semanal',
     name: 'Boletim Semanal',
-    description: 'Visão geral dos indicadores e equipamentos',
-    component: <BoletimSemanal />,
+    description: 'Visão semanal consolidada dos indicadores e equipamentos',
+    Component: BoletimSemanal,
   },
 ];
 
@@ -59,7 +62,6 @@ const DashboardHomeCOA = () => {
   const [activeDash, setActiveDash] = useState(DASH_MODULES[0].id);
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [isModalOpen, setModalOpen] = useState(false);
-
   const [isPlaying, setIsPlaying] = useState(false);
   const [playlist, setPlaylist] = useState(DASH_MODULES.map((module) => module.id));
   const [intervalSecs, setIntervalSecs] = useState(30);
@@ -68,6 +70,8 @@ const DashboardHomeCOA = () => {
     () => DASH_MODULES.find((module) => module.id === activeDash) || DASH_MODULES[0],
     [activeDash]
   );
+
+  const ActiveDashboard = currentDashInfo.Component;
 
   useEffect(() => {
     if (!isPlaying || playlist.length === 0) return undefined;
@@ -104,6 +108,11 @@ const DashboardHomeCOA = () => {
   }, []);
 
   const handleManualNav = (id) => {
+    if (id === activeDash) {
+      setSidebarOpen(false);
+      return;
+    }
+
     setIsPlaying(false);
     setActiveDash(id);
     setSidebarOpen(false);
@@ -142,8 +151,10 @@ const DashboardHomeCOA = () => {
       <header className="coa-dash-header">
         <div className="coa-dash-header__identity">
           <span className="coa-text-overline">COA Center</span>
+
           <div className="coa-dash-header__title-row">
             <h1 className="coa-dash-header__title">{currentDashInfo.name}</h1>
+
             {isPlaying && (
               <span className="coa-dash-live" title="Playlist em execução">
                 <span className="coa-dash-live__dot" />
@@ -151,6 +162,7 @@ const DashboardHomeCOA = () => {
               </span>
             )}
           </div>
+
           <p className="coa-dash-header__description">
             {currentDashInfo.description}
           </p>
@@ -186,15 +198,13 @@ const DashboardHomeCOA = () => {
       </header>
 
       <main className="coa-dash-content">
-        {DASH_MODULES.map((module) => (
-          <section
-            key={module.id}
-            className={`coa-dash-module ${activeDash === module.id ? 'is-active' : ''}`}
-            aria-hidden={activeDash !== module.id}
-          >
-            {module.component}
-          </section>
-        ))}
+        <section
+          key={currentDashInfo.id}
+          className="coa-dash-module is-active"
+          aria-label={currentDashInfo.name}
+        >
+          <ActiveDashboard />
+        </section>
       </main>
 
       {isSidebarOpen && (
@@ -234,6 +244,7 @@ const DashboardHomeCOA = () => {
               <span className="coa-dash-nav-item__number">
                 {String(index + 1).padStart(2, '0')}
               </span>
+
               <span className="coa-dash-nav-item__content">
                 <strong>{module.name}</strong>
                 <small>{module.description}</small>
@@ -281,6 +292,7 @@ const DashboardHomeCOA = () => {
             <div className="coa-dash-modal__body">
               <div className="coa-dash-fieldset">
                 <span className="coa-dash-fieldset__label">Tempo por dashboard</span>
+
                 <div className="coa-dash-time-grid">
                   {TIME_OPTIONS.map((option) => (
                     <button
@@ -297,6 +309,7 @@ const DashboardHomeCOA = () => {
 
               <div className="coa-dash-fieldset">
                 <span className="coa-dash-fieldset__label">Dashboards incluídos</span>
+
                 <div className="coa-dash-playlist-list">
                   {DASH_MODULES.map((module) => (
                     <label key={module.id} className="coa-dash-check-option">
@@ -305,7 +318,9 @@ const DashboardHomeCOA = () => {
                         checked={playlist.includes(module.id)}
                         onChange={() => toggleDashInPlaylist(module.id)}
                       />
+
                       <span className="coa-dash-check-option__control" aria-hidden="true" />
+
                       <span className="coa-dash-check-option__text">
                         <strong>{module.name}</strong>
                         <small>{module.description}</small>
@@ -330,6 +345,7 @@ const DashboardHomeCOA = () => {
               >
                 Cancelar
               </button>
+
               <button
                 type="button"
                 className="coa-btn coa-btn--primary"
