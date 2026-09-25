@@ -14,6 +14,7 @@ import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
 import PerdaMecDetail from './pages/QualyFlow/details/PerdaMecDetail';
 import CucDetail from './pages/QualyFlow/details/CucDetail';
 import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
+import CbDetail from './pages/QualyFlow/details/CbDetail';
 
 import DashboardHome from './pages/QualyFlow/dashboard/DashboardHome';
 
@@ -119,6 +120,7 @@ function App() {
         <Route path="/qualyflow" element={<QualyFlowHome />} />
         <Route path="/qualyflow/perdasmec" element={<PerdaMecDetail />} />
         <Route path="/qualyflow/cuc" element={<CucDetail />} />
+        <Route path="/qualyflow/casabomba" element={<CbDetail />} />
 
         <Route path="/qualyflow/dashboard" element={<DashboardHome />} />
 

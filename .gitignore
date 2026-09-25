@@ -26,3 +26,7 @@ dist-ssr
 # Arquivos temporários do SQLite (Lixo de processamento barrado!)
 *.db-wal
 *.db-shm
+
+
+# Arquivos de rascunho pessoais
+zzz.md

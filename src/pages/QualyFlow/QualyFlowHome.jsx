@@ -18,6 +18,7 @@ import DateSelectorQualyFlow from '../../components/QualyFlow/DateSelectorQualyF
 import CardAtividadesDiaria from '../../components/QualyFlow/CardAtividadesDiaria';
 import CardCUC from '../../components/QualyFlow/CardCUC';
 import CardPerdaMec from '../../components/QualyFlow/CardPerdaMec';
+import CardCb from '../../components/QualyFlow/CardCb';
 
 // ================================= HELPERS ------------------------------------------------
 
@@ -199,6 +200,7 @@ const QualyFlowHome = () => {
                 <CardAtividadesDiaria selectedDate={selectedDate}/>
                 <CardCUC selectedDate={selectedDate}/>
                 <CardPerdaMec selectedDate={selectedDate}/>
+                <CardCb selectedDate={selectedDate}/>
               </div>
             )}
           </div>
