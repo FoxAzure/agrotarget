@@ -14,12 +14,14 @@ import './Dashboard.css';
 import DashCUC from './DashCUC';
 import DashPerdasMec from './DashPerdasMec';
 import DashPreparo from './DashPreparo';
+import DashCB from './DashCB';
 
 // Lista de Módulos Disponíveis (Fácil de escalar)
 const DASH_MODULES = [
   { id: 'cuc', name: 'Irrigação: CUC', component: <DashCUC /> },
   { id: 'perdasmec', name: 'Perda Colheita Mecanizada', component: <DashPerdasMec /> },
   { id: 'preparo', name: 'Preparo de Solo', component: <DashPreparo /> },
+  { id: 'casabomba', name: 'Casa de Bomba', component: <DashCB /> },
 ];
 
 // Opções de tempo para a Playlist
