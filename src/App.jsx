@@ -45,6 +45,11 @@ import VinhacaTools from './pages/AgroTools/details/Vinhaca';
 import CucPivotTools from './pages/AgroTools/details/CucPivot';
 
 
+
+// Gerenciamento da Equipe
+import EquipeHome from './pages/Equipe/EquipeHome';
+
+
 // ================================= HELPERS (COMPONENTES) ================================= //
 
 const ModuleCard = ({ title, logoSrc, to }) => (
@@ -139,6 +144,8 @@ function App() {
         <Route path="/agrotools/perdas" element={<PerdasColheitaTools />} />
         <Route path="/agrotools/vinhaca" element={<VinhacaTools />} />
         <Route path="/agrotools/cucpivot" element={<CucPivotTools />} />
+
+        <Route path='/qualyflow/equipe' element={<EquipeHome />} />
 
         {/* ROTA PADRÃO (CATCH-ALL) */}
         <Route path="*" element={<PaginaNaoEncontrada />} />
