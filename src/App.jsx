@@ -15,6 +15,7 @@ import PerdaMecDetail from './pages/QualyFlow/details/PerdaMecDetail';
 import CucDetail from './pages/QualyFlow/details/CucDetail';
 import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
 import CbDetail from './pages/QualyFlow/details/CbDetail';
+import HidrorollDetail from './pages/QualyFlow/details/HidrorollDetail';
 
 import DashboardHome from './pages/QualyFlow/dashboard/DashboardHome';
 
@@ -25,6 +26,7 @@ import OciosoDetail from './pages/COACenter/details/OciosoDetail';
 import DispoDetail from './pages/COACenter/details/DispoDetail';
 import COAOperacoes from './pages/COACenter/COAOperacoes';
 import IndeterDetail from './pages/COACenter/details/IndeterDetail';
+
 
 import DashboardHomeCOA from './pages/COACenter/dashboard/DashboardHome';
 
@@ -126,6 +128,7 @@ function App() {
         <Route path="/qualyflow/perdasmec" element={<PerdaMecDetail />} />
         <Route path="/qualyflow/cuc" element={<CucDetail />} />
         <Route path="/qualyflow/casabomba" element={<CbDetail />} />
+        <Route path="/qualyflow/hidroroll" element={<HidrorollDetail />} />
 
         <Route path="/qualyflow/dashboard" element={<DashboardHome />} />
 

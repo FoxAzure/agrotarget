@@ -29,6 +29,8 @@ const HIDRO_LAYOUT = {
   tableFontSize: 8,
   sampleChartHeight: 148,
   sampleScaleMin: 25,
+  donutRadius: 48,
+  donutSize: 144,
 };
 
 const COLORS = {
@@ -156,11 +158,38 @@ function ChartTooltip({ active, payload, label }) {
 function DonutKpi({ title, value, subtitle }) {
   const safe = Math.max(0, Math.min(1, num(value, 0)));
   const color = percentageColor(safe);
+  const radius = HIDRO_LAYOUT.donutRadius;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - safe * circumference;
+
   return <section className="hidro-panel hidro-donut-card">
     <div className="hidro-panel-title">{title}</div>
-    <div className="hidro-donut" style={{ '--donut-value': `${safe * 360}deg`, '--donut-color': color }}>
-      <div><strong style={{ color }}>{fmtPct(safe)}</strong><small>{subtitle}</small></div>
+
+    <div className="hidro-donut-wrap">
+      <svg
+        viewBox="0 0 120 120"
+        preserveAspectRatio="xMidYMid meet"
+        style={{ width: `${HIDRO_LAYOUT.donutSize}px`, height: `${HIDRO_LAYOUT.donutSize}px` }}
+        aria-hidden="true"
+      >
+        <circle cx="60" cy="60" r={radius} className="hidro-donut-track" />
+        <circle
+          cx="60"
+          cy="60"
+          r={radius}
+          className="hidro-donut-value"
+          stroke={color}
+          strokeDasharray={circumference}
+          strokeDashoffset={offset}
+        />
+      </svg>
+
+      <div className="hidro-donut-center">
+        <strong style={{ color }}>{fmtPct(safe)}</strong>
+        <small>{subtitle}</small>
+      </div>
     </div>
+
     <div className="hidro-scale-caption"><span>Meta</span><b>90%</b></div>
   </section>;
 }
@@ -209,15 +238,59 @@ function CaneKpi({ minimum, maximum, average }) {
 
 function PointTable({ rows, selectedKey, onSelect }) {
   return <section className="hidro-panel hidro-table-panel">
-    <div className="hidro-section-head"><strong>Resumo Geral por Ponto</strong><span>{rows.length} ponto(s)</span></div>
-    <div className="hidro-table-scroll"><table className="hidro-table">
-      <thead><tr><th>Ponto</th><th>Lote</th><th>Méd. Infil.</th><th>Méd. Mín.</th><th>Méd. Máx.</th><th>Uniform.</th><th>Aval.</th><th>Padrão</th><th>% Padrão</th></tr></thead>
-      <tbody>{rows.map(row => <tr key={row.key} className={row.key === selectedKey ? 'is-selected' : ''} onClick={() => onSelect(row.key)}>
-        <td><b>P{row.ponto}</b></td><td>{row.lote}</td><td style={{ color: infiltrationColor(row.media_infiltracao) }}>{fmt(row.media_infiltracao)}</td>
-        <td>{fmt(row.media_min)}</td><td>{fmt(row.media_max)}</td><td style={{ color: percentageColor(row.uniformidade) }}>{fmtPct(row.uniformidade)}</td>
-        <td>{row.avaliado}</td><td>{row.padrao}</td><td style={{ color: percentageColor(row.perc_padrao) }}>{fmtPct(row.perc_padrao)}</td>
-      </tr>)}</tbody>
-    </table></div>
+    <div className="hidro-section-head">
+      <strong>Resumo Geral por Ponto</strong>
+      <span>{rows.length} ponto(s)</span>
+    </div>
+
+    <div className="hidro-table-scroll">
+      <table className="hidro-table">
+        <colgroup>
+          <col className="hidro-col-field" />
+          <col className="hidro-col-lot" />
+          <col className="hidro-col-point" />
+          <col className="hidro-col-infiltration" />
+          <col className="hidro-col-min" />
+          <col className="hidro-col-max" />
+          <col className="hidro-col-uniformity" />
+          <col className="hidro-col-evaluated" />
+          <col className="hidro-col-standard" />
+          <col className="hidro-col-standard-percent" />
+        </colgroup>
+        <thead>
+          <tr>
+            <th>Campo</th>
+            <th>Lote</th>
+            <th>Ponto</th>
+            <th>Méd. Infil.</th>
+            <th>Méd. Mín.</th>
+            <th>Méd. Máx.</th>
+            <th>Uniform.</th>
+            <th>Av.</th>
+            <th>Padrão</th>
+            <th>Padrão %</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map(row => <tr
+            key={row.key}
+            className={row.key === selectedKey ? 'is-selected' : ''}
+            onClick={() => onSelect(row.key)}
+          >
+            <td className="hidro-table-field" title={row.campo}>{row.campo || row.codigo_campo}</td>
+            <td>{row.lote}</td>
+            <td><b>P{row.ponto}</b></td>
+            <td style={{ color: infiltrationColor(row.media_infiltracao) }}>{fmt(row.media_infiltracao)}</td>
+            <td>{fmt(row.media_min)}</td>
+            <td>{fmt(row.media_max)}</td>
+            <td style={{ color: percentageColor(row.uniformidade) }}>{fmtPct(row.uniformidade)}</td>
+            <td>{row.avaliado}</td>
+            <td>{row.padrao}</td>
+            <td style={{ color: percentageColor(row.perc_padrao) }}>{fmtPct(row.perc_padrao)}</td>
+          </tr>)}
+        </tbody>
+      </table>
+    </div>
   </section>;
 }
 

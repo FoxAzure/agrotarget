@@ -45,3 +45,160 @@
   .hidro-history-field strong,.hidro-history-value{font-size:8px}
   .hidro-history-field small{font-size:6px}
 }
+
+
+/* =====================================================================================
+   V4 | AJUSTES FINAIS: TABELA RESPONSIVA, ROSCAS SVG E PROPORCAO DA ULTIMA LINHA
+   ===================================================================================== */
+
+/* Última linha: histórico mensal ganha aproximadamente 40% do espaço da tabela. */
+.hidro-bottom-grid{
+  grid-template-columns:minmax(0,1.4fr) minmax(310px,.6fr);
+}
+
+/* Tabela sem scroll horizontal em notebook, TV ou monitor ultrawide. */
+.hidro-table-scroll{
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}
+
+.hidro-table{
+  width:100%;
+  min-width:0 !important;
+  max-width:100%;
+  table-layout:fixed;
+}
+
+.hidro-table th,
+.hidro-table td{
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  padding-left:3px;
+  padding-right:3px;
+}
+
+.hidro-table th{
+  font-size:clamp(6px,.48vw,8px);
+}
+
+.hidro-table td{
+  font-size:clamp(7px,.58vw,9px);
+}
+
+.hidro-col-field{width:16%}
+.hidro-col-lot{width:7%}
+.hidro-col-point{width:7%}
+.hidro-col-infiltration{width:12%}
+.hidro-col-min{width:10%}
+.hidro-col-max{width:10%}
+.hidro-col-uniformity{width:11%}
+.hidro-col-evaluated{width:6%}
+.hidro-col-standard{width:9%}
+.hidro-col-standard-percent{width:12%}
+
+.hidro-table-field{
+  color:#e2e8f0 !important;
+  font-weight:900 !important;
+  text-align:left !important;
+}
+
+/* Roscas no mesmo padrão SVG do Dashboard CUC. */
+.hidro-donut-card{
+  display:flex;
+  flex-direction:column;
+}
+
+.hidro-donut-wrap{
+  position:relative;
+  flex:1;
+  min-height:0;
+  display:grid;
+  place-items:center;
+}
+
+.hidro-donut-wrap svg{
+  width:min(144px,78%);
+  height:min(144px,78%);
+  overflow:visible;
+  transform:rotate(-90deg);
+}
+
+.hidro-donut-track{
+  fill:none;
+  stroke:#334155;
+  stroke-width:12px;
+}
+
+.hidro-donut-value{
+  fill:none;
+  stroke-width:12px;
+  stroke-linecap:round;
+  transition:stroke-dashoffset .35s ease;
+}
+
+.hidro-donut-center{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+}
+
+.hidro-donut-center strong{
+  font-size:18px;
+  line-height:1;
+  font-weight:900;
+  transform:translateY(-1px);
+}
+
+.hidro-donut-center small{
+  margin-top:5px;
+  color:var(--hr-muted);
+  font-size:7px;
+  font-weight:800;
+}
+
+/* Neutraliza a rosca CSS anterior. */
+.hidro-donut,
+.hidro-donut::before,
+.hidro-donut::after{
+  display:none !important;
+  content:none !important;
+}
+
+@media(max-width:1180px) and (min-width:901px){
+  .hidro-table th,
+  .hidro-table td{
+    padding-left:2px;
+    padding-right:2px;
+  }
+
+  .hidro-col-field{width:15%}
+  .hidro-col-infiltration{width:12%}
+  .hidro-col-uniformity{width:11%}
+  .hidro-col-standard-percent{width:12%}
+}
+
+@media(max-width:900px){
+  .hidro-bottom-grid{
+    grid-template-columns:1fr;
+  }
+
+  .hidro-history-table-panel{
+    height:220px;
+  }
+}
+
+@media(max-width:560px){
+  .hidro-table-scroll{
+    overflow-x:auto !important;
+  }
+
+  .hidro-table{
+    min-width:680px !important;
+  }
+}
