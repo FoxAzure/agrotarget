@@ -17,15 +17,18 @@ import DashPreparo from './DashPreparo';
 import DashCB from './DashCB';
 import DashRankingMec from './DashRankingMec';
 import DashPerdasFrente from './DashPerdasFrente';
+import DashHidroroll from './DashHidroroll';
 
 // Lista de Módulos Disponíveis (Fácil de escalar)
 const DASH_MODULES = [
   { id: 'cuc', name: 'Irrigação: CUC', component: <DashCUC /> },
+  { id: 'hidroroll', name: 'Irrigação: Hidroroll', component: <DashHidroroll /> },
   { id: 'perdasmec', name: 'Perda Colheita Mecanizada', component: <DashPerdasMec /> },
   { id: 'rakingmec', name: 'Ranking Colhedoras', component: <DashRankingMec /> },
   { id: 'perdasfrente', name: 'Perdas Mecanizada Frente', component: <DashPerdasFrente /> },
   { id: 'preparo', name: 'Preparo de Solo', component: <DashPreparo /> },
   { id: 'casabomba', name: 'Casa de Bomba', component: <DashCB /> },
+
   
 ];
 

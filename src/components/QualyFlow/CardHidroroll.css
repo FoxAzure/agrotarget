@@ -1,0 +1,477 @@
+/* =====================================================================================
+   QUALYFLOW | CARD HIDROROLL V2
+   Mobile-first, pontos em abas e um bloco compacto por campo.
+   ===================================================================================== */
+
+.qf-hr-card {
+  --qf-hr-water-ok: #1677ff;
+  --qf-hr-water-fail: #ef4444;
+  --qf-hr-water-track: #eef3f8;
+  --qf-hr-cane-min: #f59e0b;
+  --qf-hr-cane-max: #334155;
+  --qf-hr-good: #16a34a;
+  --qf-hr-warning: #d69e00;
+  --qf-hr-danger: #dc2626;
+  --qf-hr-neutral: #94a3b8;
+  --qf-hr-chart-height: 104px;
+
+  width: 100%;
+  gap: 0;
+  padding: 0.9rem;
+}
+
+.qf-hr-card-header {
+  padding-bottom: 7px;
+}
+
+/* ================================= CAMPOS ================================= */
+
+.qf-hr-fields-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 9px;
+}
+
+.qf-hr-field-block {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--q-border, #e2e8f0);
+  border-radius: 11px;
+  background: #fff;
+}
+
+.qf-hr-field-block + .qf-hr-field-block {
+  margin-top: 2px;
+}
+
+.qf-hr-field-header {
+  display: grid;
+  grid-template-columns: minmax(92px, 1.1fr) minmax(210px, 2fr);
+  align-items: center;
+  gap: 8px;
+  padding: 9px;
+  border-bottom: 1px solid #eef2f7;
+  background: linear-gradient(90deg, #f8fafc, #fff);
+}
+
+.qf-hr-field-title {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.qf-hr-field-title strong {
+  overflow: hidden;
+  color: var(--q-dark, #1e293b);
+  font-size: 0.8rem;
+  font-weight: 950;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qf-hr-field-title span {
+  overflow: hidden;
+  color: #94a3b8;
+  font-size: 0.55rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qf-hr-kpis {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 3px;
+}
+
+.qf-hr-kpis > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding-left: 3px;
+  border-left: 1px solid #eef2f7;
+}
+
+.qf-hr-kpis small {
+  width: 100%;
+  overflow: hidden;
+  color: #94a3b8;
+  font-size: 0.48rem;
+  font-weight: 900;
+  line-height: 1.1;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.qf-hr-kpis strong {
+  font-size: 0.7rem;
+  font-weight: 950;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.qf-hr-kpis em {
+  color: #94a3b8;
+  font-size: 0.46rem;
+  font-style: normal;
+}
+
+.qf-hr-kpis .is-good,
+.qf-hr-sample-value.is-good { color: var(--qf-hr-good); }
+.qf-hr-kpis .is-warning,
+.qf-hr-sample-value.is-warning { color: var(--qf-hr-warning); }
+.qf-hr-kpis .is-danger,
+.qf-hr-sample-value.is-danger { color: var(--qf-hr-danger); }
+.qf-hr-kpis .is-neutral,
+.qf-hr-sample-value.is-neutral { color: var(--qf-hr-neutral); }
+
+/* ================================= ABAS DOS PONTOS ================================= */
+
+.qf-hr-point-tabs {
+  display: flex;
+  gap: 5px;
+  padding: 7px 8px;
+  overflow-x: auto;
+  border-bottom: 1px solid #eef2f7;
+  background: #fbfdff;
+  scrollbar-width: none;
+}
+
+.qf-hr-point-tabs::-webkit-scrollbar { display: none; }
+
+.qf-hr-point-tabs button {
+  min-width: 54px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 5px 8px;
+  border: 1px solid #dfe7ef;
+  border-radius: 8px;
+  background: #fff;
+  color: #64748b;
+  font: inherit;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.qf-hr-point-tabs button span {
+  font-size: 0.64rem;
+  font-weight: 950;
+}
+
+.qf-hr-point-tabs button small {
+  font-size: 0.48rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.qf-hr-point-tabs button.is-active {
+  border-color: var(--q-green, #027636);
+  background: var(--q-green-soft, rgba(16, 185, 129, 0.1));
+  color: var(--q-green-dark, #059669);
+  box-shadow: inset 0 -2px 0 var(--q-green, #027636);
+}
+
+.qf-hr-point-tabs button:focus-visible {
+  outline: 2px solid var(--q-green-soft, rgba(16, 185, 129, 0.18));
+  outline-offset: 1px;
+}
+
+/* ================================= GRÁFICO ================================= */
+
+.qf-hr-point-chart {
+  min-width: 0;
+  padding: 7px 6px 5px;
+}
+
+.qf-hr-point-caption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 2px 5px;
+}
+
+.qf-hr-point-caption > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.qf-hr-point-caption span,
+.qf-hr-point-caption strong {
+  font-size: 0.57rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.qf-hr-point-caption > div:first-child span {
+  padding: 3px 6px;
+  border-radius: 6px;
+  background: var(--q-green-soft, rgba(16, 185, 129, 0.1));
+  color: var(--q-green-dark, #059669);
+}
+
+.qf-hr-point-caption strong { color: #64748b; }
+
+.qf-hr-point-legend {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #94a3b8;
+}
+
+.qf-hr-point-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.47rem;
+  text-transform: none;
+}
+
+.qf-hr-point-legend i {
+  width: 8px;
+  height: 3px;
+  display: inline-block;
+  border-radius: 2px;
+}
+
+.qf-hr-point-legend .is-water { background: var(--qf-hr-water-ok); }
+.qf-hr-point-legend .is-cane { background: var(--qf-hr-cane-max); }
+
+.qf-hr-samples-grid {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  gap: 2px;
+}
+
+.qf-hr-sample {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: 18px var(--qf-hr-chart-height) 13px;
+  justify-items: center;
+  gap: 2px;
+}
+
+.qf-hr-sample-value {
+  max-width: 100%;
+  align-self: center;
+  overflow: hidden;
+  font-size: 0.61rem;
+  font-weight: 950;
+  line-height: 1;
+  text-overflow: clip;
+}
+
+.qf-hr-depth-track {
+  position: relative;
+  width: min(15px, 72%);
+  height: var(--qf-hr-chart-height);
+  overflow: visible;
+  border: 1px solid #dce5ee;
+  border-radius: 4px 4px 6px 6px;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(20% - 1px),
+      rgba(148, 163, 184, 0.15) calc(20% - 1px),
+      rgba(148, 163, 184, 0.15) 20%
+    ),
+    var(--qf-hr-water-track);
+}
+
+.qf-hr-water-column {
+  position: absolute;
+  top: 0;
+  left: 1px;
+  right: 1px;
+  border-radius: 3px 3px 5px 5px;
+  opacity: 0.9;
+  transform-origin: top center;
+  animation: qf-hr-depth-enter 0.6s ease-out both;
+}
+
+.qf-hr-water-column.is-reached {
+  background: linear-gradient(180deg, #75b6ff, var(--qf-hr-water-ok));
+}
+
+.qf-hr-water-column.is-not-reached {
+  background: linear-gradient(180deg, #ff9a9a, var(--qf-hr-water-fail));
+}
+
+.qf-hr-cane-mark {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  width: calc(100% + 8px);
+  height: 3px;
+  border-radius: 999px;
+  transform: translate(-50%, -50%);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.85);
+}
+
+.qf-hr-cane-mark--min { background: var(--qf-hr-cane-min); }
+.qf-hr-cane-mark--max { background: var(--qf-hr-cane-max); }
+
+.qf-hr-sample-order {
+  color: #94a3b8;
+  font-size: 0.48rem;
+  font-weight: 800;
+}
+
+.qf-hr-sample--empty { opacity: 0.4; }
+
+.qf-hr-empty-mark {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 0.55rem;
+}
+
+@keyframes qf-hr-depth-enter {
+  from { transform: scaleY(0); opacity: 0.25; }
+  to { transform: scaleY(1); opacity: 0.9; }
+}
+
+/* ================================= FOOTER ================================= */
+
+.qf-hr-footer {
+  margin-top: 9px;
+  padding-top: 9px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.qf-hr-footer-note {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.qf-hr-footer-note span {
+  padding: 3px 5px;
+  border-radius: 999px;
+  background: #f8fafc;
+  font-size: 0.5rem;
+  font-weight: 900;
+}
+
+.qf-hr-footer-note .is-good { color: var(--qf-hr-good); }
+.qf-hr-footer-note .is-warning { color: var(--qf-hr-warning); }
+.qf-hr-footer-note .is-danger { color: var(--qf-hr-danger); }
+
+.qf-hr-detail-button {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border: 1px solid rgba(25, 135, 84, 0.35);
+  border-radius: 9px;
+  background: #fff;
+  color: var(--q-green, #027636);
+  font: inherit;
+  font-size: 0.7rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: 0.18s ease;
+}
+
+.qf-hr-detail-button:hover {
+  background: var(--q-green-soft, rgba(16, 185, 129, 0.1));
+  box-shadow: 0 5px 12px rgba(0, 0, 0, 0.12);
+  transform: translateY(-1px);
+}
+
+/* ================================= LOADING ================================= */
+
+.qf-hr-loading {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 0;
+}
+
+.qf-hr-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid #e5e7eb;
+  border-top-color: var(--q-green, #027636);
+  border-radius: 50%;
+  animation: qf-hr-spin 0.75s linear infinite;
+}
+
+@keyframes qf-hr-spin { to { transform: rotate(360deg); } }
+
+/* ================================= CELULAR PEQUENO ================================= */
+
+@media (max-width: 390px) {
+  .qf-hr-card {
+    --qf-hr-chart-height: 96px;
+    padding: 0.72rem;
+  }
+
+  .qf-hr-field-header {
+    grid-template-columns: minmax(76px, 0.9fr) minmax(190px, 2.1fr);
+    gap: 4px;
+    padding: 8px 6px;
+  }
+
+  .qf-hr-field-title strong { font-size: 0.69rem; }
+  .qf-hr-field-title span { font-size: 0.48rem; }
+  .qf-hr-kpis small { font-size: 0.42rem; }
+  .qf-hr-kpis strong { font-size: 0.62rem; }
+  .qf-hr-kpis em { display: none; }
+  .qf-hr-point-chart { padding-inline: 3px; }
+  .qf-hr-samples-grid { gap: 1px; }
+  .qf-hr-sample-value { font-size: 0.55rem; }
+  .qf-hr-depth-track { width: min(13px, 76%); }
+  .qf-hr-cane-mark { width: calc(100% + 6px); }
+  .qf-hr-point-legend { display: none; }
+}
+
+/* ================================= TABLET / DESKTOP ================================= */
+
+@media (min-width: 640px) {
+  .qf-hr-card {
+    --qf-hr-chart-height: 122px;
+    padding: 1.1rem;
+  }
+
+  .qf-hr-field-header {
+    grid-template-columns: minmax(150px, 1.3fr) minmax(300px, 1.7fr);
+    padding: 10px 12px;
+  }
+
+  .qf-hr-field-title strong { font-size: 0.9rem; }
+  .qf-hr-kpis small { font-size: 0.56rem; }
+  .qf-hr-kpis strong { font-size: 0.82rem; }
+  .qf-hr-point-tabs { padding: 8px 11px; }
+  .qf-hr-point-chart { padding: 9px 12px 7px; }
+  .qf-hr-samples-grid { gap: 6px; }
+  .qf-hr-sample-value { font-size: 0.72rem; }
+  .qf-hr-depth-track { width: 20px; }
+  .qf-hr-cane-mark { width: 30px; }
+  .qf-hr-sample-order { font-size: 0.57rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qf-hr-water-column,
+  .qf-hr-spinner {
+    animation: none;
+  }
+}
+

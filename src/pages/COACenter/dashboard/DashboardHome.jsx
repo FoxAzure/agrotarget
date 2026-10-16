@@ -13,9 +13,10 @@ import './DashboardHome.css';
 // Dashboards modulares
 import BoletimDiario from './BoletimDiario';
 import BoletimSemanal from './BoletimSemanal';
+import DashMotorOcioso from './DashMotorOcioso';
 
 // Dashboards opcionais. Descomente os imports e os itens em DASH_MODULES quando necessario.
-// import DashMotorOcioso from './DashMotorOcioso';
+// 
 // import DashSemApontamento from './DashSemApontamento';
 
 // Use a referencia do componente, e nao <Componente />.

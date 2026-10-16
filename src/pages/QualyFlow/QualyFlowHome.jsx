@@ -5,6 +5,7 @@
 //   - vw_q_agrotarget_datas
 //   - CardAtividadesDiaria
 //   - CardCUC
+//   - CardHidroroll
 //   - CardPerdaMec
 // ==========================================================================================
 
@@ -17,6 +18,7 @@ import Sidebar from '../../components/QualyFlow/Sidebar';
 import DateSelectorQualyFlow from '../../components/QualyFlow/DateSelectorQualyFlow';
 import CardAtividadesDiaria from '../../components/QualyFlow/CardAtividadesDiaria';
 import CardCUC from '../../components/QualyFlow/CardCUC';
+import CardHidroroll from '../../components/QualyFlow/CardHidroroll';
 import CardPerdaMec from '../../components/QualyFlow/CardPerdaMec';
 import CardCb from '../../components/QualyFlow/CardCb';
 
@@ -26,11 +28,9 @@ const toIsoDate = (date = new Date()) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-
   return `${year}-${month}-${day}`;
 };
 
-// Motor de resiliência: Tenta executar a query até 3 vezes antes de desistir silenciosamente
 const runWithRetry = async (queryFn, maxRetries = 3) => {
   for (let i = 0; i < maxRetries; i++) {
     try {
@@ -39,10 +39,10 @@ const runWithRetry = async (queryFn, maxRetries = 3) => {
       return result.data;
     } catch (err) {
       if (i === maxRetries - 1) throw err;
-      // Espera 1s, depois 2s, antes de tentar novamente (Exponential Backoff)
       await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)));
     }
   }
+  return [];
 };
 
 // ================================= EXECUTOR -----------------------------------------------
@@ -50,25 +50,17 @@ const runWithRetry = async (queryFn, maxRetries = 3) => {
 const QualyFlowHome = () => {
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(toIsoDate(new Date()));
-
-  // Controle dos anos disponíveis
   const [maxYearDb, setMaxYearDb] = useState(new Date().getFullYear());
   const [activeYear, setActiveYear] = useState(null);
-
-  // Datas disponíveis
   const [availableDates, setAvailableDates] = useState([]);
   const [isLoadingDates, setIsLoadingDates] = useState(true);
-
-  // =========================================================================
-  // 1. DESCOBRE O MAIOR ANO (COM RETENTATIVA)
-  // =========================================================================
 
   useEffect(() => {
     let mounted = true;
 
     const fetchMaxYear = async () => {
       try {
-        const data = await runWithRetry(() => 
+        const data = await runWithRetry(() =>
           supabase.from('vw_q_agrotarget_datas').select('ano').limit(1)
         );
 
@@ -82,7 +74,6 @@ const QualyFlowHome = () => {
           setActiveYear(currentYear);
         }
       } catch (err) {
-        // Falhou silenciosamente, assume o ano atual para não quebrar a tela
         if (mounted) {
           const currentYear = new Date().getFullYear();
           setMaxYearDb(currentYear);
@@ -95,21 +86,11 @@ const QualyFlowHome = () => {
     return () => { mounted = false; };
   }, []);
 
-  // =========================================================================
-  // 2. LISTA DE ANOS
-  // =========================================================================
-
   const yearsList = useMemo(() => {
     const list = [];
-    for (let year = maxYearDb; year >= 2024; year--) {
-      list.push(year);
-    }
+    for (let year = maxYearDb; year >= 2024; year--) list.push(year);
     return list;
   }, [maxYearDb]);
-
-  // =========================================================================
-  // 3. BUSCA DATAS DO ANO SELECIONADO (COM RETENTATIVA)
-  // =========================================================================
 
   useEffect(() => {
     if (!activeYear) return;
@@ -119,8 +100,11 @@ const QualyFlowHome = () => {
       setIsLoadingDates(true);
 
       try {
-        const data = await runWithRetry(() => 
-          supabase.from('vw_q_agrotarget_datas').select('data_apontamento').eq('ano', activeYear)
+        const data = await runWithRetry(() =>
+          supabase
+            .from('vw_q_agrotarget_datas')
+            .select('data_apontamento')
+            .eq('ano', activeYear)
         );
 
         if (!mounted) return;
@@ -134,13 +118,9 @@ const QualyFlowHome = () => {
           .filter(Boolean);
 
         const uniqueDates = [...new Set(rawIsoDates)];
-
         setAvailableDates(uniqueDates);
-        if (uniqueDates.length > 0) {
-          setSelectedDate(uniqueDates[0]);
-        }
+        if (uniqueDates.length > 0) setSelectedDate(uniqueDates[0]);
       } catch (err) {
-        // Falhou silenciosamente, deixa a lista de datas vazia e a vida segue
         if (mounted) setAvailableDates([]);
       } finally {
         if (mounted) setIsLoadingDates(false);
@@ -151,22 +131,13 @@ const QualyFlowHome = () => {
     return () => { mounted = false; };
   }, [activeYear]);
 
-  // =========================================================================
-  // RENDER
-  // =========================================================================
-
   return (
     <div className="qf-theme">
-      
       <HeaderQualyFlow onMenuOpen={() => setSidebarOpen(true)} />
       <Sidebar isOpen={isSidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <main className="qf-container py-6 md:py-10">
         <section className="flex flex-col gap-6">
-
-          {/* ==============================================================
-              SELETOR DE DATA
-          ============================================================== */}
           <div className="w-full flex justify-center">
             <div className="w-full max-w-sm md:max-w-md">
               {activeYear && (
@@ -183,9 +154,6 @@ const QualyFlowHome = () => {
             </div>
           </div>
 
-          {/* ==============================================================
-              CONTEÚDO PRINCIPAL
-          ============================================================== */}
           <div className="w-full">
             {isLoadingDates ? (
               <div className="qf-home-loading">
@@ -197,14 +165,14 @@ const QualyFlowHome = () => {
               </div>
             ) : (
               <div className="flex flex-col gap-4">
-                <CardAtividadesDiaria selectedDate={selectedDate}/>
-                <CardCUC selectedDate={selectedDate}/>
-                <CardPerdaMec selectedDate={selectedDate}/>
-                <CardCb selectedDate={selectedDate}/>
+                <CardAtividadesDiaria selectedDate={selectedDate} />
+                <CardCUC selectedDate={selectedDate} />
+                <CardHidroroll selectedDate={selectedDate} />
+                <CardPerdaMec selectedDate={selectedDate} />
+                <CardCb selectedDate={selectedDate} />
               </div>
             )}
           </div>
-
         </section>
       </main>
     </div>
