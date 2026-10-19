@@ -16,6 +16,7 @@ import CucDetail from './pages/QualyFlow/details/CucDetail';
 import PaginaNaoEncontrada from './pages/Config/PaginaNaoEncontrada';
 import CbDetail from './pages/QualyFlow/details/CbDetail';
 import HidrorollDetail from './pages/QualyFlow/details/HidrorollDetail';
+import PreparoDetail from './pages/QualyFlow/details/PreparoDetail';
 
 import DashboardHome from './pages/QualyFlow/dashboard/DashboardHome';
 
@@ -129,6 +130,7 @@ function App() {
         <Route path="/qualyflow/cuc" element={<CucDetail />} />
         <Route path="/qualyflow/casabomba" element={<CbDetail />} />
         <Route path="/qualyflow/hidroroll" element={<HidrorollDetail />} />
+        <Route path="/qualyflow/preparo" element={<PreparoDetail />} />
 
         <Route path="/qualyflow/dashboard" element={<DashboardHome />} />
 

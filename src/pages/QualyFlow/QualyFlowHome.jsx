@@ -21,6 +21,7 @@ import CardCUC from '../../components/QualyFlow/CardCUC';
 import CardHidroroll from '../../components/QualyFlow/CardHidroroll';
 import CardPerdaMec from '../../components/QualyFlow/CardPerdaMec';
 import CardCb from '../../components/QualyFlow/CardCb';
+import CardPreparo from '../../components/QualyFlow/CardPreparo';
 
 // ================================= HELPERS ------------------------------------------------
 
@@ -170,6 +171,7 @@ const QualyFlowHome = () => {
                 <CardHidroroll selectedDate={selectedDate} />
                 <CardPerdaMec selectedDate={selectedDate} />
                 <CardCb selectedDate={selectedDate} />
+                <CardPreparo selectedDate={selectedDate} />
               </div>
             )}
           </div>
