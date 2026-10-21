@@ -1,0 +1,450 @@
+/* =====================================================================================
+   PerdaMecDetailHst | Identidade compartilhada dos rankings
+   Aplica-se somente às tabelas de Equipamentos e Indicadores por Frente.
+   ===================================================================================== */
+
+/* CONTROLE CENTRAL DOS TAMANHOS EM PX */
+.qf-hst-rank-card {
+  --qf-rank-title-font: 10px;
+  --qf-rank-counter-font: 10px;
+  --qf-rank-header-font: 10px;
+  --qf-rank-position-font: 10px;
+  --qf-rank-name-font: 12px;
+  --qf-rank-points-font: 12px;
+  --qf-rank-value-font: 12px;
+  --qf-rank-medal-size: 20px;
+
+  /* Controle exclusivo para celular */
+  --qf-rank-mobile-title-font: 10px;
+  --qf-rank-mobile-counter-font: 10px;
+  --qf-rank-mobile-header-font: 10px;
+  --qf-rank-mobile-position-font: 10px;
+  --qf-rank-mobile-name-font: 12px;
+  --qf-rank-mobile-points-font: 11px;
+  --qf-rank-mobile-value-font: 12px;
+  --qf-rank-mobile-medal-size: 18px;
+
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.qf-hst-rank-titlebar {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  background: #f8fafc;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.qf-hst-rank-titlebar--equipment {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.qf-hst-rank-titlebar h4 {
+  min-width: 0;
+  margin: 0;
+  color: var(--q-dark);
+  font-size: var(--qf-rank-title-font);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.qf-hst-rank-titlebar > span {
+  flex-shrink: 0;
+  color: #94a3b8;
+  font-size: var(--qf-rank-counter-font);
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.qf-hst-rank-tabs {
+  width: 100%;
+  display: flex;
+  padding: 4px;
+  background: rgba(226, 232, 240, 0.55);
+  border-radius: 0.75rem;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.06);
+}
+
+.qf-hst-rank-tabs button {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 4px;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transition: 0.2s ease;
+}
+
+.qf-hst-rank-tabs button:hover {
+  color: #334155;
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.qf-hst-rank-tabs button.is-active {
+  color: #ffffff;
+  background: var(--q-green);
+  box-shadow: 0 4px 8px rgba(2, 118, 54, 0.18);
+}
+
+.qf-hst-rank-table {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.qf-hst-rank-grid {
+  width: 100%;
+  min-width: 0;
+  display: grid;
+  align-items: center;
+  column-gap: 4px;
+}
+
+/* Frente: Frente e Pts permanecem juntos à esquerda.
+   O espaço flexível cresce depois de Pts, mantendo os indicadores à direita. */
+.qf-hst-rank-grid--front {
+  grid-template-columns:
+    30px
+    minmax(46px, max-content)
+    48px
+    minmax(16px, 1fr)
+    62px
+    66px
+    66px
+    62px;
+}
+
+.qf-hst-rank-grid--front > :nth-child(4) {
+  grid-column: 5;
+}
+
+/* Equipamentos usa a mesma identidade e mantém os indicadores à direita. */
+.qf-hst-rank-grid--equipment {
+  grid-template-columns:
+    30px
+    minmax(80px, 1fr)
+    62px
+    66px
+    66px
+    62px;
+}
+
+.qf-hst-rank-head {
+  min-height: 34px;
+  padding: 7px 8px;
+  background: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.qf-hst-rank-head span {
+  min-width: 0;
+  overflow: hidden;
+  color: #94a3b8;
+  font-size: var(--qf-rank-header-font);
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  line-height: 1;
+  text-align: center;
+  text-overflow: clip;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.qf-hst-rank-head-name {
+  text-align: left !important;
+}
+
+.qf-hst-rank-head span:last-child {
+  text-align: right;
+}
+
+.qf-hst-rank-body {
+  width: 100%;
+  max-height: 400px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.qf-hst-rank-row {
+  min-height: 39px;
+  padding: 6px 4px;
+  border-bottom: 1px solid #f1f5f9;
+  border-radius: 0.5rem;
+  transition: background-color 0.18s ease, color 0.18s ease;
+}
+
+.qf-hst-rank-row:last-child {
+  border-bottom: 0;
+}
+
+.qf-hst-rank-row:hover {
+  background: rgba(248, 250, 252, 0.9);
+}
+
+.qf-hst-rank-row.is-clickable {
+  cursor: pointer;
+}
+
+.qf-hst-rank-row.is-clickable:hover .qf-hst-rank-name {
+  color: var(--q-green);
+}
+
+.qf-hst-rank-position {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qf-hst-rank-position img {
+  width: var(--qf-rank-medal-size);
+  height: var(--qf-rank-medal-size);
+  object-fit: contain;
+}
+
+.qf-hst-rank-position span {
+  font-size: var(--qf-rank-position-font);
+}
+
+.qf-hst-rank-name,
+.qf-hst-rank-points,
+.qf-hst-rank-value {
+  min-width: 0;
+  overflow: hidden;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.qf-hst-rank-name {
+  color: #334155;
+  font-size: var(--qf-rank-name-font);
+  font-weight: 900;
+  text-align: left;
+}
+
+.qf-hst-rank-grid--front .qf-hst-rank-name {
+  text-align: center;
+}
+
+.qf-hst-rank-points {
+  color: #64748b;
+  font-size: var(--qf-rank-points-font);
+  font-weight: 900;
+  text-align: center;
+}
+
+.qf-hst-rank-value {
+  font-size: var(--qf-rank-value-font);
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.qf-hst-rank-value--last {
+  padding-right: 1px;
+  text-align: right;
+}
+
+.qf-hst-rank-empty {
+  padding: 2rem 0.75rem;
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.qf-hst-rank-footer {
+  padding: 6px 12px;
+  background: #f1f5f9;
+  border-top: 1px solid #e2e8f0;
+  color: #94a3b8;
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+}
+
+/* MOBILE: mantém os dois rankings inteiros no card, sem rolagem horizontal. */
+@media (max-width: 480px) {
+  .qf-hst-rank-titlebar {
+    padding: 10px 8px;
+  }
+
+  .qf-hst-rank-titlebar h4 {
+    font-size: var(--qf-rank-mobile-title-font);
+    letter-spacing: 0.04em;
+  }
+
+  .qf-hst-rank-titlebar > span {
+    font-size: var(--qf-rank-mobile-counter-font);
+    letter-spacing: 0.03em;
+  }
+
+  .qf-hst-rank-tabs button {
+    padding: 8px 2px;
+    font-size: 10px;
+    letter-spacing: 0.02em;
+  }
+
+  .qf-hst-rank-grid {
+    column-gap: 1px;
+  }
+
+  .qf-hst-rank-grid--front {
+    grid-template-columns:
+      22px
+      minmax(34px, 0.62fr)
+      minmax(24px, 0.42fr)
+      minmax(45px, 0.90fr)
+      minmax(49px, 1fr)
+      minmax(49px, 1fr)
+      minmax(47px, 0.96fr);
+  }
+
+  .qf-hst-rank-grid--front > :nth-child(4) {
+    grid-column: auto;
+  }
+
+  .qf-hst-rank-grid--equipment {
+    grid-template-columns:
+      22px
+      minmax(54px, 1fr)
+      minmax(45px, 0.90fr)
+      minmax(49px, 1fr)
+      minmax(49px, 1fr)
+      minmax(47px, 0.96fr);
+  }
+
+  .qf-hst-rank-head {
+    min-height: 31px;
+    padding: 6px 4px;
+  }
+
+  .qf-hst-rank-head span {
+    font-size: var(--qf-rank-mobile-header-font);
+    letter-spacing: -0.03em;
+  }
+
+  .qf-hst-rank-body {
+    padding: 3px;
+  }
+
+  .qf-hst-rank-row {
+    min-height: 36px;
+    padding: 5px 1px;
+  }
+
+  .qf-hst-rank-position img {
+    width: var(--qf-rank-mobile-medal-size);
+    height: var(--qf-rank-mobile-medal-size);
+  }
+
+  .qf-hst-rank-position span {
+    font-size: var(--qf-rank-mobile-position-font);
+  }
+
+  .qf-hst-rank-name {
+    font-size: var(--qf-rank-mobile-name-font);
+  }
+
+  .qf-hst-rank-points {
+    font-size: var(--qf-rank-mobile-points-font);
+  }
+
+  .qf-hst-rank-value {
+    font-size: var(--qf-rank-mobile-value-font);
+    letter-spacing: -0.035em;
+  }
+}
+
+@media (max-width: 360px) {
+  .qf-hst-rank-grid--front {
+    grid-template-columns:
+      20px
+      minmax(31px, 0.58fr)
+      minmax(22px, 0.40fr)
+      minmax(43px, 0.88fr)
+      minmax(47px, 1fr)
+      minmax(47px, 1fr)
+      minmax(45px, 0.94fr);
+  }
+
+  .qf-hst-rank-grid--equipment {
+    grid-template-columns:
+      20px
+      minmax(48px, 1fr)
+      minmax(43px, 0.88fr)
+      minmax(47px, 1fr)
+      minmax(47px, 1fr)
+      minmax(45px, 0.94fr);
+  }
+
+  .qf-hst-rank-head {
+    padding-right: 2px;
+    padding-left: 2px;
+  }
+}
+
+/* DESKTOP: mais respiro e indicadores alinhados à direita nos dois rankings. */
+@media (min-width: 640px) {
+  .qf-hst-rank-grid {
+    column-gap: 8px;
+  }
+
+  .qf-hst-rank-grid--front {
+    grid-template-columns:
+      36px
+      minmax(70px, max-content)
+      58px
+      minmax(24px, 1fr)
+      78px
+      78px
+      78px
+      72px;
+  }
+
+  .qf-hst-rank-grid--equipment {
+    grid-template-columns:
+      36px
+      minmax(100px, 1fr)
+      78px
+      78px
+      78px
+      72px;
+  }
+
+  .qf-hst-rank-head {
+    padding: 8px 12px;
+  }
+
+  .qf-hst-rank-row {
+    min-height: 42px;
+    padding: 7px 8px;
+  }
+}

@@ -1,16 +1,18 @@
 // ================================= DOCUMENTATION ------------------------------------------
 // Script: PerdaMecDetailHst
 // Purpose: Tela de Histórico e Evolução das Perdas Mecanizadas (Visão Anual/Mensal).
-// Relationships: vw_q_perdamec_ano, vw_q_perdamec_mes, vw_q_perdamec_colhedora, rulesPerdaMec
+// Relationships: vw_q_perdamec_ano, vw_q_perdamec_mes, vw_q_perdamec_colhedora,
+//                vw_q_perdamec_frentegeral, rulesPerdaMec
 // ==========================================================================================
 
 import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '../../../lib/supabaseClient';
 import YearSelectorQualyFlow from '../../../components/QualyFlow/YearSelectorQualyFlow';
 import { getMetasParaData, getStatusColor } from '../../../components/QualyFlow/rulesPerdaMec';
-import { ComposedChart, Bar, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, LabelList } from 'recharts';
+import { ComposedChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, ReferenceLine, LabelList } from 'recharts';
 
 import PerdaMecDetailRankEquip from './PerdaMecDetailRankEquip';
+import './PerdaMecDetailHst.css';
 
 import imgOuro from '../../../gallery/logo/medalha-de-ouro.png';
 import imgPrata from '../../../gallery/logo/medalha-de-prata.png';
@@ -24,6 +26,12 @@ const formatValue = (value, decimals = 2) => {
   if (value === null || value === undefined || value === '') return '-';
   const number = Number(value);
   return Number.isNaN(number) ? '-' : number.toFixed(decimals).replace('.', ',');
+};
+
+const nullableNumber = (value) => {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? number : null;
 };
 
 const parseColhedora = (fullName) => {
@@ -49,7 +57,7 @@ const CompareTriangle = ({ current, previous }) => {
 const getGradientColor = (value, min, max) => {
   if (max === min || max === 0) return 'hsl(140, 95%, 35%)';
   const ratio = (value - min) / (max - min);
-  const hue = 140 - (ratio * 140); 
+  const hue = 140 - (ratio * 140);
   const lightness = 35 + (ratio * 15);
   return `hsl(${hue}, 95%, ${lightness}%)`;
 };
@@ -79,13 +87,13 @@ const PerdaMecDetailHst = () => {
   const [prevYearData, setPrevYearData] = useState(null);
   const [monthlyData, setMonthlyData] = useState([]);
   const [colhedoraData, setColhedoraData] = useState([]);
+  const [frenteData, setFrenteData] = useState([]);
 
   const [selectedInd, setSelectedInd] = useState('perda');
   const [shiftTab, setShiftTab] = useState('Geral');
   const [selectedMachineToView, setSelectedMachineToView] = useState(null);
 
   const chartScrollRef = useRef(null);
-
   const metas = useMemo(() => getMetasParaData(`${activeYear}-12-31`), [activeYear]);
 
   // 1. Busca Anos Disponíveis
@@ -93,13 +101,14 @@ const PerdaMecDetailHst = () => {
     let mounted = true;
     const fetchYears = async () => {
       try {
-        const { data } = await supabase.from('vw_q_perdamec_ano').select('ano');
+        const { data, error } = await supabase.from('vw_q_perdamec_ano').select('ano');
+        if (error) throw error;
         if (mounted && data) {
-          const uniqueYears = [...new Set(data.map(r => r.ano))].sort((a, b) => b - a);
+          const uniqueYears = [...new Set(data.map(r => Number(r.ano)))].sort((a, b) => b - a);
           setAvailableYears(uniqueYears);
           if (uniqueYears.length > 0 && !uniqueYears.includes(activeYear)) setActiveYear(uniqueYears[0]);
         }
-      } catch (err) { console.error(err); }
+      } catch (err) { console.error('Erro ao buscar safras:', err); }
     };
     fetchYears();
     return () => { mounted = false; };
@@ -113,21 +122,33 @@ const PerdaMecDetailHst = () => {
       setLoading(true);
 
       try {
-        const [resAno, resAnoAnt, resMes, resColh] = await Promise.all([
+        const [resAno, resAnoAnt, resMes, resColh, resFrente] = await Promise.all([
           supabase.from('vw_q_perdamec_ano').select('*').eq('ano', activeYear).single(),
           supabase.from('vw_q_perdamec_ano').select('*').eq('ano', activeYear - 1).maybeSingle(),
           supabase.from('vw_q_perdamec_mes').select('*').eq('ano', activeYear).order('mes', { ascending: true }),
-          supabase.from('vw_q_perdamec_colhedora').select('*').eq('ano', activeYear)
+          supabase.from('vw_q_perdamec_colhedora').select('*').eq('ano', activeYear),
+          supabase.from('vw_q_perdamec_frentegeral').select('*').eq('ano', activeYear)
         ]);
+
+        const requestError = resAno.error || resAnoAnt.error || resMes.error || resColh.error || resFrente.error;
+        if (requestError) throw requestError;
 
         if (mounted) {
           setYearData(resAno.data || null);
           setPrevYearData(resAnoAnt.data || null);
           setMonthlyData(resMes.data || []);
           setColhedoraData(resColh.data || []);
+          setFrenteData(resFrente.data || []);
         }
       } catch (err) {
-        console.error(err);
+        console.error('Erro ao carregar histórico de perdas mecanizadas:', err);
+        if (mounted) {
+          setYearData(null);
+          setPrevYearData(null);
+          setMonthlyData([]);
+          setColhedoraData([]);
+          setFrenteData([]);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
@@ -139,10 +160,12 @@ const PerdaMecDetailHst = () => {
   // 3. Auto-scroll do Gráfico Mensal
   useEffect(() => {
     if (chartScrollRef.current && monthlyData.length > 0) {
-      setTimeout(() => {
-        chartScrollRef.current.scrollTo({ left: chartScrollRef.current.scrollWidth, behavior: 'smooth' });
+      const timer = setTimeout(() => {
+        chartScrollRef.current?.scrollTo({ left: chartScrollRef.current.scrollWidth, behavior: 'smooth' });
       }, 300);
+      return () => clearTimeout(timer);
     }
+    return undefined;
   }, [monthlyData, selectedInd]);
 
   // 4. Processamento Inteligente
@@ -199,18 +222,26 @@ const PerdaMecDetailHst = () => {
         calcPisotSimp: c.sAvS > 0 ? (c.sMtS / c.sAvS) * 100 : null,
         calcPisotDup: c.sAvD > 0 ? (c.sMtD / c.sAvD) * 100 : null,
         calcArr: c.sTFix > 0 ? (c.sTArr / c.sTFix) * 100 : null
-      })).sort((a, b) => (a.calcPerda || 0) - (b.calcPerda || 0));
-
+      })).sort((a, b) => (a.calcPerda ?? Infinity) - (b.calcPerda ?? Infinity));
     } else {
       rankList = colhedoraData.filter(r => r.turno === shiftTab).map(r => ({
         colhedora: r.colhedora,
         turno: r.turno,
-        calcPerda: Number(r.perda_perc),
+        calcPerda: nullableNumber(r.perda_perc),
         calcPisotSimp: Number(r.av_pisoteio_simples) > 0 ? (Number(r.mt_pisoteio_simples) / Number(r.av_pisoteio_simples)) * 100 : null,
         calcPisotDup: Number(r.av_pisoteio_duplo) > 0 ? (Number(r.mt_pisoteio_duplo) / Number(r.av_pisoteio_duplo)) * 100 : null,
-        calcArr: Number(r.arranquio_perc)
-      })).sort((a, b) => (a.calcPerda || 0) - (b.calcPerda || 0));
+        calcArr: nullableNumber(r.arranquio_perc)
+      })).sort((a, b) => (a.calcPerda ?? Infinity) - (b.calcPerda ?? Infinity));
     }
+
+    const frenteList = frenteData.map(r => ({
+      frente: String(r.frente ?? '-'),
+      pontos: Number(r.pontos || 0),
+      perda: nullableNumber(r.perda_perc),
+      pSimples: nullableNumber(r.pisoteio_simples_perc),
+      pDuplo: nullableNumber(r.pisoteio_duplo_perc),
+      arranquio: nullableNumber(r.arranquio_perc)
+    })).sort((a, b) => (a.perda ?? Infinity) - (b.perda ?? Infinity) || a.frente.localeCompare(b.frente, 'pt-BR', { numeric: true }));
 
     const categoriasBase = [
       { key: 'cat_canaponta', label: 'Cana Ponta' }, { key: 'cat_toco', label: 'Toco' },
@@ -228,8 +259,8 @@ const PerdaMecDetailHst = () => {
     const minCat = Math.min(...chartCatData.map(d => d.atual));
     const maxCat = Math.max(...chartCatData.map(d => d.atual));
 
-    return { kpisGlobais, kpisAnt, chartCfg: activeChartCfg, dataMesChart, rankList, chartCatData, minCat, maxCat };
-  }, [yearData, prevYearData, monthlyData, colhedoraData, selectedInd, shiftTab, metas]);
+    return { kpisGlobais, kpisAnt, chartCfg: activeChartCfg, dataMesChart, rankList, frenteList, chartCatData, minCat, maxCat };
+  }, [yearData, prevYearData, monthlyData, colhedoraData, frenteData, selectedInd, shiftTab, metas]);
 
   // ================================= RENDERIZADORES COMPONENTIZADOS =========================
 
@@ -258,24 +289,13 @@ const PerdaMecDetailHst = () => {
       const isWorse = valAtual > valAnt;
       const borderColor = isWorse ? 'border-red-400' : 'border-green-400';
       const shadowColor = isWorse ? 'shadow-red-500/20' : 'shadow-green-500/20';
-
       return (
         <div className={`flex flex-col min-w-[170px] bg-white/95 backdrop-blur shadow-lg border ${borderColor} ${shadowColor} rounded-xl p-3 z-50`}>
-          <span className="text-[10px] font-black text-slate-700 uppercase text-center border-b border-slate-100 pb-1 mb-2">
-            {payload[0].payload.name}
-          </span>
+          <span className="text-[10px] font-black text-slate-700 uppercase text-center border-b border-slate-100 pb-1 mb-2">{payload[0].payload.name}</span>
           <div className="flex justify-between items-center px-1">
-            <div className="flex flex-col items-center">
-              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{activeYear - 1}</span>
-              <span className="text-[11px] font-black text-slate-500">{formatValue(valAnt, 3)}</span>
-            </div>
-            <div className="flex items-center justify-center pt-3">
-              <CompareTriangle current={valAtual} previous={valAnt} />
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-[9px] font-bold text-[var(--q-dark)] uppercase tracking-widest">{activeYear}</span>
-              <span className="text-[11px] font-black text-[var(--q-dark)]">{formatValue(valAtual, 3)}</span>
-            </div>
+            <div className="flex flex-col items-center"><span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{activeYear - 1}</span><span className="text-[11px] font-black text-slate-500">{formatValue(valAnt, 3)}</span></div>
+            <div className="flex items-center justify-center pt-3"><CompareTriangle current={valAtual} previous={valAnt} /></div>
+            <div className="flex flex-col items-center"><span className="text-[9px] font-bold text-[var(--q-dark)] uppercase tracking-widest">{activeYear}</span><span className="text-[11px] font-black text-[var(--q-dark)]">{formatValue(valAtual, 3)}</span></div>
           </div>
         </div>
       );
@@ -285,32 +305,19 @@ const PerdaMecDetailHst = () => {
 
   return (
     <div className="flex flex-col gap-6 w-full animate-in slide-in-from-bottom-4 duration-500 pb-10">
-      
       <div className="flex flex-col items-center">
         <YearSelectorQualyFlow value={activeYear} onChange={setActiveYear} availableYears={availableYears} isLoading={loading} />
       </div>
 
       {loading ? (
-        <div className="flex flex-col items-center justify-center py-16 mt-4">
-          <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Carregando Safra...</span>
-        </div>
+        <div className="flex flex-col items-center justify-center py-16 mt-4"><span className="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Carregando Safra...</span></div>
       ) : !yearData ? (
-        <div className="flex flex-col items-center justify-center py-16 bg-white border border-dashed border-slate-200 rounded-xl mt-4 shadow-sm">
-          <span className="text-4xl opacity-40 mb-4 grayscale">📂</span>
-          <h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">Nenhum dado consolidado nesta safra</h3>
-        </div>
+        <div className="flex flex-col items-center justify-center py-16 bg-white border border-dashed border-slate-200 rounded-xl mt-4 shadow-sm"><span className="text-4xl opacity-40 mb-4 grayscale">📂</span><h3 className="text-[11px] font-black text-slate-400 uppercase tracking-widest text-center">Nenhum dado consolidado nesta safra</h3></div>
       ) : (
         <div className="flex flex-col gap-5 mt-2">
-          
           {/* LISTA DE INDICADORES GLOBAIS */}
           <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm">
-            <div className="flex justify-between items-end border-b border-slate-200 pb-2 mb-2 px-2">
-              <span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Indicador</span>
-              <div className="flex gap-4 md:gap-8 pr-1">
-                <span className="text-[9px] font-black uppercase tracking-widest text-[var(--q-dark)] text-right w-12">{activeYear}</span>
-                <span className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-right w-12">{activeYear - 1}</span>
-              </div>
-            </div>
+            <div className="flex justify-between items-end border-b border-slate-200 pb-2 mb-2 px-2"><span className="text-[10px] font-black uppercase tracking-widest text-slate-400">Indicador</span><div className="flex gap-4 md:gap-8 pr-1"><span className="text-[9px] font-black uppercase tracking-widest text-[var(--q-dark)] text-right w-12">{activeYear}</span><span className="text-[9px] font-black uppercase tracking-widest text-slate-400 text-right w-12">{activeYear - 1}</span></div></div>
             <div className="flex flex-col">
               <TopKpiRow label="Perdas" valAtual={processamento.kpisGlobais.perda} valAnt={processamento.kpisAnt.perda} meta={metas.perda} />
               <TopKpiRow label="Pisoteio Simples" valAtual={processamento.kpisGlobais.pSimples} valAnt={processamento.kpisAnt.pSimples} meta={metas.pisoteio_simples} />
@@ -323,81 +330,36 @@ const PerdaMecDetailHst = () => {
           <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
             <div className="p-3 border-b border-slate-100 bg-slate-50 flex flex-col gap-3">
               <h4 className="text-[10px] font-black text-[var(--q-dark)] uppercase tracking-widest px-1">Evolução Mensal</h4>
-              
               <div className="flex w-full bg-slate-200/50 p-1 rounded-xl shadow-inner">
-                {[
-                  { key: 'perda', label: 'Perda' }, 
-                  { key: 'simp', label: 'P. Simples' }, 
-                  { key: 'dup', label: 'P. Duplo' }, 
-                  { key: 'arr', label: 'Arranquio' }
-                ].map(ind => (
-                  <button
-                    key={ind.key}
-                    onClick={() => setSelectedInd(ind.key)}
-                    className={`flex-1 py-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                      selectedInd === ind.key ? 'bg-white text-[var(--q-dark)] shadow-sm ring-1 ring-slate-200/50' : 'text-slate-400 hover:text-slate-600'
-                    }`}
-                  >
-                    {ind.label}
-                  </button>
+                {[{ key: 'perda', label: 'Perda' }, { key: 'simp', label: 'P. Simples' }, { key: 'dup', label: 'P. Duplo' }, { key: 'arr', label: 'Arranquio' }].map(ind => (
+                  <button type="button" key={ind.key} onClick={() => setSelectedInd(ind.key)} className={`flex-1 py-2 text-[9px] md:text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${selectedInd === ind.key ? 'bg-white text-[var(--q-dark)] shadow-sm ring-1 ring-slate-200/50' : 'text-slate-400 hover:text-slate-600'}`}>{ind.label}</button>
                 ))}
               </div>
             </div>
-
             <div className="w-full overflow-x-auto custom-scrollbar" ref={chartScrollRef}>
               <div style={{ minWidth: Math.max(400, processamento.dataMesChart.length * 60) + 'px', height: '240px', padding: '15px 5px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={processamento.dataMesChart} margin={{ top: 20, right: 15, left: 0, bottom: 20 }}>
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#64748b' }} interval={0} />
-                    <YAxis hide domain={[0, dataMax => dataMax * 1.25]} />
-                    <Tooltip 
-                      cursor={{fill: 'rgba(241, 245, 249, 0.4)'}}
-                      content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          return (
-                            <div className="bg-white/95 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-3 z-50 flex flex-col gap-1">
-                              <span className="text-[10px] font-black text-slate-400 uppercase">{payload[0].payload.name} / {activeYear}</span>
-                              <span className="text-[13px] font-black" style={{ color: getStatusColor(payload[0].value, processamento.chartCfg.meta) }}>
-                                {formatValue(payload[0].value, 2)}%
-                              </span>
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    
-                    <ReferenceLine 
-                      y={processamento.chartCfg.meta} 
-                      stroke="#22c55e" 
-                      strokeDasharray="4 4" 
-                      label={{ position: 'insideTopLeft', value: 'Meta', fill: '#22c55e', fontSize: 9, fontWeight: 900 }} 
-                    />
-
-                    <Bar dataKey="valor" barSize={36} radius={[6, 6, 0, 0]}>
-                      {processamento.dataMesChart.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={getStatusColor(entry.valor, processamento.chartCfg.meta)} />
-                      ))}
-                      <LabelList dataKey="valor" position="top" formatter={(val) => formatValue(val)} style={{ fontSize: '10px', fontWeight: '900', fill: '#475569' }} />
-                    </Bar>
-                  </ComposedChart>
-                </ResponsiveContainer>
+                <ResponsiveContainer width="100%" height="100%"><ComposedChart data={processamento.dataMesChart} margin={{ top: 20, right: 15, left: 0, bottom: 20 }}>
+                  <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 900, fill: '#64748b' }} interval={0} /><YAxis hide domain={[0, dataMax => dataMax * 1.25]} />
+                  <Tooltip cursor={{fill: 'rgba(241, 245, 249, 0.4)'}} content={({ active, payload }) => active && payload?.length ? <div className="bg-white/95 backdrop-blur shadow-lg border border-slate-200 rounded-xl p-3 z-50 flex flex-col gap-1"><span className="text-[10px] font-black text-slate-400 uppercase">{payload[0].payload.name} / {activeYear}</span><span className="text-[13px] font-black" style={{ color: getStatusColor(payload[0].value, processamento.chartCfg.meta) }}>{formatValue(payload[0].value, 2)}%</span></div> : null} />
+                  <ReferenceLine y={processamento.chartCfg.meta} stroke="#22c55e" strokeDasharray="4 4" label={{ position: 'insideTopLeft', value: 'Meta', fill: '#22c55e', fontSize: 9, fontWeight: 900 }} />
+                  <Bar dataKey="valor" barSize={36} radius={[6, 6, 0, 0]}>{processamento.dataMesChart.map((entry, index) => <Cell key={`cell-${index}`} fill={getStatusColor(entry.valor, processamento.chartCfg.meta)} />)}<LabelList dataKey="valor" position="top" formatter={(val) => formatValue(val)} style={{ fontSize: '10px', fontWeight: '900', fill: '#475569' }} /></Bar>
+                </ComposedChart></ResponsiveContainer>
               </div>
             </div>
           </div>
 
           {/* RANKING COLHEDORAS */}
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm flex flex-col">
-            <div className="p-3 border-b border-slate-100 bg-slate-50 flex flex-col gap-3">
-              <h4 className="text-[10px] font-black text-[var(--q-dark)] uppercase tracking-widest px-1">Desempenho de Equipamentos</h4>
-              <div className="flex w-full bg-slate-200/50 p-1 rounded-xl shadow-inner">
+          <div className="qf-hst-rank-card">
+            <div className="qf-hst-rank-titlebar qf-hst-rank-titlebar--equipment">
+              <h4>Desempenho de Equipamentos</h4>
+
+              <div className="qf-hst-rank-tabs">
                 {['Geral', '1º Turno', '2º Turno'].map(t => (
                   <button
+                    type="button"
                     key={t}
                     onClick={() => setShiftTab(t)}
-                    className={`flex-1 py-2 text-[10px] font-black uppercase tracking-widest rounded-lg transition-all ${
-                      shiftTab === t ? 'bg-[var(--q-green)] text-white shadow-md' : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
-                    }`}
+                    className={shiftTab === t ? 'is-active' : ''}
                   >
                     {t}
                   </button>
@@ -405,91 +367,135 @@ const PerdaMecDetailHst = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-[30px_1fr_45px_50px_50px_50px] gap-2 px-3 py-2 bg-slate-50 border-b border-slate-200 cursor-default items-center">
-              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-center">#</span>
-              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400">Máquina</span>
-              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-center">Perda</span>
-              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-center">Pisot.S</span>
-              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-center">Pisot.D</span>
-              <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 text-right">Arran.</span>
+            <div className="qf-hst-rank-table qf-hst-rank-table--equipment">
+              <div className="qf-hst-rank-grid qf-hst-rank-grid--equipment qf-hst-rank-head">
+                <span>#</span>
+                <span className="qf-hst-rank-head-name">Máquina</span>
+                <span>Perda</span>
+                <span>Pisot.S</span>
+                <span>Pisot.D</span>
+                <span>Arran.</span>
+              </div>
+
+              <div className="qf-hst-rank-body custom-scrollbar">
+                {processamento.rankList.length === 0 ? (
+                  <div className="qf-hst-rank-empty">Sem apontamentos</div>
+                ) : (
+                  processamento.rankList.map((r, idx) => (
+                    <div
+                      key={`${r.colhedora}-${idx}`}
+                      onClick={() => {
+                        if (shiftTab !== 'Geral') setSelectedMachineToView(r);
+                      }}
+                      className={`qf-hst-rank-grid qf-hst-rank-grid--equipment qf-hst-rank-row ${
+                        shiftTab !== 'Geral' ? 'is-clickable' : ''
+                      }`}
+                    >
+                      <div className="qf-hst-rank-position">{getMedalIcon(idx + 1)}</div>
+                      <span className="qf-hst-rank-name" title={r.colhedora}>
+                        {parseColhedora(r.colhedora).shortName}
+                      </span>
+                      <span
+                        className="qf-hst-rank-value"
+                        style={{ color: r.calcPerda === null ? '#94a3b8' : getStatusColor(r.calcPerda, metas.perda) }}
+                      >
+                        {r.calcPerda !== null ? `${formatValue(r.calcPerda)}%` : '-'}
+                      </span>
+                      <span
+                        className="qf-hst-rank-value"
+                        style={{ color: r.calcPisotSimp === null ? '#94a3b8' : getStatusColor(r.calcPisotSimp, metas.pisoteio_simples) }}
+                      >
+                        {r.calcPisotSimp !== null ? `${formatValue(r.calcPisotSimp)}%` : '-'}
+                      </span>
+                      <span
+                        className="qf-hst-rank-value"
+                        style={{ color: r.calcPisotDup === null ? '#94a3b8' : getStatusColor(r.calcPisotDup, metas.pisoteio_duplo) }}
+                      >
+                        {r.calcPisotDup !== null ? `${formatValue(r.calcPisotDup)}%` : '-'}
+                      </span>
+                      <span
+                        className="qf-hst-rank-value qf-hst-rank-value--last"
+                        style={{ color: r.calcArr === null ? '#94a3b8' : getStatusColor(r.calcArr, metas.arranquio) }}
+                      >
+                        {r.calcArr !== null ? `${formatValue(r.calcArr)}%` : '-'}
+                      </span>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
-            <div className="flex flex-col overflow-y-auto custom-scrollbar p-1 max-h-[400px]">
-              {processamento.rankList.length === 0 ? (
-                <div className="py-8 text-center text-[10px] font-bold text-slate-400 uppercase">Sem apontamentos</div>
-              ) : (
-                processamento.rankList.map((r, idx) => (
-                  <div 
-                    key={idx} 
-                    onClick={() => {
-                      if (shiftTab !== 'Geral') setSelectedMachineToView(r);
-                    }}
-                    className={`grid grid-cols-[30px_1fr_45px_50px_50px_50px] gap-2 px-2 py-2.5 rounded-lg transition-colors border-b border-slate-50 last:border-0 items-center group ${
-                      shiftTab !== 'Geral' ? 'cursor-pointer hover:bg-slate-50' : 'cursor-default'
-                    }`}
-                  >
-                    <div className="flex justify-center items-center">{getMedalIcon(idx + 1)}</div>
-                    <span className={`text-[12px] font-black text-slate-700 truncate transition-colors ${shiftTab !== 'Geral' && 'group-hover:text-[var(--q-green)]'}`}>
-                      {parseColhedora(r.colhedora).shortName}
-                    </span>
-                    <span className="text-[11px] font-black text-center" style={{ color: getStatusColor(r.calcPerda, metas.perda) }}>{formatValue(r.calcPerda)}%</span>
-                    <span className="text-[10px] font-black text-center" style={{ color: getStatusColor(r.calcPisotSimp, metas.pisoteio_simples) }}>{r.calcPisotSimp !== null ? `${formatValue(r.calcPisotSimp)}%` : '-'}</span>
-                    <span className="text-[10px] font-black text-center" style={{ color: getStatusColor(r.calcPisotDup, metas.pisoteio_duplo) }}>{r.calcPisotDup !== null ? `${formatValue(r.calcPisotDup)}%` : '-'}</span>
-                    <span className="text-[11px] font-black text-right" style={{ color: getStatusColor(r.calcArr, metas.arranquio) }}>{formatValue(r.calcArr)}%</span>
-                  </div>
-                ))
-              )}
-            </div>
-            
             {shiftTab === 'Geral' && (
-              <div className="bg-slate-100 py-1.5 px-3 border-t border-slate-200">
-                <span className="text-[10px] font-bold text-slate-400 block text-center">Selecione um turno para abir análise das Colhedoras</span>
+              <div className="qf-hst-rank-footer">
+                Selecione um turno para abrir a análise das colhedoras
               </div>
             )}
           </div>
 
-          {/* GRÁFICO CATEGORIAS (Fim da Página) */}
-          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm mt-4">
-            <h4 className="text-[10px] font-black text-[var(--q-dark)] uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">Média de Categorias na Safra</h4>
-            <div className="overflow-x-auto custom-scrollbar">
-              <div className="min-w-[500px] h-[220px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <ComposedChart data={processamento.chartCatData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}>
-                    <XAxis 
-                      dataKey="name" 
-                      axisLine={false} 
-                      tickLine={false} 
-                      interval={0}
-                      tick={<CustomXAxisTick />} 
-                    />
-                    <YAxis hide domain={[0, dataMax => dataMax * 1.2]} />
-                    <Tooltip content={<CustomCatTooltip />} cursor={{fill: 'rgba(241, 245, 249, 0.4)'}} />
-                    
-                    <Bar dataKey="atual" barSize={32} radius={[6, 6, 0, 0]}>
-                      {processamento.chartCatData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={getGradientColor(entry.atual, processamento.minCat, processamento.maxCat)} />
-                      ))}
-                      <LabelList dataKey="atual" position="top" formatter={(val) => formatValue(val, 3)} style={{ fontSize: '9px', fontWeight: '900', fill: '#475569' }} />
-                    </Bar>
-                  </ComposedChart>
-                </ResponsiveContainer>
+          {/* NOVA TABELA: INDICADORES POR FRENTE */}
+          <div className="qf-hst-rank-card">
+            <div className="qf-hst-rank-titlebar">
+              <h4>Indicadores por Frente</h4>
+              <span>{processamento.frenteList.length} frentes</span>
+            </div>
+
+            <div className="qf-hst-rank-table">
+              <div className="qf-hst-rank-grid qf-hst-rank-grid--front qf-hst-rank-head">
+                <span>#</span>
+                <span>Frente</span>
+                <span>Pts</span>
+                <span>Perda</span>
+                <span>Pisot.S</span>
+                <span>Pisot.D</span>
+                <span>Arran.</span>
+              </div>
+
+              <div className="qf-hst-rank-body custom-scrollbar">
+                {processamento.frenteList.length === 0 ? (
+                  <div className="qf-hst-rank-empty">Sem apontamentos por frente</div>
+                ) : (
+                  processamento.frenteList.map((r, idx) => (
+                    <div key={`${r.frente}-${idx}`} className="qf-hst-rank-grid qf-hst-rank-grid--front qf-hst-rank-row">
+                      <div className="qf-hst-rank-position">{getMedalIcon(idx + 1)}</div>
+                      <span className="qf-hst-rank-name" title={r.frente}>{r.frente}</span>
+                      <span className="qf-hst-rank-points">{r.pontos}</span>
+                      <span
+                        className="qf-hst-rank-value"
+                        style={{ color: r.perda === null ? '#94a3b8' : getStatusColor(r.perda, metas.perda) }}
+                      >
+                        {r.perda !== null ? `${formatValue(r.perda)}%` : '-'}
+                      </span>
+                      <span
+                        className="qf-hst-rank-value"
+                        style={{ color: r.pSimples === null ? '#94a3b8' : getStatusColor(r.pSimples, metas.pisoteio_simples) }}
+                      >
+                        {r.pSimples !== null ? `${formatValue(r.pSimples)}%` : '-'}
+                      </span>
+                      <span
+                        className="qf-hst-rank-value"
+                        style={{ color: r.pDuplo === null ? '#94a3b8' : getStatusColor(r.pDuplo, metas.pisoteio_duplo) }}
+                      >
+                        {r.pDuplo !== null ? `${formatValue(r.pDuplo)}%` : '-'}
+                      </span>
+                      <span
+                        className="qf-hst-rank-value qf-hst-rank-value--last"
+                        style={{ color: r.arranquio === null ? '#94a3b8' : getStatusColor(r.arranquio, metas.arranquio) }}
+                      >
+                        {r.arranquio !== null ? `${formatValue(r.arranquio)}%` : '-'}
+                      </span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
 
+          {/* GRÁFICO CATEGORIAS */}
+          <div className="bg-white border border-slate-200 rounded-xl p-4 shadow-sm mt-4"><h4 className="text-[10px] font-black text-[var(--q-dark)] uppercase tracking-widest border-b border-slate-100 pb-2 mb-4">Média de Categorias na Safra</h4><div className="overflow-x-auto custom-scrollbar"><div className="min-w-[500px] h-[220px]"><ResponsiveContainer width="100%" height="100%"><ComposedChart data={processamento.chartCatData} margin={{ top: 20, right: 10, left: 0, bottom: 20 }}><XAxis dataKey="name" axisLine={false} tickLine={false} interval={0} tick={<CustomXAxisTick />} /><YAxis hide domain={[0, dataMax => dataMax * 1.2]} /><Tooltip content={<CustomCatTooltip />} cursor={{fill: 'rgba(241, 245, 249, 0.4)'}} /><Bar dataKey="atual" barSize={32} radius={[6, 6, 0, 0]}>{processamento.chartCatData.map((entry, index) => <Cell key={`cell-${index}`} fill={getGradientColor(entry.atual, processamento.minCat, processamento.maxCat)} />)}<LabelList dataKey="atual" position="top" formatter={(val) => formatValue(val, 3)} style={{ fontSize: '9px', fontWeight: '900', fill: '#475569' }} /></Bar></ComposedChart></ResponsiveContainer></div></div></div>
         </div>
       )}
 
-      {/* MODAL DA COLHEDORA */}
-      {selectedMachineToView && (
-        <PerdaMecDetailRankEquip
-          colhedora={parseColhedora(selectedMachineToView.colhedora)}
-          ano={activeYear}
-          initialShift={selectedMachineToView.turno}
-          onClose={() => setSelectedMachineToView(null)}
-        />
-      )}
-
+      {selectedMachineToView && <PerdaMecDetailRankEquip colhedora={parseColhedora(selectedMachineToView.colhedora)} ano={activeYear} initialShift={selectedMachineToView.turno} onClose={() => setSelectedMachineToView(null)} />}
     </div>
   );
 };
