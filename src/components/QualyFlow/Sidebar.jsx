@@ -7,11 +7,18 @@ const Sidebar = ({ isOpen, onClose }) => {
 
   const menuGroups = [
     {
+      title: "Relatórios",
+      items: [
+        { label: "Dashboards", path: "/qualyflow/dashboard" },
+      ]
+    },
+    {
       title: "Irrigação",
       items: [
         { label: "CUC Gotejo", path: "/qualyflow/cuc" },
         { label: "Casa de Bomba", path: "/qualyflow/casabomba" },
         { label: "CheckList Gotejo", path: "/qualyflow/checklist" },
+        { label: "Avaliação Hidroroll", path: "/qualyflow/hidroroll" },
       ]
     },
     {

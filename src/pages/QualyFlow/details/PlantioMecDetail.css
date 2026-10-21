@@ -1,0 +1,365 @@
+/* =====================================================================================
+   QUALYFLOW | PLANTIO MECANIZADO DETAIL V1
+   Gerenciador das abas Diário, Campo e Histórico.
+   Mantém a identidade visual das rotas de detalhamento do QualyFlow.
+   ===================================================================================== */
+
+.qf-plantio-mec-detail-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-bottom: 2.5rem;
+  background: var(--q-bg, #ffffff);
+  color: var(--q-dark, #1e293b);
+  font-family: var(--q-font-family, 'Inter', 'Segoe UI', sans-serif);
+}
+
+/* ================================= CONTEÚDO PRINCIPAL ================================= */
+
+.qf-plantio-mec-detail-main {
+  width: 100%;
+  max-width: 80rem;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  margin-top: 1.5rem;
+  padding: 0 1rem;
+  animation: qf-plantio-mec-detail-enter 0.35s ease-out;
+}
+
+/* ================================= TÍTULO ================================= */
+
+.qf-plantio-mec-detail-heading {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 1rem;
+  padding: 0 0.25rem;
+}
+
+.qf-plantio-mec-detail-heading > span {
+  margin-bottom: 0.125rem;
+  color: #94a3b8;
+  font-size: 0.625rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.qf-plantio-mec-detail-heading h1 {
+  margin: 0;
+  color: var(--q-dark, #1e293b);
+  font-size: 1.125rem;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  line-height: 1;
+  text-transform: uppercase;
+}
+
+.qf-plantio-mec-detail-heading h1 b {
+  color: var(--q-green, #027636);
+  font-weight: 900;
+}
+
+/* ================================= ABAS ================================= */
+
+.qf-plantio-mec-detail-tabs {
+  width: 100%;
+  display: flex;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  border-bottom: 1px solid #e2e8f0;
+  border-radius: 0.5rem 0.5rem 0 0;
+  background: rgba(248, 250, 252, 0.3);
+}
+
+.qf-plantio-mec-detail-tab {
+  flex: 1;
+  min-width: 0;
+  min-height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.75rem 0.25rem;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: var(--q-gray, #64748b);
+  font: inherit;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.qf-plantio-mec-detail-tab span {
+  width: 100%;
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.6875rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.qf-plantio-mec-detail-tab:hover {
+  background: #f8fafc;
+  color: var(--q-orange, #f97316);
+}
+
+.qf-plantio-mec-detail-tab.is-active {
+  border-bottom-color: var(--q-green, #027636);
+  background: #ffffff;
+  color: var(--q-green, #027636);
+}
+
+.qf-plantio-mec-detail-tab:focus-visible {
+  outline: 3px solid var(--q-green-soft, rgba(16, 185, 129, 0.1));
+  outline-offset: -3px;
+}
+
+/* ================================= ÁREA DAS ABAS ================================= */
+
+.qf-plantio-mec-detail-content {
+  width: 100%;
+  min-width: 0;
+}
+
+.qf-plantio-mec-detail-content > div {
+  width: 100%;
+  min-width: 0;
+}
+
+.qf-plantio-mec-detail-content > div[hidden] {
+  display: none;
+}
+
+/* ================================= PLACEHOLDER TEMPORÁRIO ================================= */
+
+.qf-plantio-mec-detail-placeholder {
+  min-height: 260px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 2.5rem 1.5rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  color: #94a3b8;
+  text-align: center;
+  animation: qf-plantio-mec-detail-panel-enter 0.25s ease-out;
+}
+
+.qf-plantio-mec-detail-placeholder strong {
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.qf-plantio-mec-detail-placeholder span {
+  max-width: 36rem;
+  color: #94a3b8;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.qf-plantio-mec-detail-placeholder small {
+  margin-top: 0.5rem;
+  color: var(--q-green, #027636);
+  font-size: 0.625rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* ================================= DESKTOP ================================= */
+
+@media (min-width: 1024px) {
+  .qf-plantio-mec-detail-main {
+    max-width: 80rem;
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+  }
+
+  .qf-plantio-mec-detail-heading {
+    margin-bottom: 1.1rem;
+  }
+
+  .qf-plantio-mec-detail-tabs {
+    margin-bottom: 1.75rem;
+  }
+
+  .qf-plantio-mec-detail-tab {
+    min-height: 47px;
+  }
+}
+
+@media (min-width: 1440px) {
+  .qf-plantio-mec-detail-main {
+    max-width: 88rem;
+    padding-right: 2rem;
+    padding-left: 2rem;
+  }
+}
+
+/* ================================= MOBILE ================================= */
+
+@media (max-width: 640px) {
+  .qf-plantio-mec-detail-main {
+    margin-top: 1.25rem;
+    padding-right: 0.75rem;
+    padding-left: 0.75rem;
+  }
+
+  .qf-plantio-mec-detail-heading h1 {
+    font-size: 1rem;
+    line-height: 1.08;
+  }
+
+  .qf-plantio-mec-detail-tabs {
+    margin-bottom: 1.25rem;
+  }
+
+  .qf-plantio-mec-detail-tab {
+    min-height: 43px;
+    padding-right: 0.2rem;
+    padding-left: 0.2rem;
+  }
+
+  .qf-plantio-mec-detail-tab span {
+    font-size: 0.625rem;
+    letter-spacing: 0.07em;
+  }
+
+  .qf-plantio-mec-detail-placeholder {
+    min-height: 220px;
+    margin-top: 0.5rem;
+    padding: 2rem 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qf-plantio-mec-detail-main,
+  .qf-plantio-mec-detail-placeholder {
+    animation: none;
+  }
+}
+
+/* ================================= ANIMAÇÕES ================================= */
+
+@keyframes qf-plantio-mec-detail-enter {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes qf-plantio-mec-detail-panel-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+
+/* PLANTIO MECANIZADO DETAIL DIARIO V2 | MOBILE FIRST */
+.qf-pmd-page{--pmd-good:#22c55e;--pmd-warning:#f59e0b;--pmd-danger:#ef4444;--pmd-muted:#94a3b8;width:100%;min-width:0;display:flex;flex-direction:column;gap:.75rem;font-size:var(--pmd-font-base,12px)}
+.qf-pmd-date-selector{width:100%;display:flex;justify-content:center;margin-bottom:.1rem;position:relative;z-index:30}
+.qf-pmd-content{width:100%;min-width:0;display:flex;flex-direction:column;gap:.75rem;animation:qf-pmd-enter .3s ease-out}
+.qf-pmd-state{min-height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.4rem;padding:2rem 1rem;border:1px dashed #cbd5e1;border-radius:.75rem;background:#f8fafc;color:#94a3b8;font-size:var(--pmd-font-base,12px);font-weight:800;text-align:center}
+.qf-pmd-state.is-error{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.04);color:var(--pmd-danger)}
+.qf-pmd-state span{color:#94a3b8;font-size:var(--pmd-font-small,9px)}
+.qf-pmd-card,.qf-pmd-field-filter{min-width:0;overflow:hidden;border:1px solid #e2e8f0;border-radius:.75rem;background:#fff;box-shadow:0 3px 10px rgba(15,23,42,.055)}
+.qf-pmd-section-head,.qf-pmd-filter-head{min-height:38px;display:flex;align-items:center;justify-content:space-between;gap:.65rem;padding:.62rem .7rem;border-bottom:1px solid #eef2f7}
+.qf-pmd-section-head strong,.qf-pmd-filter-head strong{min-width:0;overflow:hidden;color:#475569;font-size:var(--pmd-font-title,12px);font-weight:900;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
+.qf-pmd-section-head span,.qf-pmd-filter-head span{flex:0 0 auto;max-width:52%;overflow:hidden;color:#94a3b8;font-size:var(--pmd-font-small,9px);font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.qf-pmd-field-list{display:grid;grid-template-columns:1fr;gap:.4rem;padding:.5rem}
+.qf-pmd-field-list button{min-width:0;min-height:54px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:.55rem;padding:.55rem .65rem;border:1px solid #e2e8f0;border-radius:.6rem;background:#fff;color:#64748b;text-align:left;cursor:pointer}
+.qf-pmd-field-list button.is-selected{border-color:var(--q-green,#027636);background:var(--q-green-soft,rgba(16,185,129,.1));box-shadow:inset 3px 0 0 var(--q-green,#027636)}
+.qf-pmd-field-list button>span,.qf-pmd-field-list button>em{min-width:0;display:flex;flex-direction:column;gap:.12rem;font-style:normal}
+.qf-pmd-field-list button>em{align-items:flex-end}
+.qf-pmd-field-list b{overflow:hidden;color:#334155;font-size:var(--pmd-font-value,11px);font-weight:950;text-overflow:ellipsis;text-transform:uppercase;white-space:nowrap}
+.qf-pmd-field-list small{overflow:hidden;color:#94a3b8;font-size:var(--pmd-font-small,9px);font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.qf-pmd-summary-body{min-height:154px;display:grid;grid-template-columns:118px minmax(0,1fr);align-items:center;gap:.55rem;padding:.65rem}
+.qf-pmd-donut-wrap{position:relative;display:grid;place-items:center;overflow:visible}
+.qf-pmd-donut-wrap svg{width:min(112px,100%)!important;height:auto!important;overflow:visible;transform:rotate(-90deg)}
+.qf-pmd-donut-track{fill:none;stroke:#e2e8f0;stroke-width:12px}
+.qf-pmd-donut-value{fill:none;stroke-width:12px;stroke-linecap:round;transition:stroke-dashoffset .35s ease}
+.qf-pmd-donut-center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none}
+.qf-pmd-donut-center strong{font-size:18px;font-weight:950;line-height:1;letter-spacing:-.045em}
+.qf-pmd-donut-center small{margin-top:.25rem;color:#94a3b8;font-size:var(--pmd-font-small,9px);font-weight:800;text-transform:uppercase}
+.qf-pmd-summary-table{min-width:0;display:flex;flex-direction:column}
+.qf-pmd-summary-table>div{min-height:37px;display:flex;align-items:center;justify-content:space-between;gap:.4rem;border-bottom:1px solid #eef2f7}
+.qf-pmd-summary-table>div:last-child{border-bottom:0}
+.qf-pmd-summary-table span{min-width:0;overflow:hidden;color:#64748b;font-size:var(--pmd-font-small,9px);font-weight:850;text-overflow:ellipsis;white-space:nowrap}
+.qf-pmd-summary-table strong{color:#334155;font-size:var(--pmd-font-value,11px);font-weight:950;white-space:nowrap;font-variant-numeric:tabular-nums}
+.qf-pmd-summary-table .is-good{color:var(--pmd-good)}
+.qf-pmd-summary-table .is-danger{color:var(--pmd-danger)}
+.qf-pmd-point-list{display:flex;flex-direction:column}
+.qf-pmd-point{border-bottom:1px solid #eef2f7}
+.qf-pmd-point:last-child{border-bottom:0}
+.qf-pmd-point-toggle{width:100%;min-height:52px;display:flex;align-items:center;justify-content:space-between;gap:.6rem;padding:.55rem .7rem;border:0;background:#fff;color:#475569;text-align:left;cursor:pointer}
+.qf-pmd-point-toggle:hover,.qf-pmd-point.is-open>.qf-pmd-point-toggle{background:#f8fafc}
+.qf-pmd-point-toggle>span{min-width:0;display:flex;flex-direction:column;gap:.12rem}
+.qf-pmd-point-toggle b{overflow:hidden;color:#334155;font-size:var(--pmd-font-value,11px);font-weight:950;text-overflow:ellipsis;white-space:nowrap}
+.qf-pmd-point-toggle small{overflow:hidden;color:#94a3b8;font-size:var(--pmd-font-small,9px);font-weight:800;text-overflow:ellipsis;white-space:nowrap}
+.qf-pmd-point-toggle i{color:var(--q-green,#027636);font-size:16px;font-style:normal;font-weight:950}
+.qf-pmd-point-content{padding:.35rem .3rem .55rem;background:#f8fafc}
+.qf-pmd-sample-labels,.qf-pmd-sample-row{width:100%;min-width:0;display:grid;grid-template-columns:minmax(55px,1.35fr) repeat(12,minmax(0,1fr));align-items:center;gap:1px}
+.qf-pmd-sample-labels>*{min-width:0;padding:.25rem .02rem;color:#94a3b8;font-size:clamp(6px,1.7vw,var(--pmd-font-header,10px));font-weight:900;text-align:center}
+.qf-pmd-sample-labels span{text-align:left}
+.qf-pmd-sample-row>*{min-width:0;overflow:hidden;padding:.34rem .02rem;border-radius:.18rem;background:#fff;color:#475569;font-size:clamp(6px,1.75vw,var(--pmd-font-table,9px));font-weight:900;text-align:center;text-overflow:clip;white-space:nowrap;font-variant-numeric:tabular-nums}
+.qf-pmd-sample-row strong{text-align:left;padding-left:.2rem}
+.qf-pmd-sample-row span.is-good{background:rgba(34,197,94,.09)}
+.qf-pmd-sample-row span.is-warning{background:rgba(245,158,11,.1)}
+.qf-pmd-sample-row span.is-danger{background:rgba(239,68,68,.08)}
+.qf-pmd-histogram{height:190px;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:end;gap:.3rem;padding:.65rem .55rem .5rem}
+.qf-pmd-hist-item{height:100%;min-width:0;display:grid;grid-template-rows:18px minmax(0,1fr) 16px;justify-items:center;gap:.15rem}
+.qf-pmd-hist-item>b{font-size:var(--pmd-font-value,11px);font-weight:950}
+.qf-pmd-hist-item>div{position:relative;width:min(34px,70%);height:100%;overflow:hidden;border:1px solid #dce5ee;border-radius:.35rem .35rem .2rem .2rem;background:repeating-linear-gradient(to top,transparent 0,transparent calc(20% - 1px),rgba(148,163,184,.16) calc(20% - 1px),rgba(148,163,184,.16) 20%),#eef3f8}
+.qf-pmd-hist-item i{position:absolute;right:2px;bottom:2px;left:2px;border-radius:.25rem .25rem .12rem .12rem;transform-origin:bottom;animation:qf-pmd-bar .55s ease-out both}
+.qf-pmd-hist-item>span{max-width:100%;overflow:hidden;color:#475569;font-size:var(--pmd-font-small,9px);font-weight:950;text-overflow:ellipsis;white-space:nowrap}
+.qf-pmd-hist-item .is-good{color:var(--pmd-good)}.qf-pmd-hist-item i.is-good{background:linear-gradient(180deg,#62cf7b,var(--pmd-good))}.qf-pmd-hist-item .is-warning{color:var(--pmd-warning)}.qf-pmd-hist-item i.is-warning{background:linear-gradient(180deg,#f6d365,var(--pmd-warning))}.qf-pmd-hist-item .is-danger{color:var(--pmd-danger)}.qf-pmd-hist-item i.is-danger{background:linear-gradient(180deg,#fb8c8c,var(--pmd-danger))}
+.qf-pmd-quality-stack{display:flex;flex-direction:column;gap:.75rem}
+.qf-pmd-progress-head{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.55rem .7rem .32rem}
+.qf-pmd-progress-head span{color:#64748b;font-size:var(--pmd-font-small,9px);font-weight:850}
+.qf-pmd-progress-head strong{font-size:var(--pmd-font-value,11px);font-weight:950}
+.qf-pmd-progress-head .is-good{color:var(--pmd-good)}.qf-pmd-progress-head .is-danger{color:var(--pmd-danger)}.qf-pmd-progress-head .is-neutral{color:var(--pmd-muted)}
+.qf-pmd-progress{height:9px;margin:0 .7rem .6rem;overflow:hidden;border:1px solid #dce5ee;border-radius:999px;background:#eef3f8}
+.qf-pmd-progress i{display:block;height:100%;border-radius:999px;transform-origin:left;animation:qf-pmd-progress .55s ease-out both}
+.qf-pmd-progress i.is-good{background:linear-gradient(90deg,#62cf7b,var(--pmd-good))}.qf-pmd-progress i.is-danger{background:linear-gradient(90deg,#fb8c8c,var(--pmd-danger))}.qf-pmd-progress i.is-neutral{background:var(--pmd-muted)}
+.qf-pmd-quality-grid{padding:.1rem .3rem .55rem}
+.qf-pmd-quality-head,.qf-pmd-quality-values{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:1px}
+.qf-pmd-quality-head b{min-width:0;padding:.25rem .01rem;color:#94a3b8;font-size:clamp(6px,1.7vw,var(--pmd-font-header,10px));font-weight:900;text-align:center}
+.qf-pmd-quality-values span{min-width:0;overflow:hidden;padding:.4rem .01rem;border-radius:.18rem;font-size:clamp(6px,1.8vw,var(--pmd-font-table,9px));font-weight:950;text-align:center;text-overflow:clip;white-space:nowrap;font-variant-numeric:tabular-nums}
+.qf-pmd-quality-values .is-good{background:rgba(34,197,94,.09);color:var(--pmd-good)}.qf-pmd-quality-values .is-danger{background:rgba(239,68,68,.08);color:var(--pmd-danger)}.qf-pmd-quality-values .is-neutral{color:var(--pmd-muted)}
+.qf-pmd-quality-grid>small{display:block;margin-top:.35rem;color:#94a3b8;font-size:var(--pmd-font-small,9px);font-weight:800;text-align:right}
+@media(min-width:700px){.qf-pmd-page,.qf-pmd-content{gap:1rem}.qf-pmd-field-list{grid-template-columns:repeat(auto-fit,minmax(245px,1fr));padding:.65rem}.qf-pmd-summary-card{max-width:none}.qf-pmd-summary-body{grid-template-columns:minmax(150px,.65fr) minmax(220px,1fr);min-height:175px;padding:.8rem 1.2rem}.qf-pmd-donut-wrap svg{width:144px!important}.qf-pmd-sample-labels,.qf-pmd-sample-row{grid-template-columns:minmax(90px,1.5fr) repeat(12,minmax(0,1fr))}.qf-pmd-sample-labels>*,.qf-pmd-sample-row>*{font-size:var(--pmd-font-table,9px)}.qf-pmd-histogram{height:220px;gap:.75rem;padding:.8rem 1rem .6rem}.qf-pmd-hist-item>div{width:42px}.qf-pmd-quality-head b,.qf-pmd-quality-values span{font-size:var(--pmd-font-table,9px)}}
+@media(min-width:1050px){.qf-pmd-summary-card{width:100%}.qf-pmd-quality-stack{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-items:start}.qf-pmd-quality-stack>.qf-pmd-card:only-child{grid-column:1/-1}.qf-pmd-quality-stack>.qf-pmd-card:nth-last-child(2):first-child,.qf-pmd-quality-stack>.qf-pmd-card:nth-last-child(2):first-child~.qf-pmd-card{grid-column:span 1}.qf-pmd-quality-head b,.qf-pmd-quality-values span{font-size:7px}}
+@media(max-width:370px){.qf-pmd-summary-body{grid-template-columns:102px minmax(0,1fr);padding:.55rem .45rem}.qf-pmd-donut-wrap svg{width:98px!important}.qf-pmd-donut-center strong{font-size:15px}.qf-pmd-sample-labels,.qf-pmd-sample-row{grid-template-columns:minmax(48px,1.25fr) repeat(12,minmax(0,1fr))}.qf-pmd-sample-labels>*,.qf-pmd-sample-row>*{font-size:6px}}
+@media(prefers-reduced-motion:reduce){.qf-pmd-content,.qf-pmd-hist-item i,.qf-pmd-progress i{animation:none}}
+@keyframes qf-pmd-enter{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+@keyframes qf-pmd-bar{from{opacity:.3;transform:scaleY(0)}to{opacity:1;transform:scaleY(1)}}
+@keyframes qf-pmd-progress{from{opacity:.3;transform:scaleX(0)}to{opacity:1;transform:scaleX(1)}}
