@@ -10,6 +10,7 @@ const Sidebar = ({ isOpen, onClose }) => {
       title: "Relatórios",
       items: [
         { label: "Dashboards", path: "/qualyflow/dashboard" },
+        { label: "Timeline", path: "/qualyflow/timeline" },
       ]
     },
     {

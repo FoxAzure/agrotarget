@@ -18,6 +18,7 @@ import CbDetail from './pages/QualyFlow/details/CbDetail';
 import HidrorollDetail from './pages/QualyFlow/details/HidrorollDetail';
 import PreparoDetail from './pages/QualyFlow/details/PreparoDetail';
 import PlantioMecDetail from './pages/QualyFlow/details/PlantioMecDetail';
+import TimelineHome from './pages/QualyFlow/timeline/TimelineHome';
 
 import DashboardHome from './pages/QualyFlow/dashboard/DashboardHome';
 
@@ -135,6 +136,7 @@ function App() {
         <Route path="/qualyflow/plantiomec" element={<PlantioMecDetail />} />
 
         <Route path="/qualyflow/dashboard" element={<DashboardHome />} />
+        <Route path="/qualyflow/timeline" element={<TimelineHome />} />
 
         <Route path="/coacenter" element={<COACenterHome />} />
         <Route path="/coacenter/resumo" element={<ResumoDetail />} />
