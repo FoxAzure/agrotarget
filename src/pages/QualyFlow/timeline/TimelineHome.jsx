@@ -44,13 +44,14 @@ const TimelineHome = () => {
   const visibleCards = useMemo(() => activeArea === ALL_AREAS ? TIMELINE_CARDS : TIMELINE_CARDS.filter((card) => card.area === activeArea), [activeArea]);
 
   const handleExportExcel = () => {
-    const tables = [...document.querySelectorAll('[data-timeline-export-root] table')];
+    const tables = [...document.querySelectorAll('[data-timeline-export-root] table.qf-mx-export-table')];
     if (!tables.length) return;
     const body = tables.map((table) => table.outerHTML).join('<br>');
-    const html = `<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"><style>body{font-family:Arial}table{border-collapse:collapse;margin-bottom:18px}th,td{border:1px solid #cbd5e1;padding:6px 9px}th{background:#002f8e;color:#fff}</style></head><body><h1>Timeline de Indicadores</h1><p>Ano: ${activeYear ?? '-'} | Area: ${activeArea}</p>${body}</body></html>`;
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;color:#1e293b}h1{color:#002f8e;margin:0 0 8px}p{margin:0 0 20px;color:#64748b}table{border-collapse:collapse;width:100%;margin-bottom:22px}th,td{border:1px solid #cbd5e1;padding:7px 10px;text-align:left}th{background:#002f8e;color:#fff;font-weight:700}td.qf-xls-number{mso-number-format:"\\@"}</style></head><body><h1>Timeline de Indicadores</h1><p>Ano: ${activeYear ?? '-'} | Area: ${activeArea}</p>${body}</body></html>`;
     const url = URL.createObjectURL(new Blob(['\ufeff', html], { type: 'application/vnd.ms-excel;charset=utf-8;' }));
     const link = document.createElement('a');
-    link.href = url; link.download = `timeline_${normalizeFileName(activeArea === ALL_AREAS ? 'todas_as_areas' : activeArea)}_${activeYear || currentYear}.xls`;
+    link.href = url;
+    link.download = `timeline_${normalizeFileName(activeArea === ALL_AREAS ? 'todas_as_areas' : activeArea)}_${activeYear || currentYear}.xls`;
     document.body.appendChild(link); link.click(); link.remove(); URL.revokeObjectURL(url);
   };
 
@@ -64,6 +65,7 @@ const TimelineHome = () => {
         <div className="qf-timeline-area-block"><span className="qf-timeline-control-title">Area</span><div className="qf-timeline-area-filters">{areas.map((area) => <button key={area} type="button" className={`qf-timeline-area-button${activeArea === area ? ' is-active' : ''}`} onClick={() => setActiveArea(area)}>{area}</button>)}</div></div>
         <div className="qf-timeline-export-block"><span className="qf-timeline-control-title">Exportar</span><div className="qf-timeline-export-actions"><button type="button" className="qf-timeline-export-button qf-timeline-export-button--xls" onClick={handleExportExcel}><span>XLS</span>Excel</button><button type="button" className="qf-timeline-export-button qf-timeline-export-button--pdf" onClick={() => window.print()}><span>PDF</span>PDF</button></div></div>
       </section>
+      <div className="qf-timeline-print-header" aria-hidden="true"><h1>Timeline de Indicadores</h1><p>Ano selecionado: {activeYear ?? '-'}</p></div>
       <section className="qf-timeline-content" data-timeline-export-root><div className="qf-timeline-cards">{visibleCards.map(({ id, area, component: Card }) => <div key={id} className="qf-timeline-card-group"><div className="qf-timeline-card-area-tag">{area}</div><Card selectedYear={activeYear} /></div>)}</div></section>
     </main>
   </div>;
