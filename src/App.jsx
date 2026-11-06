@@ -1,15 +1,14 @@
 import React from 'react';
-import { Routes, Route, Link, useNavigate } from 'react-router-dom';
+import { Routes, Route, Link } from 'react-router-dom';
+import { RNCAuthProvider } from './lib/RNCAuthContext';
 
-// Importando o nosso espião de rolagem
 import ScrollToTop from './components/Config/ScrollToTop';
 
-// Importando as logos
 import qualyflowLogo from './gallery/logo/qualyflow.png';
 import coacenterLogo from './gallery/logo/coacenter.png';
-import agroToolsLogo from './gallery/logo/agrotools.png'; // ➔ Logo do AgroTools adicionada!
+import agroToolsLogo from './gallery/logo/agrotools.png';
+import rncLogo from './gallery/logo/rnc.png';
 
-// Importando a página principal do QualyFlow
 import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
 import PerdaMecDetail from './pages/QualyFlow/details/PerdaMecDetail';
 import CucDetail from './pages/QualyFlow/details/CucDetail';
@@ -19,29 +18,16 @@ import HidrorollDetail from './pages/QualyFlow/details/HidrorollDetail';
 import PreparoDetail from './pages/QualyFlow/details/PreparoDetail';
 import PlantioMecDetail from './pages/QualyFlow/details/PlantioMecDetail';
 import TimelineHome from './pages/QualyFlow/timeline/TimelineHome';
-
 import DashboardHome from './pages/QualyFlow/dashboard/DashboardHome';
 
-// Importando Páginas do COA Center
 import COACenterHome from './pages/COACenter/COACenterHome';
 import ResumoDetail from './pages/COACenter/details/ResumoDetail';
 import OciosoDetail from './pages/COACenter/details/OciosoDetail';
 import DispoDetail from './pages/COACenter/details/DispoDetail';
 import COAOperacoes from './pages/COACenter/COAOperacoes';
 import IndeterDetail from './pages/COACenter/details/IndeterDetail';
-
-
 import DashboardHomeCOA from './pages/COACenter/dashboard/DashboardHome';
 
-//import Operacoes from './pages/COACenter/Operacoes';
-//import Detalhe from './pages/COACenter/Detalhe';
-//import MotorOcioso from './pages/COACenter/MotorOcioso';
-//import COADataAudit from './pages/COACenter/COADataAudit';
-//import Comboio from './pages/COACenter/Comboio';
-
-
-
-// Importação das Páginas do AgroTools
 import AgroToolsHome from './pages/AgroTools/AgroToolsHome';
 import CucGotejoTools from './pages/AgroTools/details/CucGotejo';
 import AdubacaoTools from './pages/AgroTools/details/Adubacao';
@@ -49,23 +35,25 @@ import PerdasColheitaTools from './pages/AgroTools/details/PerdasColheita';
 import VinhacaTools from './pages/AgroTools/details/Vinhaca';
 import CucPivotTools from './pages/AgroTools/details/CucPivot';
 
-
-
-// Gerenciamento da Equipe
 import EquipeHome from './pages/Equipe/EquipeHome';
 
-
-// ================================= HELPERS (COMPONENTES) ================================= //
+import RNCHome from './pages/RNC/RNCHome';
+import RNCLogin from './pages/RNC/login/RNCLogin';
+import RNCProtectedRoute from './components/RNC/RNCProtectedRoute';
+import RNCUsuarios from './pages/RNC/usuarios/RNCUsuarios';
+import RNCAreas from './pages/RNC/areas/RNCAreas';
+import RNCNova from './pages/RNC/nova/RNCNova';
+import RNCEditar from './pages/RNC/editar/RNCEditar';
 
 const ModuleCard = ({ title, logoSrc, to }) => (
-  <Link 
+  <Link
     to={to}
     className="group flex flex-col items-center justify-center p-6 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-agro-orange hover:shadow-md transition-all duration-300 cursor-pointer active:scale-95 outline-none"
   >
-    <img 
-      src={logoSrc} 
-      alt={title} 
-      className="w-16 h-16 object-contain mb-3 opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 drop-shadow-sm" 
+    <img
+      src={logoSrc}
+      alt={title}
+      className="w-16 h-16 object-contain mb-3 opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 drop-shadow-sm"
     />
     <h2 className="text-[11px] font-black text-agro-green uppercase tracking-widest group-hover:text-agro-orange transition-colors text-center">
       {title}
@@ -73,13 +61,9 @@ const ModuleCard = ({ title, logoSrc, to }) => (
   </Link>
 );
 
-// ================================= PÁGINAS (ROTAS) ================================= //
-
-// Página 1: O Hub AgroTarget
 function Hub() {
   return (
     <div className="min-h-screen flex flex-col bg-slate-50 no-scrollbar selection:bg-agro-orange/20">
-      
       <header className="w-full py-6 px-6 text-center bg-agro-green border-b-2 border-agro-orange sticky top-0 z-50 shadow-sm">
         <h1 className="text-4xl font-black tracking-tighter text-white drop-shadow-sm">
           Agro<span className="text-agro-orange">Target</span>
@@ -94,10 +78,10 @@ function Hub() {
       </header>
 
       <main className="flex-grow p-6 flex justify-center items-start pt-10">
-        {/* ➔ Grid atualizado para lidar bem com os 3 cards (max-w-3xl e md:grid-cols-3) */}
         <div className="w-full max-w-3xl grid grid-cols-2 md:grid-cols-3 gap-4">
           <ModuleCard title="QualyFlow" logoSrc={qualyflowLogo} to="/qualyflow" />
           <ModuleCard title="COA Center" logoSrc={coacenterLogo} to="/coacenter" />
+          <ModuleCard title="Não Conformidade" logoSrc={rncLogo} to="/rnc" />
           <ModuleCard title="AgroTools" logoSrc={agroToolsLogo} to="/agrotools" />
         </div>
       </main>
@@ -117,16 +101,22 @@ function Hub() {
   );
 }
 
-// ================================= EXECUTOR (ROUTER PRINCIPAL) ================================= //
+function RNCPlaceholder({ title }) {
+  return (
+    <div style={{ minHeight: '100vh', padding: 30, background: '#0f172a', color: '#fff' }}>
+      <h1>{title}</h1>
+    </div>
+  );
+}
 
 function App() {
   return (
-    <>
+    <RNCAuthProvider>
       <ScrollToTop />
-      
+
       <Routes>
         <Route path="/" element={<Hub />} />
-        
+
         <Route path="/qualyflow" element={<QualyFlowHome />} />
         <Route path="/qualyflow/perdasmec" element={<PerdaMecDetail />} />
         <Route path="/qualyflow/cuc" element={<CucDetail />} />
@@ -134,9 +124,9 @@ function App() {
         <Route path="/qualyflow/hidroroll" element={<HidrorollDetail />} />
         <Route path="/qualyflow/preparo" element={<PreparoDetail />} />
         <Route path="/qualyflow/plantiomec" element={<PlantioMecDetail />} />
-
         <Route path="/qualyflow/dashboard" element={<DashboardHome />} />
         <Route path="/qualyflow/timeline" element={<TimelineHome />} />
+        <Route path="/qualyflow/equipe" element={<EquipeHome />} />
 
         <Route path="/coacenter" element={<COACenterHome />} />
         <Route path="/coacenter/resumo" element={<ResumoDetail />} />
@@ -144,9 +134,8 @@ function App() {
         <Route path="/coacenter/disponibilidade" element={<DispoDetail />} />
         <Route path="/coacenter/operacoes" element={<COAOperacoes />} />
         <Route path="/coacenter/indeterminado" element={<IndeterDetail />} />
-
         <Route path="/coacenter/dashboard" element={<DashboardHomeCOA />} />
-        
+
         <Route path="/agrotools" element={<AgroToolsHome />} />
         <Route path="/agrotools/cuc" element={<CucGotejoTools />} />
         <Route path="/agrotools/adubacao" element={<AdubacaoTools />} />
@@ -154,14 +143,44 @@ function App() {
         <Route path="/agrotools/vinhaca" element={<VinhacaTools />} />
         <Route path="/agrotools/cucpivot" element={<CucPivotTools />} />
 
-        <Route path='/qualyflow/equipe' element={<EquipeHome />} />
+        <Route path="/rnc" element={<RNCHome />} />
+        <Route path="/rnc/login" element={<RNCLogin />} />
+        <Route path="/rnc/usuarios" element={<RNCUsuarios />} />
+        <Route path="/rnc/areas" element={<RNCAreas />} />
+        <Route path="/rnc/nova" element={<RNCNova />} />
+        <Route path="/rnc/editar/:id" element={<RNCEditar />} />
 
-        {/* ROTA PADRÃO (CATCH-ALL) */}
+        <Route
+          path="/rnc/plano-acao"
+          element={
+            <RNCProtectedRoute allowedLevels={['normal', 'gerente', 'admin']}>
+              <RNCPlaceholder title="Plano de Ação" />
+            </RNCProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/rnc/acompanhamento"
+          element={
+            <RNCProtectedRoute allowedLevels={['normal', 'gerente', 'admin']}>
+              <RNCPlaceholder title="Acompanhamento" />
+            </RNCProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/rnc/usuarios"
+          element={
+            <RNCProtectedRoute allowedLevels={['admin']}>
+              <RNCPlaceholder title="Gerenciamento de Usuários" />
+            </RNCProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<PaginaNaoEncontrada />} />
       </Routes>
-    </>
+    </RNCAuthProvider>
   );
 }
-
 
 export default App;
