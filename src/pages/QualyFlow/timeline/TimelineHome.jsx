@@ -4,11 +4,29 @@ import HeaderQualyFlow from '../../../components/QualyFlow/HeaderQualyFlow';
 import Sidebar from '../../../components/QualyFlow/Sidebar';
 import YearSelectorQualyFlow from '../../../components/QualyFlow/YearSelectorQualyFlow';
 import CardTLPerdasMec from './cards/CardTLPerdasMec';
+import CardTLPlantioMec from './cards/CardTLPlantioMec';
+import CardTLPreparo from './cards/CardTLPreparo';
 import '../Style.css';
 import './TimelineHome.css';
 
 const ALL_AREAS = 'Todas';
-const TIMELINE_CARDS = [{ id: 'perdas-mecanizadas', area: 'Colheita', component: CardTLPerdasMec }];
+const TIMELINE_CARDS = [
+  {
+    id: 'perdas-mecanizadas',
+    area: 'Colheita',
+    component: CardTLPerdasMec,
+  },
+  {
+    id: 'plantio-mecanizado',
+    area: 'Plantio',
+    component: CardTLPlantioMec,
+  },
+  {
+    id: 'preparo-solo',
+    area: 'Preparo de Solo',
+    component: CardTLPreparo,
+  },
+];
 const normalizeFileName = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9-_]+/g, '_').replace(/^_+|_+$/g, '').toLowerCase();
 
 const TimelineHome = () => {

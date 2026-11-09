@@ -1,0 +1,25 @@
+/* Reutiliza integralmente a identidade visual e a responsividade do card de Perdas. */
+@import './CardTLPerdasMec.css';
+
+/* Ajustes exclusivos do card de Preparo de Solo. */
+.qf-pr-card .qf-mx-header {
+  background: linear-gradient(135deg, #fbfcfd, #f5f9ff);
+}
+
+.qf-pr-card .qf-mx-val.is-warning {
+  color: #ca8a04;
+}
+
+.qf-pr-card .qf-mx-node.is-baseline-warning {
+  --c: #eab308;
+  --m: rgba(234, 179, 8, .34);
+  --s: rgba(234, 179, 8, .05);
+}
+
+.qf-pr-card .qf-mx-modal-value.is-warning {
+  border-color: #eab308;
+}
+
+.qf-pr-card .qf-mx-meta {
+  max-width: 100%;
+}
