@@ -6,6 +6,7 @@ import YearSelectorQualyFlow from '../../../components/QualyFlow/YearSelectorQua
 import CardTLPerdasMec from './cards/CardTLPerdasMec';
 import CardTLPlantioMec from './cards/CardTLPlantioMec';
 import CardTLPreparo from './cards/CardTLPreparo';
+import CardTLSemente from './cards/CardTLSemente';
 import '../Style.css';
 import './TimelineHome.css';
 
@@ -15,6 +16,11 @@ const TIMELINE_CARDS = [
     id: 'perdas-mecanizadas',
     area: 'Colheita',
     component: CardTLPerdasMec,
+  },
+  {
+    id: 'semente-mecanizada',
+    area: 'Semente',
+    component: CardTLSemente,
   },
   {
     id: 'plantio-mecanizado',

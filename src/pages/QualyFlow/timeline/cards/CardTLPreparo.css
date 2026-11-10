@@ -1,10 +1,80 @@
-/* Reutiliza integralmente a identidade visual e a responsividade do card de Perdas. */
+/* Deve permanecer obrigatoriamente na primeira linha. */
 @import './CardTLPerdasMec.css';
 
-/* Ajustes exclusivos do card de Preparo de Solo. */
-.qf-pr-card .qf-mx-header {
-  background: linear-gradient(135deg, #fbfcfd, #f5f9ff);
+/* =========================================================
+   CARD DE PREPARO
+   Remove qualquer espaçamento externo herdado.
+   ========================================================= */
+
+.qf-mx-card.qf-pr-card {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
 }
+
+/* =========================================================
+   CABEÇALHO PRINCIPAL
+   Garante exatamente o mesmo comportamento do card de Perdas.
+   ========================================================= */
+
+.qf-mx-card.qf-pr-card > .qf-mx-header {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: .9rem;
+  border-bottom: 1px solid #e2e8f0;
+  background: linear-gradient(135deg, #fbfcfd, #f7fcf9);
+}
+
+.qf-mx-card.qf-pr-card > .qf-mx-header h2 {
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================================================
+   CORPO
+   Evita margem entre o cabeçalho principal e a linha
+   Indicador / Evolução geral.
+   ========================================================= */
+
+.qf-mx-card.qf-pr-card > .qf-mx-body {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+}
+
+/* Primeira linha do corpo encostada no cabeçalho do card. */
+.qf-mx-card.qf-pr-card > .qf-mx-body > .qf-mx-row:first-child {
+  margin-top: 0;
+}
+
+/* Linha Indicador / anos / Evolução geral. */
+.qf-mx-card.qf-pr-card
+  > .qf-mx-body
+  > .qf-mx-row.qf-mx-row-head {
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding-top: .45rem;
+  padding-bottom: .45rem;
+  border-bottom: 2px solid #e2e8f0;
+  background: #fbfcfd;
+}
+
+/* Remove margens que possam atingir os elementos do cabeçalho. */
+.qf-mx-card.qf-pr-card .qf-mx-row-head > .qf-mx-col-ind,
+.qf-mx-card.qf-pr-card .qf-mx-row-head > .qf-mx-track,
+.qf-mx-card.qf-pr-card .qf-mx-row-head > .qf-mx-summary-head {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+/* =========================================================
+   FAIXA AMARELA
+   ========================================================= */
 
 .qf-pr-card .qf-mx-val.is-warning {
   color: #ca8a04;
@@ -22,4 +92,41 @@
 
 .qf-pr-card .qf-mx-meta {
   max-width: 100%;
+}
+
+/* =========================================================
+   DESKTOP
+   Mantém exatamente as medidas definidas no card de Perdas.
+   ========================================================= */
+
+@media (min-width: 900px) {
+  .qf-mx-card.qf-pr-card .qf-mx-row {
+    margin: 0;
+    padding: .68rem 1rem;
+  }
+
+  .qf-mx-card.qf-pr-card .qf-mx-row-head {
+    margin: 0;
+    padding: .45rem 1rem;
+  }
+
+  .qf-mx-card.qf-pr-card .qf-mx-col-ind {
+    flex: 0 0 185px;
+    width: 185px;
+    max-width: 185px;
+  }
+
+  .qf-mx-card.qf-pr-card .qf-mx-track {
+    flex: 0 1 650px;
+    width: auto;
+    max-width: 650px;
+    margin-left: auto;
+  }
+
+  .qf-mx-card.qf-pr-card .qf-mx-summary-head,
+  .qf-mx-card.qf-pr-card .qf-mx-summary {
+    flex: 0 0 155px;
+    width: 155px;
+    margin-left: 1rem;
+  }
 }

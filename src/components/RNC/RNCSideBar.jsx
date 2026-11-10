@@ -14,6 +14,7 @@ const RNCSideBar = ({ isOpen, onClose }) => {
     { label: 'Acompanhamento', path: '/rnc/acompanhamento', visible: Boolean(user) },
     { label: 'Gerenciar Usuários', path: '/rnc/usuarios', visible: isAdmin },
     { label: 'Gerenciar Áreas', path: '/rnc/areas', visible: isAdmin },
+    { label: 'Gerenciar Tags', path: '/rnc/tags', visible: isAdmin },
   ];
 
   useEffect(() => {

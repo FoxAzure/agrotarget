@@ -44,6 +44,7 @@ import RNCUsuarios from './pages/RNC/usuarios/RNCUsuarios';
 import RNCAreas from './pages/RNC/areas/RNCAreas';
 import RNCNova from './pages/RNC/nova/RNCNova';
 import RNCEditar from './pages/RNC/editar/RNCEditar';
+import RNCTags from './pages/RNC/tags/RNCTags';
 
 const ModuleCard = ({ title, logoSrc, to }) => (
   <Link
@@ -148,6 +149,8 @@ function App() {
         <Route path="/rnc/usuarios" element={<RNCUsuarios />} />
         <Route path="/rnc/areas" element={<RNCAreas />} />
         <Route path="/rnc/nova" element={<RNCNova />} />
+        <Route path="/rnc/tags" element={<RNCTags />} />
+
         <Route path="/rnc/editar/:id" element={<RNCEditar />} />
 
         <Route

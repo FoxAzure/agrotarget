@@ -12,14 +12,8 @@ const MAX_SOURCE_SIZE = 12 * 1024 * 1024;
 const loadImage = (file) => new Promise((resolve, reject) => {
   const url = URL.createObjectURL(file);
   const image = new Image();
-  image.onload = () => {
-    URL.revokeObjectURL(url);
-    resolve(image);
-  };
-  image.onerror = () => {
-    URL.revokeObjectURL(url);
-    reject(new Error('Imagem inválida.'));
-  };
+  image.onload = () => { URL.revokeObjectURL(url); resolve(image); };
+  image.onerror = () => { URL.revokeObjectURL(url); reject(new Error('Imagem inválida.')); };
   image.src = url;
 });
 
@@ -30,7 +24,6 @@ const compressImage = async (file) => {
   canvas.width = Math.max(1, Math.round(image.width * scale));
   canvas.height = Math.max(1, Math.round(image.height * scale));
   canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
-
   const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/webp', 0.72));
   if (!blob) throw new Error('Não foi possível compactar a imagem.');
   return blob;
@@ -42,12 +35,17 @@ const RNCEditar = () => {
   const { user, loading: authLoading, canCreateRNC } = useRNCAuth();
   const searchTimer = useRef(null);
   const previewRef = useRef([]);
+  const tagSearchRef = useRef(null);
 
   const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const [isTagModalOpen, setTagModalOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [areas, setAreas] = useState([]);
+  const [availableTags, setAvailableTags] = useState([]);
+  const [selectedTagIds, setSelectedTagIds] = useState([]);
+  const [tagSearch, setTagSearch] = useState('');
   const [form, setForm] = useState(null);
   const [originalPaths, setOriginalPaths] = useState([]);
   const [keptPaths, setKeptPaths] = useState([]);
@@ -69,13 +67,15 @@ const RNCEditar = () => {
       setLoading(true);
       setError('');
 
-      const [recordResult, areasResult] = await Promise.all([
+      const [recordResult, areasResult, tagsResult] = await Promise.all([
         supabase.rpc('rnc_obter_registro_edicao', {
           p_usuario_id: user.id,
           p_registro_id: Number(id),
         }),
-        supabase.rpc('rnc_listar_areas_ativas', {
+        supabase.rpc('rnc_listar_areas_ativas', { p_usuario_id: user.id }),
+        supabase.rpc('rnc_listar_tags_edicao', {
           p_usuario_id: user.id,
+          p_registro_id: Number(id),
         }),
       ]);
 
@@ -87,9 +87,11 @@ const RNCEditar = () => {
       }
 
       if (areasResult.error) console.error(areasResult.error);
+      if (tagsResult.error) console.error(tagsResult.error);
 
       const record = recordResult.data[0];
       const paths = record.imagens || [];
+
       setForm({
         data_ocorrencia: record.data_ocorrencia || '',
         id_area: record.id_area ? String(record.id_area) : '',
@@ -100,7 +102,13 @@ const RNCEditar = () => {
       setFieldSearch(record.cod_campo ? `${record.cod_campo} - ${record.campo}` : '');
       setOriginalPaths(paths);
       setKeptPaths(paths);
+      setSelectedTagIds((record.tags || []).map(Number));
       setAreas(areasResult.data || []);
+      setAvailableTags(
+        [...(tagsResult.data || [])].sort((a, b) =>
+          String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR', { sensitivity: 'base' })
+        )
+      );
       setLoading(false);
     };
 
@@ -112,21 +120,68 @@ const RNCEditar = () => {
     previewRef.current.forEach((item) => URL.revokeObjectURL(item.preview));
   }, []);
 
+  useEffect(() => { previewRef.current = newImages; }, [newImages]);
+
   useEffect(() => {
-    previewRef.current = newImages;
-  }, [newImages]);
+    if (!isTagModalOpen) return undefined;
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.setTimeout(() => tagSearchRef.current?.focus(), 30);
+
+    const handleKeyDown = (event) => {
+      if (event.key === 'Escape') setTagModalOpen(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isTagModalOpen]);
 
   const selectedArea = useMemo(
     () => areas.find((item) => String(item.id) === String(form?.id_area)) || null,
     [areas, form?.id_area]
   );
 
+  const selectedTags = useMemo(
+    () => availableTags.filter((tag) => selectedTagIds.includes(Number(tag.id))),
+    [availableTags, selectedTagIds]
+  );
+
+  const filteredTags = useMemo(() => {
+    const term = tagSearch.trim().toLocaleLowerCase('pt-BR');
+    const list = term
+      ? availableTags.filter((tag) => String(tag.nome || '').toLocaleLowerCase('pt-BR').includes(term))
+      : availableTags;
+
+    return [...list].sort((a, b) =>
+      String(a.nome || '').localeCompare(String(b.nome || ''), 'pt-BR', { sensitivity: 'base' })
+    );
+  }, [availableTags, tagSearch]);
+
   const totalImages = keptPaths.length + newImages.length;
   const imageUrl = (path) => supabase.storage.from('rnc-imagens').getPublicUrl(path).data.publicUrl;
+  const handleChange = ({ target: { name, value } }) => setForm((current) => ({ ...current, [name]: value }));
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
-    setForm((current) => ({ ...current, [name]: value }));
+  const openTagModal = () => {
+    setTagSearch('');
+    setTagModalOpen(true);
+  };
+
+  const closeTagModal = () => {
+    setTagSearch('');
+    setTagModalOpen(false);
+  };
+
+  const toggleTag = (tagId) => {
+    const numericId = Number(tagId);
+    setSelectedTagIds((current) =>
+      current.includes(numericId)
+        ? current.filter((item) => item !== numericId)
+        : [...current, numericId]
+    );
   };
 
   const handleFieldSearch = (value) => {
@@ -134,11 +189,7 @@ const RNCEditar = () => {
     setSelectedField(null);
     setShowFieldOptions(true);
     window.clearTimeout(searchTimer.current);
-
-    if (!value.trim()) {
-      setFieldOptions([]);
-      return;
-    }
+    if (!value.trim()) { setFieldOptions([]); return; }
 
     searchTimer.current = window.setTimeout(async () => {
       setSearchingFields(true);
@@ -159,32 +210,16 @@ const RNCEditar = () => {
     setShowFieldOptions(false);
   };
 
-  const clearField = () => {
-    setSelectedField(null);
-    setFieldSearch('');
-    setFieldOptions([]);
-  };
+  const clearField = () => { setSelectedField(null); setFieldSearch(''); setFieldOptions([]); };
 
   const handleImages = (event) => {
     const files = Array.from(event.target.files || []);
     event.target.value = '';
     setError('');
-
-    if (totalImages + files.length > MAX_IMAGES) {
-      setError('A RNC pode possuir no máximo 3 imagens.');
-      return;
-    }
-
+    if (totalImages + files.length > MAX_IMAGES) { setError('A RNC pode possuir no máximo 3 imagens.'); return; }
     const invalid = files.find((file) => !file.type.startsWith('image/') || file.size > MAX_SOURCE_SIZE);
-    if (invalid) {
-      setError('Use imagens JPG, PNG ou WebP com até 12 MB cada.');
-      return;
-    }
-
-    setNewImages((current) => [
-      ...current,
-      ...files.map((file) => ({ file, preview: URL.createObjectURL(file) })),
-    ]);
+    if (invalid) { setError('Use imagens JPG, PNG ou WebP com até 12 MB cada.'); return; }
+    setNewImages((current) => [...current, ...files.map((file) => ({ file, preview: URL.createObjectURL(file) }))]);
   };
 
   const removeNewImage = (index) => {
@@ -196,45 +231,29 @@ const RNCEditar = () => {
 
   const uploadNewImages = async () => {
     const paths = [];
-
     for (let index = 0; index < newImages.length; index += 1) {
       const compressed = await compressImage(newImages[index].file);
-      if (compressed.size > 1024 * 1024) {
-        throw new Error(`A imagem ${index + 1} permaneceu acima de 1 MB após a compactação.`);
-      }
-
+      if (compressed.size > 1024 * 1024) throw new Error(`A imagem ${index + 1} permaneceu acima de 1 MB após a compactação.`);
       const random = crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}-${index}`;
       const path = `rnc/${id}/${random}.webp`;
-      const { error: uploadError } = await supabase.storage
-        .from('rnc-imagens')
-        .upload(path, compressed, {
-          contentType: 'image/webp',
-          cacheControl: '31536000',
-          upsert: false,
-        });
-
+      const { error: uploadError } = await supabase.storage.from('rnc-imagens').upload(path, compressed, {
+        contentType: 'image/webp', cacheControl: '31536000', upsert: false,
+      });
       if (uploadError) throw uploadError;
       paths.push(path);
     }
-
     return paths;
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setError('');
-
-    if (form.desc_rnc.trim().length < 5) {
-      setError('A descrição deve ter pelo menos 5 caracteres.');
-      return;
-    }
-
+    if (form.desc_rnc.trim().length < 5) { setError('A descrição deve ter pelo menos 5 caracteres.'); return; }
     setSaving(true);
 
     try {
       const uploadedPaths = await uploadNewImages();
       const finalPaths = [...keptPaths, ...uploadedPaths];
-
       const { error: updateError } = await supabase.rpc('rnc_atualizar_registro', {
         p_usuario_id: user.id,
         p_registro_id: Number(id),
@@ -246,8 +265,8 @@ const RNCEditar = () => {
         p_desc_rnc: form.desc_rnc.trim(),
         p_responsavel: form.responsavel.trim() || null,
         p_imagens: finalPaths,
+        p_tags: selectedTagIds,
       });
-
       if (updateError) throw updateError;
 
       const removedPaths = originalPaths.filter((path) => !keptPaths.includes(path));
@@ -255,31 +274,21 @@ const RNCEditar = () => {
         const { error: removeError } = await supabase.storage.from('rnc-imagens').remove(removedPaths);
         if (removeError) console.error('RNC salva, mas houve erro ao excluir imagens antigas:', removeError);
       }
-
       navigate('/rnc', { replace: true, state: { message: `RNC #${id} atualizada com sucesso.` } });
     } catch (submitError) {
       console.error(submitError);
       setError(submitError.message || 'Não foi possível atualizar a RNC.');
-    } finally {
-      setSaving(false);
-    }
+    } finally { setSaving(false); }
   };
 
-  if (authLoading || !user || !canCreateRNC || loading) {
-    return <div className="rnc-editar-loading">Carregando RNC...</div>;
-  }
+  if (authLoading || !user || !canCreateRNC || loading) return <div className="rnc-editar-loading">Carregando RNC...</div>;
 
-  if (!form) {
-    return (
-      <div className="rnc-editar-page">
-        <RNCHeader onMenuOpen={() => setSidebarOpen(true)} />
-        <main className="rnc-editar-error-page">
-          <p>{error || 'RNC não encontrada.'}</p>
-          <button type="button" onClick={() => navigate('/rnc')}>Voltar</button>
-        </main>
-      </div>
-    );
-  }
+  if (!form) return (
+    <div className="rnc-editar-page">
+      <RNCHeader onMenuOpen={() => setSidebarOpen(true)} />
+      <main className="rnc-editar-error-page"><p>{error || 'RNC não encontrada.'}</p><button type="button" onClick={() => navigate('/rnc')}>Voltar</button></main>
+    </div>
+  );
 
   return (
     <div className="rnc-editar-page">
@@ -288,11 +297,7 @@ const RNCEditar = () => {
 
       <main className="rnc-editar-main">
         <section className="rnc-editar-heading">
-          <div>
-            <span>Edição</span>
-            <h1>Editar RNC #{id}</h1>
-            <p>Atualize os dados e gerencie os anexos da ocorrência.</p>
-          </div>
+          <div><span>Edição</span><h1>Editar RNC #{id}</h1><p>Atualize os dados, as tags e os anexos da ocorrência.</p></div>
           <button type="button" onClick={() => navigate('/rnc')}>Voltar</button>
         </section>
 
@@ -300,111 +305,133 @@ const RNCEditar = () => {
 
         <form className="rnc-editar-form" onSubmit={handleSubmit}>
           <section className="rnc-editar-panel">
-            <div className="rnc-editar-panel__head">
-              <strong>Dados da ocorrência</strong>
-              <span>RNC #{id}</span>
-            </div>
-
+            <div className="rnc-editar-panel__head"><strong>Dados da ocorrência</strong><span>RNC #{id}</span></div>
             <div className="rnc-editar-grid">
-              <label>
-                <span>Data da ocorrência</span>
-                <input type="date" name="data_ocorrencia" value={form.data_ocorrencia} onChange={handleChange} />
-              </label>
-
-              <label>
-                <span>Área</span>
-                <select name="id_area" value={form.id_area} onChange={handleChange}>
-                  <option value="">Selecione, se aplicável</option>
-                  {areas.map((item) => <option key={item.id} value={item.id}>{item.area}</option>)}
-                </select>
-              </label>
-
+              <label><span>Data da ocorrência</span><input type="date" name="data_ocorrencia" value={form.data_ocorrencia} onChange={handleChange} /></label>
+              <label><span>Área</span><select name="id_area" value={form.id_area} onChange={handleChange}><option value="">Selecione, se aplicável</option>{areas.map((item) => <option key={item.id} value={item.id}>{item.area}</option>)}</select></label>
               <label className="rnc-editar-field-search">
                 <span>Campo</span>
-                <div className="rnc-editar-field-input">
-                  <input value={fieldSearch} onChange={(event) => handleFieldSearch(event.target.value)} onFocus={() => setShowFieldOptions(true)} placeholder="Código ou nome do campo" autoComplete="off" />
-                  {fieldSearch && <button type="button" onClick={clearField}>×</button>}
-                </div>
+                <div className="rnc-editar-field-input"><input value={fieldSearch} onChange={(event) => handleFieldSearch(event.target.value)} onFocus={() => setShowFieldOptions(true)} placeholder="Código ou nome do campo" autoComplete="off" />{fieldSearch && <button type="button" onClick={clearField}>×</button>}</div>
+                {showFieldOptions && fieldSearch.trim() && !selectedField && <div className="rnc-editar-field-options">{searchingFields ? <div>Pesquisando...</div> : fieldOptions.length ? fieldOptions.map((item) => <button type="button" key={item.cod_campo} onClick={() => selectField(item)}><strong>{item.cod_campo}</strong><span>{item.campo}</span><small>{item.setor}</small></button>) : <div>Nenhum campo encontrado.</div>}</div>}
+              </label>
+              <label><span>Responsável</span><input name="responsavel" value={form.responsavel} onChange={handleChange} maxLength={150} /></label>
+            </div>
+          </section>
 
-                {showFieldOptions && fieldSearch.trim() && !selectedField && (
-                  <div className="rnc-editar-field-options">
-                    {searchingFields ? (
-                      <div>Pesquisando...</div>
-                    ) : fieldOptions.length ? (
-                      fieldOptions.map((item) => (
-                        <button type="button" key={item.cod_campo} onClick={() => selectField(item)}>
-                          <strong>{item.cod_campo}</strong><span>{item.campo}</span><small>{item.setor}</small>
-                        </button>
-                      ))
-                    ) : <div>Nenhum campo encontrado.</div>}
+          <section className="rnc-editar-panel">
+            <div className="rnc-editar-panel__head"><strong>Tags</strong><span>{selectedTagIds.length} selecionada(s)</span></div>
+            <div className="rnc-editar-tags-summary">
+              <div className="rnc-editar-tags-summary__content">
+                {selectedTags.length === 0 ? (
+                  <div className="rnc-editar-tags-summary__empty">
+                    <strong>Nenhuma tag adicionada</strong>
+                    <span>Use as tags para classificar e localizar esta ocorrência com facilidade.</span>
+                  </div>
+                ) : (
+                  <div className="rnc-editar-tags-summary__selected">
+                    {selectedTags.map((tag) => (
+                      <button
+                        type="button"
+                        key={tag.id}
+                        style={{ '--tag-color': tag.cor || '#64748B' }}
+                        onClick={() => toggleTag(tag.id)}
+                        title={`Remover tag ${tag.nome}`}
+                      >
+                        <i />
+                        <span>{tag.nome}</span>
+                        <b>×</b>
+                      </button>
+                    ))}
                   </div>
                 )}
-              </label>
-
-              <label>
-                <span>Responsável</span>
-                <input name="responsavel" value={form.responsavel} onChange={handleChange} maxLength={150} />
-              </label>
+              </div>
+              <button type="button" className="rnc-editar-tags-summary__add" onClick={openTagModal}>
+                {selectedTags.length ? 'Gerenciar tags' : 'Adicionar tags'}
+              </button>
             </div>
           </section>
 
           <section className="rnc-editar-panel">
-            <div className="rnc-editar-panel__head">
-              <strong>Descrição</strong>
-              <span>Obrigatório</span>
-            </div>
-            <label className="rnc-editar-description">
-              <textarea name="desc_rnc" value={form.desc_rnc} onChange={handleChange} minLength={5} maxLength={2000} required />
-              <small>{form.desc_rnc.length}/2000</small>
-            </label>
+            <div className="rnc-editar-panel__head"><strong>Descrição</strong><span>Obrigatório</span></div>
+            <label className="rnc-editar-description"><textarea name="desc_rnc" value={form.desc_rnc} onChange={handleChange} minLength={5} maxLength={2000} required /><small>{form.desc_rnc.length}/2000</small></label>
           </section>
 
           <section className="rnc-editar-panel">
-            <div className="rnc-editar-panel__head">
-              <strong>Imagens anexadas</strong>
-              <span>{totalImages}/3</span>
-            </div>
-
+            <div className="rnc-editar-panel__head"><strong>Imagens anexadas</strong><span>{totalImages}/3</span></div>
             <div className="rnc-editar-images">
-              {totalImages < MAX_IMAGES && (
-                <label className="rnc-editar-upload">
-                  <input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleImages} disabled={saving} />
-                  <strong>Adicionar imagens</strong>
-                  <small>As fotos serão compactadas em WebP.</small>
-                </label>
-              )}
-
-              {totalImages === 0 ? (
-                <div className="rnc-editar-no-images">Nenhuma imagem anexada.</div>
-              ) : (
-                <div className="rnc-editar-image-grid">
-                  {keptPaths.map((path) => (
-                    <div className="rnc-editar-image" key={path}>
-                      <img src={imageUrl(path)} alt="Imagem atual da RNC" />
-                      <button type="button" onClick={() => setKeptPaths((current) => current.filter((item) => item !== path))}>Remover</button>
-                    </div>
-                  ))}
-
-                  {newImages.map((item, index) => (
-                    <div className="rnc-editar-image is-new" key={item.preview}>
-                      <img src={item.preview} alt={`Nova imagem ${index + 1}`} />
-                      <span>Nova</span>
-                      <button type="button" onClick={() => removeNewImage(index)}>Remover</button>
-                    </div>
-                  ))}
-                </div>
-              )}
+              {totalImages < MAX_IMAGES && <label className="rnc-editar-upload"><input type="file" accept="image/jpeg,image/png,image/webp" multiple onChange={handleImages} disabled={saving} /><strong>Adicionar imagens</strong><small>As fotos serão compactadas em WebP.</small></label>}
+              {totalImages === 0 ? <div className="rnc-editar-no-images">Nenhuma imagem anexada.</div> : <div className="rnc-editar-image-grid">
+                {keptPaths.map((path) => <div className="rnc-editar-image" key={path}><img src={imageUrl(path)} alt="Imagem atual da RNC" /><button type="button" onClick={() => setKeptPaths((current) => current.filter((item) => item !== path))}>Remover</button></div>)}
+                {newImages.map((item, index) => <div className="rnc-editar-image is-new" key={item.preview}><img src={item.preview} alt={`Nova imagem ${index + 1}`} /><span>Nova</span><button type="button" onClick={() => removeNewImage(index)}>Remover</button></div>)}
+              </div>}
             </div>
           </section>
 
-          <section className="rnc-editar-actions">
-            <button type="button" onClick={() => navigate('/rnc')} disabled={saving}>Cancelar</button>
-            <button type="submit" className="is-primary" disabled={saving}>
-              {saving ? 'Compactando e salvando...' : 'Salvar alterações'}
-            </button>
-          </section>
+          <section className="rnc-editar-actions"><button type="button" onClick={() => navigate('/rnc')} disabled={saving}>Cancelar</button><button type="submit" className="is-primary" disabled={saving}>{saving ? 'Compactando e salvando...' : 'Salvar alterações'}</button></section>
         </form>
       </main>
+
+      {isTagModalOpen && (
+        <div className="rnc-editar-tag-modal" role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeTagModal(); }}>
+          <section className="rnc-editar-tag-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="rnc-tag-modal-title">
+            <header className="rnc-editar-tag-modal__head">
+              <div>
+                <span>Classificação da ocorrência</span>
+                <h2 id="rnc-tag-modal-title">Adicionar tags</h2>
+                <p>Clique em uma tag para adicionar ou remover da RNC.</p>
+              </div>
+              <button type="button" onClick={closeTagModal} aria-label="Fechar modal">×</button>
+            </header>
+
+            <div className="rnc-editar-tag-modal__search">
+              <input
+                ref={tagSearchRef}
+                type="search"
+                value={tagSearch}
+                onChange={(event) => setTagSearch(event.target.value)}
+                placeholder="Buscar tag pelo nome..."
+                aria-label="Buscar tag"
+              />
+              <span>{filteredTags.length} encontrada(s)</span>
+            </div>
+
+            <div className="rnc-editar-tag-modal__body">
+              {filteredTags.length ? (
+                <div className="rnc-editar-tag-modal__grid">
+                  {filteredTags.map((tag) => {
+                    const selected = selectedTagIds.includes(Number(tag.id));
+                    return (
+                      <button
+                        type="button"
+                        key={tag.id}
+                        className={selected ? 'is-selected' : ''}
+                        style={{ '--tag-color': tag.cor || '#64748B' }}
+                        onClick={() => toggleTag(tag.id)}
+                        aria-pressed={selected}
+                      >
+                        <i />
+                        <span>{tag.nome}</span>
+                        {tag.status === 'inativo' && <small>Inativa</small>}
+                        <b>{selected ? '✓' : '+'}</b>
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="rnc-editar-tag-modal__empty">Nenhuma tag corresponde à busca.</div>
+              )}
+            </div>
+
+            <footer className="rnc-editar-tag-modal__footer">
+              <div><strong>{selectedTagIds.length}</strong><span>tag(s) selecionada(s)</span></div>
+              <div>
+                {selectedTagIds.length > 0 && <button type="button" className="is-clear" onClick={() => setSelectedTagIds([])}>Limpar seleção</button>}
+                <button type="button" className="is-confirm" onClick={closeTagModal}>Concluir</button>
+              </div>
+            </footer>
+          </section>
+        </div>
+      )}
     </div>
   );
 };
