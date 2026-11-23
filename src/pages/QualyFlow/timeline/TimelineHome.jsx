@@ -7,6 +7,10 @@ import CardTLPerdasMec from './cards/CardTLPerdasMec';
 import CardTLPlantioMec from './cards/CardTLPlantioMec';
 import CardTLPreparo from './cards/CardTLPreparo';
 import CardTLSemente from './cards/CardTLSemente';
+import CardTLPerdasMan from './cards/CardTLPerdasMan';
+import CardTLPlantioMan from './cards/CardTLPlantioMan';
+
+
 import '../Style.css';
 import './TimelineHome.css';
 
@@ -18,6 +22,11 @@ const TIMELINE_CARDS = [
     component: CardTLPerdasMec,
   },
   {
+    id: 'perdas-manuais',
+    area: 'Colheita',
+    component: CardTLPerdasMan,
+  },
+  {
     id: 'semente-mecanizada',
     area: 'Semente',
     component: CardTLSemente,
@@ -26,6 +35,11 @@ const TIMELINE_CARDS = [
     id: 'plantio-mecanizado',
     area: 'Plantio',
     component: CardTLPlantioMec,
+  },
+  {
+  id: 'plantio-manual',
+  area: 'Plantio',
+  component: CardTLPlantioMan,
   },
   {
     id: 'preparo-solo',

@@ -1,0 +1,23 @@
+/* Deve permanecer obrigatoriamente na primeira linha. */
+@import './CardTLPlantioMec.css';
+
+/* Plantio Manual herda integralmente a identidade visual do Plantio Mecanizado. */
+.qf-mx-card.qf-pman-card { width:100%; min-width:0; margin:0; padding:0; }
+.qf-mx-card.qf-pman-card > .qf-mx-header { display:block; width:100%; margin:0; padding:.9rem; border-bottom:1px solid #e2e8f0; background:linear-gradient(135deg,#fbfcfd,#f7fcf9); }
+.qf-mx-card.qf-pman-card > .qf-mx-header h2 { margin:0; padding:0; }
+.qf-mx-card.qf-pman-card > .qf-mx-body { display:block; width:100%; min-width:0; margin:0; padding:0; }
+.qf-mx-card.qf-pman-card > .qf-mx-body > .qf-mx-row:first-child { margin-top:0; }
+.qf-mx-card.qf-pman-card > .qf-mx-body > .qf-mx-row.qf-mx-row-head { width:100%; min-width:0; margin:0; padding-top:.45rem; padding-bottom:.45rem; border-bottom:2px solid #e2e8f0; background:#fbfcfd; }
+.qf-pman-card .qf-mx-val.is-warning { color:#ca8a04; }
+.qf-pman-card .qf-mx-node.is-baseline-warning { --c:#eab308; --m:rgba(234,179,8,.34); --s:rgba(234,179,8,.05); }
+.qf-pman-card .qf-mx-modal-value.is-warning { border-color:#eab308; }
+.qf-pman-card .qf-mx-meta { max-width:100%; }
+
+@media (min-width:900px) {
+  .qf-mx-card.qf-pman-card .qf-mx-row { margin:0; padding:.68rem 1rem; }
+  .qf-mx-card.qf-pman-card .qf-mx-row-head { margin:0; padding:.45rem 1rem; }
+  .qf-mx-card.qf-pman-card .qf-mx-col-ind { flex:0 0 185px; width:185px; max-width:185px; }
+  .qf-mx-card.qf-pman-card .qf-mx-track { flex:0 1 650px; width:auto; max-width:650px; margin-left:auto; }
+  .qf-mx-card.qf-pman-card .qf-mx-summary-head,
+  .qf-mx-card.qf-pman-card .qf-mx-summary { flex:0 0 155px; width:155px; margin-left:1rem; }
+}

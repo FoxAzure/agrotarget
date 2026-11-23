@@ -1,0 +1,7 @@
+/*
+ * QUALYFLOW | TIMELINE | PERDAS NA COLHEITA MANUAL
+ *
+ * O card manual usa exatamente a mesma identidade visual do card mecanizado.
+ * Manter os estilos centralizados evita divergência entre os dois painéis.
+ */
+@import './CardTLPerdasMec.css';
