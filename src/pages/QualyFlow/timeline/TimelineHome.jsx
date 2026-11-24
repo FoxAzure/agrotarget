@@ -9,6 +9,9 @@ import CardTLPreparo from './cards/CardTLPreparo';
 import CardTLSemente from './cards/CardTLSemente';
 import CardTLPerdasMan from './cards/CardTLPerdasMan';
 import CardTLPlantioMan from './cards/CardTLPlantioMan';
+import CardTLDrone from './cards/CardTLDrone';
+import CardTLAdubSulc from './cards/CardTLAdubSulc';
+import CardTLAdubCob from './cards/CardTLAdubCob';
 
 
 import '../Style.css';
@@ -45,6 +48,21 @@ const TIMELINE_CARDS = [
     id: 'preparo-solo',
     area: 'Preparo de Solo',
     component: CardTLPreparo,
+  },
+  {
+  id: 'drone',
+  area: 'Tratos Culturais',
+  component: CardTLDrone,
+  },
+  {
+  id: 'adubacao-sulcamento',
+  area: 'Preparo de Solo',
+  component: CardTLAdubSulc,
+  },
+  {
+  id: 'adubacao-cobertura',
+  area: 'Tratos Culturais',
+  component: CardTLAdubCob,
   },
 ];
 const normalizeFileName = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9-_]+/g, '_').replace(/^_+|_+$/g, '').toLowerCase();

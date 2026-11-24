@@ -1,0 +1,24 @@
+/* Deve permanecer obrigatoriamente na primeira linha. */
+@import './CardTLPerdasMec.css';
+
+/* Adubação de Cobertura reutiliza integralmente a identidade visual da Timeline. */
+.qf-mx-card.qf-adubcob-card { width:100%; min-width:0; margin:0; padding:0; }
+.qf-mx-card.qf-adubcob-card > .qf-mx-header { display:block; width:100%; margin:0; padding:.9rem; border-bottom:1px solid #e2e8f0; background:linear-gradient(135deg,#fbfcfd,#f7fcf9); }
+.qf-mx-card.qf-adubcob-card > .qf-mx-header h2 { margin:0; padding:0; }
+.qf-mx-card.qf-adubcob-card > .qf-mx-body { display:block; width:100%; min-width:0; margin:0; padding:0; }
+.qf-mx-card.qf-adubcob-card > .qf-mx-body > .qf-mx-row:first-child { margin-top:0; }
+.qf-mx-card.qf-adubcob-card > .qf-mx-body > .qf-mx-row.qf-mx-row-head { width:100%; min-width:0; margin:0; padding-top:.45rem; padding-bottom:.45rem; border-bottom:2px solid #e2e8f0; background:#fbfcfd; }
+.qf-adubcob-card .qf-mx-meta { max-width:100%; }
+.qf-adubcob-card .qf-mx-val.is-on-target { color:#15803d; }
+.qf-adubcob-card .qf-mx-val.is-off-target { color:#dc2626; }
+.qf-adubcob-card .qf-mx-node.is-baseline-on-target { --c:#16a34a; --m:rgba(34,197,94,.34); --s:rgba(22,163,74,.05); }
+.qf-adubcob-card .qf-mx-node.is-baseline-off-target { --c:#dc2626; --m:rgba(239,68,68,.32); --s:rgba(220,38,38,.05); }
+
+@media (min-width:900px) {
+  .qf-mx-card.qf-adubcob-card .qf-mx-row { margin:0; padding:.68rem 1rem; }
+  .qf-mx-card.qf-adubcob-card .qf-mx-row-head { margin:0; padding:.45rem 1rem; }
+  .qf-mx-card.qf-adubcob-card .qf-mx-col-ind { flex:0 0 185px; width:185px; max-width:185px; }
+  .qf-mx-card.qf-adubcob-card .qf-mx-track { flex:0 1 650px; width:auto; max-width:650px; margin-left:auto; }
+  .qf-mx-card.qf-adubcob-card .qf-mx-summary-head,
+  .qf-mx-card.qf-adubcob-card .qf-mx-summary { flex:0 0 155px; width:155px; margin-left:1rem; }
+}
