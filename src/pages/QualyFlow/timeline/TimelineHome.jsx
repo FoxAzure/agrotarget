@@ -12,6 +12,8 @@ import CardTLPlantioMan from './cards/CardTLPlantioMan';
 import CardTLDrone from './cards/CardTLDrone';
 import CardTLAdubSulc from './cards/CardTLAdubSulc';
 import CardTLAdubCob from './cards/CardTLAdubCob';
+import CardTLComposto from './cards/CardTLComposto';
+import CardTLAdubPlan from './cards/CardTLAdubPlan';
 
 
 import '../Style.css';
@@ -40,6 +42,11 @@ const TIMELINE_CARDS = [
     component: CardTLPlantioMec,
   },
   {
+  id: 'adubacao-plantadora',
+  area: 'Plantio',
+  component: CardTLAdubPlan,
+  },
+  {
   id: 'plantio-manual',
   area: 'Plantio',
   component: CardTLPlantioMan,
@@ -63,6 +70,11 @@ const TIMELINE_CARDS = [
   id: 'adubacao-cobertura',
   area: 'Tratos Culturais',
   component: CardTLAdubCob,
+  },
+  {
+  id: 'composto',
+  area: 'Preparo de Solo',
+  component: CardTLComposto,
   },
 ];
 const normalizeFileName = (value) => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9-_]+/g, '_').replace(/^_+|_+$/g, '').toLowerCase();
