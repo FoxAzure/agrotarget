@@ -101,7 +101,7 @@ const CardTLAdubPlan = ({ selectedYear }) => {
       try {
         const [annualRes, paramRes] = await Promise.all([
           supabase
-            .from('vw_q_adubplan')
+            .from('vw_q_adubplan_ano')
             .select('ano, pontos, kpi_variacao')
             .in('ano', allYears),
           supabase

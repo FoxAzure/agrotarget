@@ -7,7 +7,6 @@ const ACTIVITY = { area: 'Semente', name: 'Semente Mecanizada' };
 const FIRST_YEAR = 2023;
 const MAX_VISIBLE_YEARS = 4;
 
-
 const INDICATORS = [
   {
     key: 'kpi_gemas_viaveis',
@@ -17,6 +16,16 @@ const INDICATORS = [
     decimals: 2,
     direction: 'higher',
     colorRule: 'higher-meta-warning',
+  },
+  {
+    key: 'media_idade',
+    parameterName: 'Média Idade',
+    label: 'Média Idade',
+    unit: 'months',
+    decimals: 2,
+    direction: 'range',
+    colorRule: 'range-meta',
+    metricFilter: 'idade',
   },
   {
     key: 'rebolo_tamanho_medio',
@@ -103,7 +112,7 @@ const formatValue = (indicator, rawValue) => {
   if (value === null) return '—';
   const formatted = value.toFixed(indicator.decimals ?? 2).replace('.', ',');
   if (indicator.unit === 'percent' || indicator.unit === 'percent-ratio') return `${formatted}%`;
-  if (indicator.unit === 'cm') return `${formatted}`;
+  if (indicator.unit === 'months') return `${formatted}`;
   return formatted;
 };
 
@@ -126,7 +135,6 @@ const evaluateSementeValue = (indicator, rawValue, meta = null) => {
     return { state: 'informative', label: 'Informativo' };
   }
 
-  // Gemas Viáveis: verde na meta, amarelo até 10 p.p. abaixo e vermelho abaixo disso.
   if (indicator.colorRule === 'higher-meta-warning') {
     const target = toNumber(meta?.min) ?? 90;
     if (value >= target) return { state: 'on-target', label: 'Faixa verde' };
@@ -134,7 +142,16 @@ const evaluateSementeValue = (indicator, rawValue, meta = null) => {
     return { state: 'off-target', label: 'Faixa vermelha' };
   }
 
-  // Pisoteio no sulco, rachados, amassados, palmitos e broca.
+  // Média Idade: usa a faixa vigente cadastrada no banco, atualmente 7 a 9 meses.
+  if (indicator.colorRule === 'range-meta') {
+    const min = toNumber(meta?.min);
+    const max = toNumber(meta?.max);
+    if (min === null || max === null) return { state: 'unknown', label: 'Sem regra' };
+    return value >= min && value <= max
+      ? { state: 'on-target', label: 'Faixa verde' }
+      : { state: 'off-target', label: 'Faixa vermelha' };
+  }
+
   if (indicator.colorRule === 'lower-meta') {
     const target = toNumber(meta?.min);
     if (target === null) return { state: 'unknown', label: 'Sem regra' };
@@ -143,7 +160,6 @@ const evaluateSementeValue = (indicator, rawValue, meta = null) => {
       : { state: 'off-target', label: 'Faixa vermelha' };
   }
 
-  // Pisoteio no gotejo: somente zero é verde.
   if (indicator.colorRule === 'zero-only') {
     return Math.abs(value) < 0.000001
       ? { state: 'on-target', label: 'Faixa verde' }
@@ -153,25 +169,28 @@ const evaluateSementeValue = (indicator, rawValue, meta = null) => {
   return { state: 'unknown', label: 'Sem regra' };
 };
 
-const distanceFromTarget = (indicator, rawValue) => {
+const distanceFromTarget = (indicator, rawValue, meta = null) => {
   const value = valueForDisplay(indicator, rawValue);
   if (value === null) return null;
   if (indicator.direction === 'higher') return -value;
   if (indicator.direction === 'lower') return value;
   if (indicator.direction === 'range') {
-    if (value < indicator.targetMin) return indicator.targetMin - value;
-    if (value > indicator.targetMax) return value - indicator.targetMax;
+    const min = toNumber(meta?.min);
+    const max = toNumber(meta?.max);
+    if (min === null || max === null) return null;
+    if (value < min) return min - value;
+    if (value > max) return value - max;
     return 0;
   }
   if (indicator.direction === 'neutral') return 0;
   return value;
 };
 
-const getTrend = (indicator, currentRaw, referenceRaw) => {
+const getTrend = (indicator, currentRaw, referenceRaw, currentMeta = null, referenceMeta = null) => {
   const currentValue = valueForDisplay(indicator, currentRaw);
   const referenceValue = valueForDisplay(indicator, referenceRaw);
-  const currentScore = distanceFromTarget(indicator, currentRaw);
-  const referenceScore = distanceFromTarget(indicator, referenceRaw);
+  const currentScore = distanceFromTarget(indicator, currentRaw, currentMeta);
+  const referenceScore = distanceFromTarget(indicator, referenceRaw, referenceMeta);
 
   if ([currentValue, referenceValue, currentScore, referenceScore].some((value) => value === null)) return null;
 
@@ -184,7 +203,7 @@ const getTrend = (indicator, currentRaw, referenceRaw) => {
   return {
     state: indicator.direction === 'neutral' ? 'stable' : favorable ? 'favorable' : attention ? 'attention' : 'stable',
     symbol: difference < 0 ? '▼' : '▲',
-    delta: Math.abs(difference).toFixed(2).replace('.', ','),
+    delta: Math.abs(difference).toFixed(indicator.decimals ?? 2).replace('.', ','),
   };
 };
 
@@ -200,8 +219,6 @@ const CardTLSemente = ({ selectedYear }) => {
     () => Array.from({ length: Math.max(1, year - FIRST_YEAR + 1) }, (_, index) => FIRST_YEAR + index),
     [year]
   );
-
-  // Mantém exatamente quatro colunas no card, mesmo quando algum ano ainda não possui dados.
   const visibleYears = useMemo(
     () => Array.from({ length: MAX_VISIBLE_YEARS }, (_, index) => year - MAX_VISIBLE_YEARS + 1 + index),
     [year]
@@ -209,25 +226,17 @@ const CardTLSemente = ({ selectedYear }) => {
 
   useEffect(() => {
     let mounted = true;
-
     const load = async () => {
       setIsLoading(true);
       setHasError(false);
-
       try {
         const fields = [...new Set(ACTIVE_INDICATORS.map((item) => item.key))].join(', ');
         const [annualRes, paramRes] = await Promise.all([
           supabase.from('vw_q_sementemec_ano').select(`ano, ${fields}`).in('ano', allYears),
-          supabase
-            .from('tb_q_parametros_agricolas')
-            .select('*')
-            .eq('area', ACTIVITY.area)
-            .eq('atividade', ACTIVITY.name),
+          supabase.from('tb_q_parametros_agricolas').select('*').eq('area', ACTIVITY.area).eq('atividade', ACTIVITY.name),
         ]);
-
         if (!mounted) return;
         if (annualRes.error) throw annualRes.error;
-
         setAnnualRows(annualRes.data || []);
         setParameterRows(paramRes.error ? [] : paramRes.data || []);
       } catch (error) {
@@ -237,7 +246,6 @@ const CardTLSemente = ({ selectedYear }) => {
         if (mounted) setIsLoading(false);
       }
     };
-
     load();
     return () => { mounted = false; };
   }, [allYears]);
@@ -273,13 +281,15 @@ const CardTLSemente = ({ selectedYear }) => {
 
   const annualTrend = (indicator, targetYear) => {
     const index = allYears.indexOf(targetYear);
-    return index > 0
-      ? getTrend(
-          indicator,
-          rowsByYear.get(targetYear)?.[indicator.key],
-          rowsByYear.get(allYears[index - 1])?.[indicator.key]
-        )
-      : null;
+    if (index <= 0) return null;
+    const referenceYear = allYears[index - 1];
+    return getTrend(
+      indicator,
+      rowsByYear.get(targetYear)?.[indicator.key],
+      rowsByYear.get(referenceYear)?.[indicator.key],
+      getMeta(indicator, targetYear),
+      getMeta(indicator, referenceYear)
+    );
   };
 
   const generalTrend = (indicator) => {
@@ -290,7 +300,13 @@ const CardTLSemente = ({ selectedYear }) => {
       last,
       trend:
         first !== null && last !== null && first !== last
-          ? getTrend(indicator, rowsByYear.get(last)?.[indicator.key], rowsByYear.get(first)?.[indicator.key])
+          ? getTrend(
+              indicator,
+              rowsByYear.get(last)?.[indicator.key],
+              rowsByYear.get(first)?.[indicator.key],
+              getMeta(indicator, last),
+              getMeta(indicator, first)
+            )
           : null,
     };
   };
@@ -298,8 +314,11 @@ const CardTLSemente = ({ selectedYear }) => {
   const mobileHidden = (index) => visibleYears.length > 2 && index < visibleYears.length - 2;
   const metaText = (indicator, targetYear, rawValue) => {
     if (toNumber(rawValue) === null) return 'Sem avaliação';
-    const description = formatMetaDescription(getMeta(indicator, targetYear));
-    return description && description !== 'Sem meta' ? description : evaluateSementeValue(indicator, rawValue, getMeta(indicator, targetYear)).label;
+    const meta = getMeta(indicator, targetYear);
+    const description = formatMetaDescription(meta);
+    return description && description !== 'Sem meta'
+      ? description
+      : evaluateSementeValue(indicator, rawValue, meta).label;
   };
 
   if (isLoading) return <div className="qf-mx-card qf-mx-msg"><div className="qf-mx-spinner" /></div>;
@@ -308,7 +327,6 @@ const CardTLSemente = ({ selectedYear }) => {
   return (
     <section className="qf-mx-card qf-sm-card">
       <header className="qf-mx-header"><h2>Semente Mecanizada</h2></header>
-
       <div className="qf-mx-body">
         <div className="qf-mx-row qf-mx-row-head">
           <div className="qf-mx-col-ind">Indicador</div>
@@ -325,19 +343,16 @@ const CardTLSemente = ({ selectedYear }) => {
         {ACTIVE_INDICATORS.map((indicator) => {
           const baseYear = firstValidYear(indicator);
           const general = generalTrend(indicator);
-
           return (
             <div className="qf-mx-row" key={indicator.key}>
               <button type="button" className="qf-mx-col-ind qf-mx-ind-button" onClick={() => setModalIndicator(indicator)}>
                 <strong>{indicator.label}</strong><span>›</span>
               </button>
-
               <div className="qf-mx-track">
                 {visibleYears.map((targetYear, index) => {
                   const rawValue = rowsByYear.get(targetYear)?.[indicator.key];
                   const evaluation = evaluateSementeValue(indicator, rawValue, getMeta(indicator, targetYear));
                   const trend = annualTrend(indicator, targetYear);
-
                   return (
                     <div className={`qf-mx-year-group${mobileHidden(index) ? ' is-mobile-hidden' : ''}`} key={targetYear}>
                       {index > 0 && (
@@ -356,10 +371,9 @@ const CardTLSemente = ({ selectedYear }) => {
                   );
                 })}
               </div>
-
               <div className={`qf-mx-summary is-${general.trend?.state || 'neutral'}`}>
                 <span>{general.first && general.last ? `${general.first} - ${general.last}` : 'S/ período'}</span>
-                <strong>{general.trend ? `${general.trend.symbol} ${general.trend.delta} p.p.` : '—'}</strong>
+                <strong>{general.trend ? `${general.trend.symbol} ${general.trend.delta}${indicator.unit.includes('percent') ? ' p.p.' : ''}` : '—'}</strong>
                 <small>{general.trend?.state === 'favorable' ? 'Melhora no indicador' : general.trend?.state === 'attention' ? 'Ponto de atenção' : 'Sem comparação'}</small>
               </div>
             </div>
@@ -379,13 +393,13 @@ const CardTLSemente = ({ selectedYear }) => {
               <div className={`qf-mx-modal-general is-${general.trend?.state || 'neutral'}`}>
                 <span>Evolução geral</span>
                 <strong>{general.first && general.last ? `${general.first} - ${general.last}` : 'S/ período'}</strong>
-                <b>{general.trend ? `${general.trend.symbol} ${general.trend.delta} p.p.` : '—'}</b>
+                <b>{general.trend ? `${general.trend.symbol} ${general.trend.delta}${modalIndicator.unit.includes('percent') ? ' p.p.' : ''}` : '—'}</b>
                 <small>{general.trend?.state === 'favorable' ? 'Melhora no indicador' : general.trend?.state === 'attention' ? 'Ponto de atenção' : 'Sem comparação'}</small>
               </div>
               <div className="qf-mx-modal-list">
                 {allYears.map((targetYear) => {
                   const rawValue = rowsByYear.get(targetYear)?.[modalIndicator.key];
-                  const evaluation = evaluateSementeValue(modalIndicator, rawValue);
+                  const evaluation = evaluateSementeValue(modalIndicator, rawValue, getMeta(modalIndicator, targetYear));
                   const trend = annualTrend(modalIndicator, targetYear);
                   return (
                     <div className="qf-mx-modal-item" key={targetYear}>

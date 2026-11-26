@@ -38,7 +38,7 @@ const INDICATORS = [
   },
   {
     key: 'paralelismo_fita',
-    parameterName: 'Paralelismo entre Fitas Gotejadoras',
+    parameterName: 'Paralelismo entre Fitas Gotejadoras (%)',
     label: 'Paralelismo entre Fitas',
     unit: 'percent',
     decimals: 2,

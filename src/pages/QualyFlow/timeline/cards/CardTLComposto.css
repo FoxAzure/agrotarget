@@ -24,6 +24,45 @@
 .qf-composto-card .qf-mx-node.is-baseline-above-target { --c:#ca8a04; --m:rgba(234,179,8,.34); --s:rgba(202,138,4,.06); }
 .qf-composto-card .qf-mx-node.is-baseline-below-target { --c:#dc2626; --m:rgba(239,68,68,.32); --s:rgba(220,38,38,.05); }
 
+/* Mantém as classes animadas originais (is-favorable/is-attention) e altera apenas a cor semântica. */
+.qf-composto-card .qf-mx-bridge-line.is-favorable,
+.qf-composto-card .qf-mx-diff.is-favorable,
+.qf-composto-card .qf-mx-summary.is-favorable,
+.qf-composto-card .qf-mx-modal-general.is-favorable,
+.qf-composto-card .qf-mx-modal-diff.is-favorable { --c:#16a34a; color:#15803d; }
+
+.qf-composto-card .qf-mx-bridge-line.is-above-target,
+.qf-composto-card .qf-mx-diff.is-above-target,
+.qf-composto-card .qf-mx-summary.is-above-target,
+.qf-composto-card .qf-mx-modal-general.is-above-target,
+.qf-composto-card .qf-mx-modal-diff.is-above-target { --c:#ca8a04; color:#ca8a04; }
+
+.qf-composto-card .qf-mx-bridge-line.is-below-target,
+.qf-composto-card .qf-mx-diff.is-below-target,
+.qf-composto-card .qf-mx-summary.is-below-target,
+.qf-composto-card .qf-mx-modal-general.is-below-target,
+.qf-composto-card .qf-mx-modal-diff.is-below-target { --c:#dc2626; color:#dc2626; }
+
+
+/* Evolução geral: remove o estado vermelho herdado de is-attention e aplica a cor correta. */
+.qf-composto-card .qf-mx-summary.is-above-target,
+.qf-composto-card .qf-mx-modal-general.is-above-target {
+  --c:#ca8a04;
+  color:#a16207;
+  border-color:rgba(202,138,4,.28);
+  background:rgba(202,138,4,.08);
+}
+.qf-composto-card .qf-mx-summary.is-favorable,
+.qf-composto-card .qf-mx-modal-general.is-favorable {
+  --c:#16a34a;
+  color:#15803d;
+}
+.qf-composto-card .qf-mx-summary.is-below-target,
+.qf-composto-card .qf-mx-modal-general.is-below-target {
+  --c:#dc2626;
+  color:#b91c1c;
+}
+
 @media (min-width:900px) {
   .qf-mx-card.qf-composto-card .qf-mx-row { margin:0; padding:.68rem 1rem; }
   .qf-mx-card.qf-composto-card .qf-mx-row-head { margin:0; padding:.45rem 1rem; }
