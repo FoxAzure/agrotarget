@@ -14,6 +14,7 @@ import CardTLAdubSulc from './cards/CardTLAdubSulc';
 import CardTLAdubCob from './cards/CardTLAdubCob';
 import CardTLComposto from './cards/CardTLComposto';
 import CardTLAdubPlan from './cards/CardTLAdubPlan';
+import CardTLIUP from './cards/CardTLIUP';
 
 
 import '../Style.css';
@@ -50,6 +51,11 @@ const TIMELINE_CARDS = [
   id: 'plantio-manual',
   area: 'Plantio',
   component: CardTLPlantioMan,
+  },
+  {
+  id: 'iup',
+  area: 'IUP',
+  component: CardTLIUP,
   },
   {
     id: 'preparo-solo',
