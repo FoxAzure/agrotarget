@@ -8,6 +8,7 @@ import qualyflowLogo from './gallery/logo/qualyflow.png';
 import coacenterLogo from './gallery/logo/coacenter.png';
 import agroToolsLogo from './gallery/logo/agrotools.png';
 import rncLogo from './gallery/logo/rnc.png';
+import cucLogo from './gallery/logo/cuc.png';
 
 import QualyFlowHome from './pages/QualyFlow/QualyFlowHome';
 import PerdaMecDetail from './pages/QualyFlow/details/PerdaMecDetail';
@@ -45,6 +46,11 @@ import RNCAreas from './pages/RNC/areas/RNCAreas';
 import RNCNova from './pages/RNC/nova/RNCNova';
 import RNCEditar from './pages/RNC/editar/RNCEditar';
 import RNCTags from './pages/RNC/tags/RNCTags';
+import RNCPlano from './pages/RNC/plano/RNCPlano';
+import RNCRelatorio from './pages/RNC/relatorio/RNCRelatoiro';
+
+
+import CUCHome from './pages/CUC/CUCHome';
 
 const ModuleCard = ({ title, logoSrc, to }) => (
   <Link
@@ -83,7 +89,9 @@ function Hub() {
           <ModuleCard title="QualyFlow" logoSrc={qualyflowLogo} to="/qualyflow" />
           <ModuleCard title="COA Center" logoSrc={coacenterLogo} to="/coacenter" />
           <ModuleCard title="Não Conformidade" logoSrc={rncLogo} to="/rnc" />
+          <ModuleCard title="CUC Gotejo" logoSrc={cucLogo} to="/cuc" />
           <ModuleCard title="AgroTools" logoSrc={agroToolsLogo} to="/agrotools" />
+          
         </div>
       </main>
 
@@ -150,8 +158,10 @@ function App() {
         <Route path="/rnc/areas" element={<RNCAreas />} />
         <Route path="/rnc/nova" element={<RNCNova />} />
         <Route path="/rnc/tags" element={<RNCTags />} />
+        <Route path="/rnc/plano-acao" element={<RNCPlano />} />
 
         <Route path="/rnc/editar/:id" element={<RNCEditar />} />
+        <Route path="/rnc/relatorios" element={<RNCRelatorio />} />
 
         <Route
           path="/rnc/plano-acao"
@@ -179,6 +189,8 @@ function App() {
             </RNCProtectedRoute>
           }
         />
+
+        <Route path="/cuc" element={<CUCHome />} />
 
         <Route path="*" element={<PaginaNaoEncontrada />} />
       </Routes>

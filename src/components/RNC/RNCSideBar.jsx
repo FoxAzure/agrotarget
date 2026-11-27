@@ -10,7 +10,7 @@ const RNCSideBar = ({ isOpen, onClose }) => {
 
   const menuItems = [
     { label: 'RNC - Não Conformidade', path: '/rnc', visible: true },
-    { label: 'Plano de Ação', path: '/rnc/plano-acao', visible: Boolean(user) },
+    { label: 'Relatórios', path: '/rnc/relatorios', visible: Boolean(user) },
     { label: 'Acompanhamento', path: '/rnc/acompanhamento', visible: Boolean(user) },
     { label: 'Gerenciar Usuários', path: '/rnc/usuarios', visible: isAdmin },
     { label: 'Gerenciar Áreas', path: '/rnc/areas', visible: isAdmin },
@@ -45,7 +45,7 @@ const RNCSideBar = ({ isOpen, onClose }) => {
         <nav className="rnc-sidebar__nav">
           {menuItems.filter((item) => item.visible).map((item) => (
             <button type="button" key={item.path} className={`rnc-sidebar__item ${location.pathname === item.path ? 'is-active' : ''}`} onClick={() => handleNavigation(item.path)}>
-              <span>{item.label}</span><b>→</b>
+              <span>{item.label}</span>
             </button>
           ))}
         </nav>
